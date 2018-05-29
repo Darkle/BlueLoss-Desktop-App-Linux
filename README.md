@@ -6,22 +6,25 @@ BlueLoss is a desktop app that locks your computer when a Bluetooth device is no
 
 ## Requirements:
 
-- Windows 10
+- Linux
+- BlueZ
+	- http://www.bluez.org/download/
+	- or https://docs.ubuntu.com/core/en/stacks/bluetooth/bluez/docs/install-bluez
 
 ## Installation
 
 - Basic:
 
-  - Download [here](https://github.com/Darkle/BlueLoss/releases) and install. A portable version is also available.
+  - Download [here](https://github.com/Darkle/BlueLoss/releases)
 
 - Advanced:
 
-  - For users that don't want to run the precompiled binaries, you can clone this repo, then run the following commands:
-    - `npm install`
+    - For users that don't want to run the precompiled binaries, you can clone this repo, then run the following commands:
+        - `npm install`
 
-    - then `npm run devTasks` (select `createEnvFile`)
+        - then `npm run devTasks` (select `createEnvFile`)
 
-    - then `npm start`
+        - then `npm start`
 
 - Device App:
 
