@@ -40,5 +40,6 @@ createFirefoxProfileFiles():Promise ->
 
 export {
   createBlueLossConfig,
-  blueLossLogsFolderPath
+  blueLossLogsFolderPath,
+  blueLossConfigFolderPath,
 }

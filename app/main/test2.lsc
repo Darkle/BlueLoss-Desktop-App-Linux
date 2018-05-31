@@ -1,6 +1,0 @@
-
-foo():void -> console.log('hiss')
-
-export {
-  foo
-}

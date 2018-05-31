@@ -2,9 +2,9 @@
 const inquirer = require('inquirer')
 
 const tasks = {
-  ...require('./snyk.js'),
-  ...require('./createEnvFile.js'),
-  ...require('./bumpAppVersion.js'),
+  // ...require('./snyk.js'),
+  // ...require('./createEnvFile.js'),
+  // ...require('./bumpAppVersion.js'),
   ...require('./packageApp.js'),
 }
 

@@ -1,0 +1,38 @@
+import path from 'path'
+
+import fs from 'fs-extra'
+
+import { createBlueLossConfig, blueLossConfigFolderPath } from './bluelossConfig/createBlueLossConfig.lsc'
+
+let weCreatedFileLock = false
+let blueLossSettingsFilePath = null
+
+makeSingleInstance():Promise -/>
+  now blueLossSettingsFilePath <- createBlueLossConfig()
+  exists <- fs.pathExists(getLockFilePath())
+
+  if exists:
+    console.error(new Error('The BlueLoss.lock file already exits, exiting...'))
+    process.exit(1)
+  else:
+    now weCreatedFileLock = true
+    <- fs.ensureFile(getLockFilePath())
+
+  blueLossSettingsFilePath
+
+process.on('exit', ():void ->
+  if weCreatedFileLock:
+    try: fs.removeSync(getLockFilePath())
+    catch(e): return
+)
+
+// https://github.com/moxystudio/node-proper-lockfile#graceful-exit
+process
+  .once('SIGINT', () -> process.exit(1))
+  .once('SIGTERM', () -> process.exit(1))
+
+getLockFilePath():String -> path.join(blueLossConfigFolderPath, 'BlueLoss.lock')
+
+export {
+  makeSingleInstance
+}

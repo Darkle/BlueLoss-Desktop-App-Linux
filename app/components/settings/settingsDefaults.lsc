@@ -1,14 +1,14 @@
 
 defaultSettings: {
-  blueLossEnabled: boolean,
-  runOnStartup: boolean,
-  trayIconColor: string,
+  blueLossEnabled: Boolean,
+  runOnStartup: Boolean,
+  trayIconColor: String,
   devicesToSearchFor: Object,
-  timeToLock: number,
-  reportErrors: boolean,
-  firstRun: boolean,
-  dateLastCheckedForAppUpdate: number,
-  skipUpdateVersion: string,
+  timeToLock: Number,
+  reportErrors: Boolean,
+  firstRun: Boolean,
+  dateLastCheckedForAppUpdate: Number,
+  skipUpdateVersion: String
 } = {
   blueLossEnabled: true,
   runOnStartup: true,
@@ -18,7 +18,7 @@ defaultSettings: {
   reportErrors: true,
   firstRun: true,
   dateLastCheckedForAppUpdate: Date.now(),
-  skipUpdateVersion: '0',
+  skipUpdateVersion: '0'
 }
 
 export {

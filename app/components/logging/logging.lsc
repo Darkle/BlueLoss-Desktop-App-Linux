@@ -3,8 +3,8 @@ import path from 'path'
 import winston from 'winston'
 
 import { CustomRollbarTransport, rollbarLogger } from './customRollbarTransport.lsc'
-import { getSettings } from '../../settings/settings.lsc'
-import { blueLossLogsFolderPath } from '../../bluelossConfig/createBlueLossConfig.lsc'
+import { getSettings } from '../settings/settings.lsc'
+import { blueLossLogsFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 
 bluelossLogFilePath = path.join(blueLossLogsFolderPath, 'BlueLoss.log.txt')
 rollbarTransportOptions = {

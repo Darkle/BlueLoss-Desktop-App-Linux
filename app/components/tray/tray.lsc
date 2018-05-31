@@ -1,10 +1,8 @@
-import path from 'path'
-import fs from 'fs'
-
 import SysTray from 'systray'
 
 import { updateSetting, getSettings } from '../settings/settings.lsc'
-iconDirPath = path.resolve(__dirname, '..', 'tray', 'icons',)
+import { base64IconData } from './iconsData.lsc'
+
 let systray = null
 
 initTrayMenu():Promise ->
@@ -12,7 +10,7 @@ initTrayMenu():Promise ->
   new Promise((resolve):void ->
     now systray = new SysTray({
       menu: {
-        icon: getTrayIconAsBase64(),
+        icon: base64IconData[getTrayIconColor()],
         title: "BlueLoss",
         tooltip: "BlueLoss",
         items: [
@@ -58,16 +56,15 @@ initTrayMenu():Promise ->
       if action.seq_id === 2:
         systray.kill()
     )
-    systray.onReady(resolve)
+    systray.onReady(() ->
+      console.log('onready')
+      resolve()
+    )
   )
 
 checkIfBlueLossEnabled():Boolean -> getSettings().blueLossEnabled
 
-getTrayIconColor():String -> if ISDEV: 'White' else: getSettings().trayIconColor
-
-getTrayIconAsBase64():String->
-  fs.readFileSync(path.join(iconDirPath, `BlueLoss-${ getTrayIconColor() }-128x128.png`))
-    .toString('base64')
+getTrayIconColor():String -> if ISDEV: 'white' else: getSettings().trayIconColor
 
 /*****
 * We can't just check for getSettings().blueLossEnabled in generateEnabledDisabledLabel, because in

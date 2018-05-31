@@ -3,29 +3,26 @@ import low from 'lowdb'
 import FileSync from 'lowdb/adapters/FileSync'
 import is from 'typa'
 
-import { createBlueLossConfig } from '../bluelossConfig/createBlueLossConfig.lsc'
-import { tenYearsFromNow, omitGawkFromSettings } from '../common/utils.lsc'
+import { tenYearsFromNow, omitGawkFromSettings } from '../utils.lsc'
 import { DeviceType, SettingsTypes } from '../types/types.lsc'
 import { defaultSettings } from './settingsDefaults.lsc'
 import { initSettingsObservers } from './settingsObservers.lsc'
 import { initSettingsIPClisteners } from './settingsIPClisteners.lsc'
-import { logger } from '../common/logging/logging.lsc'
+import { logger } from '../logging/logging.lsc'
 
 let db = null
 let settings = null
 
-initSettings():Promise ->
-  createBlueLossConfig()
-    .then((settingsDBpath):void ->
-      now db = low(new FileSync(settingsDBpath))
-      db.defaults(defaultSettings).write()
+initSettings(settingsDBpath):Promise ->
+  now db = low(new FileSync(settingsDBpath))
+  db.defaults(defaultSettings).write()
 
-      now settings = gawk(db.getState())
+  now settings = gawk(db.getState())
 
-      initSettingsObservers(settings)
-      initSettingsIPClisteners()
-      updateLastSeenForDevicesLookingForOnStartup()
-    )
+  initSettingsObservers(settings)
+  initSettingsIPClisteners()
+  updateLastSeenForDevicesLookingForOnStartup()
+  settings
 
 getSettings() -> settings
 

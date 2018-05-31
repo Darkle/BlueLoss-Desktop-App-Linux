@@ -1,0 +1,35 @@
+import path from 'path'
+
+import untildify from 'untildify'
+import fs from 'fs-extra'
+
+import { logger } from './logging/logging.lsc'
+
+autoStartFolder = untildify('~/.config/autostart/')
+bluelossDesktopFilePath = path.join(autoStartFolder, 'BlueLoss.desktop')
+
+enableRunOnStartup(firstRun):void ->
+  if firstRun and ISDEV: return
+  fs.outputFile(bluelossDesktopFilePath, gernerateDesktopFile())
+    .catch(logger.error)
+
+disableRunOnStartup():void ->
+  fs.remove(bluelossDesktopFilePath).catch(logger.error)
+
+gernerateDesktopFile():String -> `
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=BlueLoss
+Comment=Run BlueLoss
+Exec=${ process.execPath }
+Icon=${ process.cwd() }
+StartupNotify=false
+Terminal=false
+Categories=Utility;
+`.trim()
+
+export {
+  enableRunOnStartup,
+  disableRunOnStartup,
+}

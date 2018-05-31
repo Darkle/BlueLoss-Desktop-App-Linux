@@ -3,16 +3,16 @@
   "productName": "BlueLoss",
   "version": "2018.30.5",
   "description": "A desktop app that locks your computer when a device is lost",
-  "main": "app/main/appMain-compiled.js",
+  "main": "app/appMain-compiled.js",
   "scripts": {
     "webpackWatch": "cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats",
-    "startDev": "cross-env NODE_ENV=development nodemon app/main/appMain-compiled.js",
-    "debug": "cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect-brk app/main/appMain-compiled.js",
+    "startDev": "cross-env NODE_ENV=development nodemon app/appMain-compiled.js",
+    "debug": "cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect-brk app/appMain-compiled.js",
     "rollupWatchMain": "cross-env NODE_ENV=development rollup --config rollup.config.main.js --watch",
     "rollupWatchSettingsPage": "cross-env NODE_ENV=development rollup --config rollup.config.frontEnd.js --watch",
     "styleWatch": "cross-env NODE_ENV=development stylus -w app/frontEnd/assets/styles/stylus/index.styl -o app/frontEnd/assets/styles/css/settingsWindowCss-compiled.css",
     "lintWatch": "cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear",
-    "start": "cross-env NODE_ENV=production node app/main/appMain-compiled.js",
+    "start": "cross-env NODE_ENV=production node app/appMain-compiled.js",
     "devTasks": "cross-env NODE_ENV=production node devTasks/tasks.js"
   },
   "repository": "https://github.com/Darkle/BlueLoss.git",
@@ -21,7 +21,6 @@
   "dependencies": {
     "@hyperapp/logger": "^0.5.0",
     "auto-launch": "^5.0.5",
-    "bluebird": "^3.5.1",
     "dotenv": "^5.0.1",
     "formbase": "^6.0.4",
     "fs-extra": "^6.0.1",
@@ -40,6 +39,7 @@
     "the-answer": "^1.0.0",
     "timeproxy": "^1.2.1",
     "typa": "^0.1.18",
+    "untildify": "^3.0.3",
     "winston": "^2.4.1"
   },
   "devDependencies": {
@@ -60,7 +60,9 @@
     "eslint-watch": "^3.1.5",
     "exeq": "^3.0.0",
     "inquirer": "^5.2.0",
+    "nexe": "^2.0.0-rc.28",
     "nodemon": "^1.17.5",
+    "pkg": "^4.3.1",
     "rollup": "^0.59.4",
     "rollup-plugin-babel": "^3.0.4",
     "rollup-plugin-commonjs": "^9.1.3",
