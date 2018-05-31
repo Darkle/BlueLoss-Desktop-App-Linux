@@ -13,7 +13,8 @@
     "styleWatch": "cross-env NODE_ENV=development stylus -w app/frontEnd/assets/styles/stylus/index.styl -o app/frontEnd/assets/styles/css/settingsWindowCss-compiled.css",
     "lintWatch": "cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear",
     "start": "cross-env NODE_ENV=production node app/appMain-compiled.js",
-    "devTasks": "cross-env NODE_ENV=production node devTasks/tasks.js"
+    "devTasks": "cross-env NODE_ENV=production node devTasks/tasks.js",
+    "test": "snyk test"
   },
   "repository": "https://github.com/Darkle/BlueLoss.git",
   "author": "Darkle <coop.coding@gmail.com>",
@@ -60,6 +61,7 @@
     "eslint-watch": "^3.1.5",
     "exeq": "^3.0.0",
     "inquirer": "^5.2.0",
+    "moment": "^2.22.1",
     "nexe": "^2.0.0-rc.28",
     "nodemon": "^1.17.5",
     "pkg": "^4.3.1",
