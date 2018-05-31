@@ -4,7 +4,6 @@ import untildify from 'untildify'
 import fs from 'fs-extra'
 
 import { logger } from './logging/logging.lsc'
-import { getAppVersion } from './utils.lsc'
 
 autoStartFolder = untildify('~/.config/autostart/')
 bluelossDesktopFilePath = path.join(autoStartFolder, 'BlueLoss.desktop')
@@ -20,11 +19,10 @@ disableRunOnStartup():void ->
 generateDesktopFile():String -> `
 [Desktop Entry]
 Type=Application
-Version=${ getAppVersion }
+Version=1.0
 Name=BlueLoss
-Comment=Run BlueLoss
 Exec=${ process.execPath }
-Icon=${ process.cwd() }
+Icon=${ path.join(process.cwd(), 'BlueLoss-blue-512x512.png') }
 StartupNotify=false
 Terminal=false
 Categories=Utility;

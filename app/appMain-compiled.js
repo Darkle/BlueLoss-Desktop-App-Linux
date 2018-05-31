@@ -503,8 +503,6 @@ var _fsExtra2 = _interopRequireDefault(_fsExtra);
 
 var _logging = __webpack_require__(/*! ./logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
-var _utils = __webpack_require__(/*! ./utils.lsc */ "./app/components/utils.lsc");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const autoStartFolder = (0, _untildify2.default)('~/.config/autostart/');
@@ -519,11 +517,10 @@ function enableRunOnStartup(firstRun) {
   return `
 [Desktop Entry]
 Type=Application
-Version=${_utils.getAppVersion}
+Version=1.0
 Name=BlueLoss
-Comment=Run BlueLoss
 Exec=${process.execPath}
-Icon=${process.cwd()}
+Icon=${_path2.default.join(process.cwd(), 'BlueLoss-blue-512x512.png')}
 StartupNotify=false
 Terminal=false
 Categories=Utility;
