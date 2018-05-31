@@ -79,8 +79,7 @@ getTrayIconColor():String ->
   if ISDEV: 'white' else: getSettings().trayIconColor
 
 toggleTrayIconColor():void ->
-  { trayIconColor } = getSettings()
-  newColor = if trayIconColor === 'white': 'blue' else: 'white'
+  newColor = if getSettings().trayIconColor === 'white': 'blue' else: 'white'
   updateSetting('trayIconColor', newColor)
 
 generateEnabledDisabledLabel():string ->

@@ -857,8 +857,7 @@ function initTrayMenu() {
 }function getTrayIconColor() {
   if (true) return 'white';else {}
 }function toggleTrayIconColor() {
-  const { trayIconColor } = (0, _settings.getSettings)();
-  const newColor = trayIconColor === 'white' ? 'blue' : 'white';
+  const newColor = (0, _settings.getSettings)().trayIconColor === 'white' ? 'blue' : 'white';
   (0, _settings.updateSetting)('trayIconColor', newColor);
 }function generateEnabledDisabledLabel() {
   return `${(0, _settings.getSettings)().blueLossEnabled ? 'Disable' : 'Enable'} BlueLoss`;
