@@ -5,58 +5,58 @@ ignore:
   'npm:diff:20180305':
     - fs-jetpack > diff:
         reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
+        expires: '2018-06-28T22:31:11.855Z'
     - fs-jetpack > mocha > diff:
         reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
+        expires: '2018-06-28T22:31:11.855Z'
   'npm:growl:20160721':
     - fs-jetpack > growl:
         reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
+        expires: '2018-06-28T22:31:11.856Z'
     - fs-jetpack > mocha > growl:
         reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
+        expires: '2018-06-28T22:31:11.856Z'
   'npm:hoek:20180212':
     - fs-jetpack > boom > hoek:
         reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
+        expires: '2018-06-28T22:31:11.856Z'
     - fs-jetpack > codecov > request > hawk > hoek:
         reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
+        expires: '2018-06-28T22:31:11.856Z'
     - fs-jetpack > codecov > request > hawk > boom > hoek:
         reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
+        expires: '2018-06-28T22:31:11.856Z'
     - fs-jetpack > codecov > request > hawk > sntp > hoek:
         reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
+        expires: '2018-06-28T22:31:11.856Z'
     - fs-jetpack > codecov > request > hawk > cryptiles > boom > hoek:
         reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
+        expires: '2018-06-28T22:31:11.856Z'
   'npm:is-my-json-valid:20180214':
     - fs-jetpack > codecov > request > har-validator > is-my-json-valid:
         reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
+        expires: '2018-06-28T22:31:11.856Z'
   'npm:lodash:20180130':
     - fs-jetpack > lodash:
         reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
+        expires: '2018-06-28T22:31:11.856Z'
     - fs-jetpack > release-assist > inquirer > lodash:
         reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
+        expires: '2018-06-28T22:31:11.856Z'
   'npm:sshpk:20180409':
     - fs-jetpack > codecov > request > http-signature > sshpk:
         reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
-  'npm:tunnel-agent:20170305':
-    - fs-jetpack > codecov > request > tunnel-agent:
-        reason: None given
-        expires: '2018-06-11T03:21:34.762Z'
+        expires: '2018-06-28T22:31:11.856Z'
   'npm:stringstream:20180511':
     - fs-jetpack > codecov > request > stringstream:
         reason: None given
-        expires: '2018-06-13T22:07:26.847Z'
+        expires: '2018-06-28T22:31:11.856Z'
+  'npm:tunnel-agent:20170305':
+    - fs-jetpack > codecov > request > tunnel-agent:
+        reason: None given
+        expires: '2018-06-28T22:31:11.857Z'
 # patches apply the minimum changes required to fix a vulnerability
 patch:
   'npm:debug:20170905':
     - fs-jetpack > mocha > debug:
-        patched: '2018-05-12T03:18:40.405Z'
+        patched: '2018-05-29T22:29:43.453Z'
