@@ -9,6 +9,7 @@ const del = require('del')
 const stringifyObject = require('stringify-object')
 const jetpack = require('fs-jetpack')
 const Zip = require('node-7z')
+https://github.com/jprichardson/node-fs-extra - use this instead of fs-jetpack
 
 const basePath = path.resolve(__dirname, '..')
 const installerImagesPath = path.join(basePath, 'resources', 'msiInstallerImages')

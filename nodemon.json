@@ -1,9 +1,0 @@
-{
-  "watch": [
-    "/app/main/appMain-compiled.js"
-  ],
-  "execMap": {
-    "js": "node_modules/.bin/electron"
-  },
-  "delay": 1800
-}

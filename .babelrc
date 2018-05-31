@@ -6,7 +6,8 @@
         "env": {
           "targets": {
             "node": "8.9.3"
-          }
+          },
+          "modules": false
         },
         "stdlib": false,
         "noEnforcedSubscriptIndentation": true,
@@ -15,6 +16,7 @@
     ]
   ],
   "plugins": [
+    "external-helpers",
     "syntax-jsx",
     [
       "transform-react-jsx",

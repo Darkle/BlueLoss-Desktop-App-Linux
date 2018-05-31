@@ -1,14 +1,9 @@
 import tp from 'timeproxy'
 import is from 'typa'
 
-/**
- * If you run Electron by pointing it to a js file that's not in the base parent directory with the
- * package.json it will report the Electron binary version rather than what's in your package.json.
- * https://github.com/electron/electron/issues/7085
- */
-appVersion = require('../../package.json').version
+import { showSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
 
-getProperAppVersion():string -> appVersion
+setUpDev(firstRun):void -> if !ISDEV && !firstRun: showSettingsWindow()
 omitGawkFromSettings(settings) -> recursivelyOmitObjProperties(settings, ['__gawk__'])
 noop() -> return
 pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
@@ -40,6 +35,7 @@ generateLogTimeStamp():String ->
   `[${ today.getHours() }:${ today.getMinutes() }:${ today.getSeconds() }]`
 
 export {
+  setUpDev,
   omitGawkFromSettings,
   omitInheritedProperties,
   noop,
@@ -50,7 +46,6 @@ export {
   compose,
   identity,
   tenYearsFromNow,
-  getProperAppVersion,
   recursivelyOmitObjProperties,
   generateLogTimeStamp,
 }

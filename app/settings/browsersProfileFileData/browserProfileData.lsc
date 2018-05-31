@@ -1,0 +1,48 @@
+
+getFirefoxUserChrome():string -> `
+  @-moz-document url(chrome://browser/content/browser.xul) {
+  #TabsToolbar {
+    visibility: collapse !important;
+  }
+  #nav-bar {
+    visibility: collapse !important;
+  }
+  `
+
+getFirefoxPrefsJs():String -> `
+  user_pref("browser.tabs.warnOnClose", false);
+  user_pref("browser.sessionstore.restore_on_demand", false);
+  user_pref("browser.tabs.warnOnCloseOtherTabs", false);
+  `
+
+getChromePrefs():Object ->
+  ({
+    "browser": {
+      "app_window_placement": {
+        "www": {
+          "google": {
+            "com_/": {
+              "bottom": 1201,
+              "left": 391,
+              "maximized": false,
+              "right": 1251,
+              "top": 404,
+              "work_area_bottom": 1398,
+              "work_area_left": 0,
+              "work_area_right": 2560,
+              "work_area_top": 0
+            }
+          }
+        }
+      },
+      "has_seen_welcome_page": true
+    }
+  })
+
+
+
+export {
+  getFirefoxUserChrome,
+  getFirefoxPrefsJs,
+  getChromePrefs,
+}

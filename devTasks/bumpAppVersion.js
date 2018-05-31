@@ -19,6 +19,9 @@ const promptOptions = {
   choices: ['major', 'minor', 'patch']
 }
 let newAppVersion = null
+
+https://github.com/jprichardson/node-fs-extra - use this instead of fs-jetpack
+
 /**
  * We bump the package.json with npm (which also adds a git tag with the version),
  * also updateInfo.json and in settingsDefaults.lsc.
