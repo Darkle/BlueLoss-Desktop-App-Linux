@@ -439,7 +439,7 @@ var _createBlueLossConfig = __webpack_require__(/*! ./bluelossConfig/createBlueL
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 let weCreatedFileLock = false;
-const anotherInstanceErrorMessage = 'BlueLoss.lock file already exists - BlueLoss is already running, exiting...';
+const anotherInstanceErrorMessage = 'BlueLoss is already running (BlueLoss.lock file already exists), exiting...';
 
 function makeSingleInstance() {
   return _fsExtra2.default.pathExists(getLockFilePath()).then(exists => {

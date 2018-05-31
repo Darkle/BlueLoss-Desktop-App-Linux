@@ -5,7 +5,7 @@ import fs from 'fs-extra'
 import { blueLossConfigFolderPath } from './bluelossConfig/createBlueLossConfig.lsc'
 
 let weCreatedFileLock = false
-anotherInstanceErrorMessage = 'BlueLoss.lock file already exists - BlueLoss is already running, exiting...'
+anotherInstanceErrorMessage = 'BlueLoss is already running (BlueLoss.lock file already exists), exiting...'
 
 makeSingleInstance():Promise ->
   fs.pathExists(getLockFilePath())
