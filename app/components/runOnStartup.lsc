@@ -16,6 +16,10 @@ enableRunOnStartup(firstRun):void ->
 disableRunOnStartup():void ->
   fs.remove(bluelossDesktopFilePath).catch(logger.error)
 
+/*****
+* https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.0.html
+* Version is the Free Desktop spec version.
+*/
 generateDesktopFile():String -> `
 [Desktop Entry]
 Type=Application

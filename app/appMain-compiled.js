@@ -513,7 +513,11 @@ function enableRunOnStartup(firstRun) {
   _fsExtra2.default.outputFile(bluelossDesktopFilePath, generateDesktopFile()).catch(_logging.logger.error);
 }function disableRunOnStartup() {
   _fsExtra2.default.remove(bluelossDesktopFilePath).catch(_logging.logger.error);
-}function generateDesktopFile() {
+} /*****
+  * https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.0.html
+  * Version is the Free Desktop spec version.
+  */
+function generateDesktopFile() {
   return `
 [Desktop Entry]
 Type=Application
