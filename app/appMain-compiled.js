@@ -822,7 +822,7 @@ function initTrayMenu() {
       seq_id: action.seq_id
     });
   }if (action.seq_id === 2) {
-    toggleIconColor();
+    toggleTrayIconColor();
     systray.sendAction({
       type: 'update-menu',
       menu: {
@@ -856,7 +856,7 @@ function initTrayMenu() {
   }];
 }function getTrayIconColor() {
   if (true) return 'white';else {}
-}function toggleIconColor() {
+}function toggleTrayIconColor() {
   const { trayIconColor } = (0, _settings.getSettings)();
   if (trayIconColor === 'white') {
     (0, _settings.updateSetting)('trayIconColor', 'blue');
