@@ -22,33 +22,39 @@ initTrayMenu():Promise ->
   )
 
 systrayClickHandler(action):void ->
-  if action.seq_id === 0:
+  if action.seq_id === 0: //Open settings window
     console.log('open settings window here')
-  if action.seq_id === 1:
+  if action.seq_id === 1: //Enable/Disable BlueLoss
     updateSetting('blueLossEnabled', !getSettings().blueLossEnabled)
-    systray.sendAction({
-      type: 'update-item',
-      item: {
-        ...action.item,
-        title: generateEnabledDisabledLabel(),
-        tooltip: generateEnabledDisabledLabel(),
-      },
-      seq_id: action.seq_id,
-    })
-  if action.seq_id === 2:
-    toggleTrayIconColor()
-    systray.sendAction({
-      type: 'update-menu',
-      menu: {
-        icon: base64IconData[getTrayIconColor()],
-        title: "BlueLoss",
-        tooltip: "BlueLoss",
-        items: generateMenuItems()
-      },
-      seq_id: action.seq_id
-    })
-  if action.seq_id === 3:
+    updateEnabledDisabledMenuItem(action)
+  if action.seq_id === 2: //Toggle system tray icon color
+    toggleTrayIconColorSetting()
+    updateSystrayIcon(action)
+  if action.seq_id === 3: //Exit BlueLoss
     systray.kill()
+
+updateEnabledDisabledMenuItem(action):void ->
+  systray.sendAction({
+    type: 'update-item',
+    item: {
+      ...action.item,
+      title: generateEnabledDisabledLabel(),
+      tooltip: generateEnabledDisabledLabel(),
+    },
+    seq_id: action.seq_id,
+  })
+
+updateSystrayIcon(action):void ->
+  systray.sendAction({
+    type: 'update-menu',
+    menu: {
+      icon: base64IconData[getTrayIconColor()],
+      title: "BlueLoss",
+      tooltip: "BlueLoss",
+      items: generateMenuItems()
+    },
+    seq_id: action.seq_id,
+  })
 
 generateMenuItems():Array ->
   [
@@ -78,7 +84,7 @@ generateMenuItems():Array ->
 getTrayIconColor():String ->
   if ISDEV: 'white' else: getSettings().trayIconColor
 
-toggleTrayIconColor():void ->
+toggleTrayIconColorSetting():void ->
   newColor = if getSettings().trayIconColor === 'white': 'blue' else: 'white'
   updateSetting('trayIconColor', newColor)
 

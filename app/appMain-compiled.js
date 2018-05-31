@@ -810,32 +810,40 @@ function initTrayMenu() {
   });
 }function systrayClickHandler(action) {
   if (action.seq_id === 0) {
+    //Open settings window
     console.log('open settings window here');
   }if (action.seq_id === 1) {
+    //Enable/Disable BlueLoss
     (0, _settings.updateSetting)('blueLossEnabled', !(0, _settings.getSettings)().blueLossEnabled);
-    systray.sendAction({
-      type: 'update-item',
-      item: _extends({}, action.item, {
-        title: generateEnabledDisabledLabel(),
-        tooltip: generateEnabledDisabledLabel()
-      }),
-      seq_id: action.seq_id
-    });
+    updateEnabledDisabledMenuItem(action);
   }if (action.seq_id === 2) {
-    toggleTrayIconColor();
-    systray.sendAction({
-      type: 'update-menu',
-      menu: {
-        icon: _iconsData.base64IconData[getTrayIconColor()],
-        title: "BlueLoss",
-        tooltip: "BlueLoss",
-        items: generateMenuItems()
-      },
-      seq_id: action.seq_id
-    });
+    //Toggle system tray icon color
+    toggleTrayIconColorSetting();
+    updateSystrayIcon(action);
   }if (action.seq_id === 3) {
+    //Exit BlueLoss
     systray.kill();
   }
+}function updateEnabledDisabledMenuItem(action) {
+  systray.sendAction({
+    type: 'update-item',
+    item: _extends({}, action.item, {
+      title: generateEnabledDisabledLabel(),
+      tooltip: generateEnabledDisabledLabel()
+    }),
+    seq_id: action.seq_id
+  });
+}function updateSystrayIcon(action) {
+  systray.sendAction({
+    type: 'update-menu',
+    menu: {
+      icon: _iconsData.base64IconData[getTrayIconColor()],
+      title: "BlueLoss",
+      tooltip: "BlueLoss",
+      items: generateMenuItems()
+    },
+    seq_id: action.seq_id
+  });
 }function generateMenuItems() {
   return [{
     title: "Open BlueLoss Settings",
@@ -856,7 +864,7 @@ function initTrayMenu() {
   }];
 }function getTrayIconColor() {
   if (true) return 'white';else {}
-}function toggleTrayIconColor() {
+}function toggleTrayIconColorSetting() {
   const newColor = (0, _settings.getSettings)().trayIconColor === 'white' ? 'blue' : 'white';
   (0, _settings.updateSetting)('trayIconColor', newColor);
 }function generateEnabledDisabledLabel() {
