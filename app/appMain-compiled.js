@@ -822,10 +822,11 @@ function initTrayMenu() {
       seq_id: action.seq_id
     });
   }if (action.seq_id === 2) {
+    toggleIconColor();
     systray.sendAction({
       type: 'update-menu',
       menu: {
-        icon: _iconsData.base64IconData[toggleIconColor()],
+        icon: _iconsData.base64IconData[getTrayIconColor()],
         title: "BlueLoss",
         tooltip: "BlueLoss",
         items: generateMenuItems()
@@ -859,10 +860,8 @@ function initTrayMenu() {
   const { trayIconColor } = (0, _settings.getSettings)();
   if (trayIconColor === 'white') {
     (0, _settings.updateSetting)('trayIconColor', 'blue');
-    return 'blue';
   } else {
     (0, _settings.updateSetting)('trayIconColor', 'white');
-    return 'white';
   }
 }function generateEnabledDisabledLabel() {
   return `${(0, _settings.getSettings)().blueLossEnabled ? 'Disable' : 'Enable'} BlueLoss`;

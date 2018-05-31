@@ -36,10 +36,11 @@ systrayClickHandler(action):void ->
       seq_id: action.seq_id,
     })
   if action.seq_id === 2:
+    toggleIconColor()
     systray.sendAction({
       type: 'update-menu',
       menu: {
-        icon: base64IconData[toggleIconColor()],
+        icon: base64IconData[getTrayIconColor()],
         title: "BlueLoss",
         tooltip: "BlueLoss",
         items: generateMenuItems()
@@ -61,7 +62,6 @@ generateMenuItems():Array ->
       tooltip: generateEnabledDisabledLabel(),
       enabled: true
     },
-
     {
       title: "Toggle Tray Icon Color",
       tooltip: "Toggle Tray Icon Color",
@@ -78,14 +78,12 @@ generateMenuItems():Array ->
 getTrayIconColor():String ->
   if ISDEV: 'white' else: getSettings().trayIconColor
 
-toggleIconColor():String ->
+toggleIconColor():void ->
   { trayIconColor } = getSettings()
   if trayIconColor === 'white':
     updateSetting('trayIconColor', 'blue')
-    return 'blue'
   else:
     updateSetting('trayIconColor', 'white')
-    return 'white'
 
 generateEnabledDisabledLabel():string ->
   `${ if getSettings().blueLossEnabled: 'Disable' else: 'Enable' } BlueLoss`
