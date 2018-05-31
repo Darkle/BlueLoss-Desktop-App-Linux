@@ -239,12 +239,10 @@ const blueLossConfigChromiumPrefsFilePath = _path2.default.join(blueLossConfigFo
 const blueLossConfigFirefoxUserChromeFilePath = _path2.default.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Firefox', 'chrome', 'userChrome.css');
 const blueLossConfigFirefoxPrefsFilePath = _path2.default.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Firefox', 'prefs.js');
 
-function createBlueLossConfig() {
-  return _fsExtra2.default.pathExists(blueLossSettingsFilePath).then(function (exists) {
-    if (!exists) {
-      return Promise.all([_fsExtra2.default.ensureFile(blueLossSettingsFilePath), _fsExtra2.default.ensureDir(blueLossLogsFolderPath), createChromiumProfileFiles(), createFirefoxProfileFiles()]);
-    }
-  });
+async function createBlueLossConfig() {
+  const exists = await _fsExtra2.default.pathExists(blueLossSettingsFilePath);
+  if (exists) return Promise.resolve();
+  return Promise.all([_fsExtra2.default.ensureFile(blueLossSettingsFilePath), _fsExtra2.default.ensureDir(blueLossLogsFolderPath), createChromiumProfileFiles(), createFirefoxProfileFiles()]);
 }function createChromiumProfileFiles() {
   return _fsExtra2.default.ensureFile(blueLossConfigChromiumPrefsFilePath).then(function () {
     return _fsExtra2.default.writeJson(blueLossConfigChromiumPrefsFilePath, (0, _browserProfileData.getChromePrefs)());

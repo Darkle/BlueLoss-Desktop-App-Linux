@@ -12,17 +12,15 @@ blueLossConfigChromiumPrefsFilePath = path.join(blueLossConfigFolderPath, 'Brows
 blueLossConfigFirefoxUserChromeFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Firefox', 'chrome', 'userChrome.css')
 blueLossConfigFirefoxPrefsFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Firefox', 'prefs.js')
 
-createBlueLossConfig():Promise ->
-  fs.pathExists(blueLossSettingsFilePath)
-    .then(exists ->
-      if !exists:
-        return Promise.all([
-          fs.ensureFile(blueLossSettingsFilePath),
-          fs.ensureDir(blueLossLogsFolderPath),
-          createChromiumProfileFiles(),
-          createFirefoxProfileFiles(),
-        ])
-    )
+createBlueLossConfig():Promise -/>
+  exists <- fs.pathExists(blueLossSettingsFilePath)
+  if exists: return Promise.resolve()
+  return Promise.all([
+    fs.ensureFile(blueLossSettingsFilePath),
+    fs.ensureDir(blueLossLogsFolderPath),
+    createChromiumProfileFiles(),
+    createFirefoxProfileFiles(),
+  ])
 
 createChromiumProfileFiles():Promise ->
   fs.ensureFile(blueLossConfigChromiumPrefsFilePath)
