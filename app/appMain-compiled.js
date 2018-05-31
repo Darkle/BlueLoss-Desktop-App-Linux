@@ -858,11 +858,8 @@ function initTrayMenu() {
   if (true) return 'white';else {}
 }function toggleTrayIconColor() {
   const { trayIconColor } = (0, _settings.getSettings)();
-  if (trayIconColor === 'white') {
-    (0, _settings.updateSetting)('trayIconColor', 'blue');
-  } else {
-    (0, _settings.updateSetting)('trayIconColor', 'white');
-  }
+  const newColor = trayIconColor === 'white' ? 'blue' : 'white';
+  (0, _settings.updateSetting)('trayIconColor', newColor);
 }function generateEnabledDisabledLabel() {
   return `${(0, _settings.getSettings)().blueLossEnabled ? 'Disable' : 'Enable'} BlueLoss`;
 }exports.initTrayMenu = initTrayMenu;

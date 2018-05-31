@@ -80,10 +80,8 @@ getTrayIconColor():String ->
 
 toggleTrayIconColor():void ->
   { trayIconColor } = getSettings()
-  if trayIconColor === 'white':
-    updateSetting('trayIconColor', 'blue')
-  else:
-    updateSetting('trayIconColor', 'white')
+  newColor = if trayIconColor === 'white': 'blue' else: 'white'
+  updateSetting('trayIconColor', newColor)
 
 generateEnabledDisabledLabel():string ->
   `${ if getSettings().blueLossEnabled: 'Disable' else: 'Enable' } BlueLoss`
