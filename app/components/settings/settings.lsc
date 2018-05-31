@@ -9,14 +9,14 @@ import { defaultSettings } from './settingsDefaults.lsc'
 import { initSettingsObservers } from './settingsObservers.lsc'
 import { initSettingsIPClisteners } from './settingsIPClisteners.lsc'
 import { logger } from '../logging/logging.lsc'
+import { blueLossSettingsFilePath } from '../bluelossConfig/createBlueLossConfig.lsc'
 
 let db = null
 let settings = null
 
-initSettings(settingsDBpath):Promise ->
-  now db = low(new FileSync(settingsDBpath))
+initSettings():Promise ->
+  now db = low(new FileSync(blueLossSettingsFilePath))
   db.defaults(defaultSettings).write()
-
   now settings = gawk(db.getState())
 
   initSettingsObservers(settings)

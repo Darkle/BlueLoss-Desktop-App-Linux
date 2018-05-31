@@ -1,5 +1,6 @@
 import './config/env.lsc'
 
+import { createBlueLossConfig as initAppConfigFiles } from './components/bluelossConfig/createBlueLossConfig.lsc'
 import { makeSingleInstance } from './components/makeSingleInstance.lsc'
 import { logger, addWinstonFileLogging } from './components/logging/logging.lsc'
 // // import { init as startBluetoothScanning } from '../bluetooth/blueToothMain.lsc'
@@ -10,7 +11,8 @@ import { initTrayMenu } from './components/tray/tray.lsc'
 import { enableRunOnStartup } from './components/runOnStartup.lsc'
 // // import { checkForUpdate as checkForAppUpdate } from '../appUpdates/appUpdates.lsc'
 
-makeSingleInstance()
+initAppConfigFiles()
+  .then(makeSingleInstance)
   .then(initSettings)
   .then(addWinstonFileLogging)
   .then(initTrayMenu)

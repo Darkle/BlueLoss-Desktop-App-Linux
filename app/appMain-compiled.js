@@ -98,6 +98,8 @@
 
 __webpack_require__(/*! ./config/env.lsc */ "./app/config/env.lsc");
 
+var _createBlueLossConfig = __webpack_require__(/*! ./components/bluelossConfig/createBlueLossConfig.lsc */ "./app/components/bluelossConfig/createBlueLossConfig.lsc");
+
 var _makeSingleInstance = __webpack_require__(/*! ./components/makeSingleInstance.lsc */ "./app/components/makeSingleInstance.lsc");
 
 var _logging = __webpack_require__(/*! ./components/logging/logging.lsc */ "./app/components/logging/logging.lsc");
@@ -113,7 +115,7 @@ var _runOnStartup = __webpack_require__(/*! ./components/runOnStartup.lsc */ "./
 // // import { checkForUpdate as checkForAppUpdate } from '../appUpdates/appUpdates.lsc'
 
 // // import { init as startBluetoothScanning } from '../bluetooth/blueToothMain.lsc'
-(0, _makeSingleInstance.makeSingleInstance)().then(_settings.initSettings).then(_logging.addWinstonFileLogging).then(_tray.initTrayMenu).then(_utils.setUpDev)
+(0, _createBlueLossConfig.createBlueLossConfig)().then(_makeSingleInstance.makeSingleInstance).then(_settings.initSettings).then(_logging.addWinstonFileLogging).then(_tray.initTrayMenu).then(_utils.setUpDev)
 // // .then(startBluetoothScanning)
 // // .then(checkForAppUpdate)
 .then(() => {
@@ -212,7 +214,7 @@ exports.getChromePrefs = getChromePrefs;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.blueLossConfigFolderPath = exports.blueLossLogsFolderPath = exports.createBlueLossConfig = undefined;
+exports.blueLossSettingsFilePath = exports.blueLossConfigFolderPath = exports.blueLossLogsFolderPath = exports.createBlueLossConfig = undefined;
 
 var _os = __webpack_require__(/*! os */ "os");
 
@@ -242,14 +244,12 @@ function createBlueLossConfig() {
     return _fsExtra2.default.ensureDir(blueLossLogsFolderPath);
   }).then(function () {
     return _fsExtra2.default.pathExists(blueLossConfigChromiumPrefsFilePath);
-  }).then(function (exists) {
-    return !exists ? createChromiumProfileFiles() : null;
+  }).then(exists => {
+    if (!exists) return createChromiumProfileFiles();
   }).then(function () {
     return _fsExtra2.default.pathExists(blueLossConfigFirefoxUserChromeFilePath);
-  }).then(function (exists) {
-    return !exists ? createFirefoxProfileFiles() : null;
-  }).then(function () {
-    return blueLossSettingsFilePath;
+  }).then(exists => {
+    if (!exists) return createFirefoxProfileFiles();
   });
 }function createChromiumProfileFiles() {
   return _fsExtra2.default.ensureFile(blueLossConfigChromiumPrefsFilePath).then(function () {
@@ -266,6 +266,7 @@ function createBlueLossConfig() {
 }exports.createBlueLossConfig = createBlueLossConfig;
 exports.blueLossLogsFolderPath = blueLossLogsFolderPath;
 exports.blueLossConfigFolderPath = blueLossConfigFolderPath;
+exports.blueLossSettingsFilePath = blueLossSettingsFilePath;
 
 /***/ }),
 
@@ -438,19 +439,17 @@ var _createBlueLossConfig = __webpack_require__(/*! ./bluelossConfig/createBlueL
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 let weCreatedFileLock = false;
-let blueLossSettingsFilePath = null;
 
-async function makeSingleInstance() {
-  blueLossSettingsFilePath = await (0, _createBlueLossConfig.createBlueLossConfig)();
-  const exists = await _fsExtra2.default.pathExists(getLockFilePath());
-
-  if (exists) {
-    console.error(new Error('The BlueLoss.lock file already exits, exiting...'));
-    process.exit(1);
-  } else {
-    weCreatedFileLock = true;
-    await _fsExtra2.default.ensureFile(getLockFilePath());
-  }return blueLossSettingsFilePath;
+function makeSingleInstance() {
+  return _fsExtra2.default.pathExists(getLockFilePath()).then(exists => {
+    if (exists) {
+      console.error(new Error('The BlueLoss.lock file already exits, exiting...'));
+      return process.exit(1);
+    } else {
+      weCreatedFileLock = true;
+      return _fsExtra2.default.ensureFile(getLockFilePath());
+    }
+  });
 }process.on('exit', function () {
   if (weCreatedFileLock) {
     try {
@@ -579,15 +578,16 @@ var _settingsIPClisteners = __webpack_require__(/*! ./settingsIPClisteners.lsc *
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
+var _createBlueLossConfig = __webpack_require__(/*! ../bluelossConfig/createBlueLossConfig.lsc */ "./app/components/bluelossConfig/createBlueLossConfig.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 let db = null;
 let settings = null;
 
-function initSettings(settingsDBpath) {
-  db = (0, _lowdb2.default)(new _FileSync2.default(settingsDBpath));
+function initSettings() {
+  db = (0, _lowdb2.default)(new _FileSync2.default(_createBlueLossConfig.blueLossSettingsFilePath));
   db.defaults(_settingsDefaults.defaultSettings).write();
-
   settings = (0, _gawk2.default)(db.getState());
 
   (0, _settingsObservers.initSettingsObservers)(settings);

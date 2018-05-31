@@ -2,23 +2,20 @@ import path from 'path'
 
 import fs from 'fs-extra'
 
-import { createBlueLossConfig, blueLossConfigFolderPath } from './bluelossConfig/createBlueLossConfig.lsc'
+import { blueLossConfigFolderPath } from './bluelossConfig/createBlueLossConfig.lsc'
 
 let weCreatedFileLock = false
-let blueLossSettingsFilePath = null
 
-makeSingleInstance():String -/>
-  now blueLossSettingsFilePath <- createBlueLossConfig()
-  exists <- fs.pathExists(getLockFilePath())
-
-  if exists:
-    console.error(new Error('The BlueLoss.lock file already exits, exiting...'))
-    process.exit(1)
-  else:
-    now weCreatedFileLock = true
-    <- fs.ensureFile(getLockFilePath())
-
-  blueLossSettingsFilePath
+makeSingleInstance():Promise ->
+  fs.pathExists(getLockFilePath())
+    .then(exists => {
+      if exists:
+        console.error(new Error('The BlueLoss.lock file already exits, exiting...'))
+        process.exit(1)
+      else:
+        now weCreatedFileLock = true
+        return fs.ensureFile(getLockFilePath())
+    })
 
 process.on('exit', ():void ->
   if weCreatedFileLock:

@@ -16,15 +16,13 @@ createBlueLossConfig():Promise ->
   fs.ensureFile(blueLossSettingsFilePath)
     .then(() -> fs.ensureDir(blueLossLogsFolderPath))
     .then(() -> fs.pathExists(blueLossConfigChromiumPrefsFilePath))
-    .then((exists):Promise|null ->
-      !exists ? createChromiumProfileFiles() : null
-    )
+    .then(exists => {
+      if !exists: createChromiumProfileFiles()
+    })
     .then(() -> fs.pathExists(blueLossConfigFirefoxUserChromeFilePath))
-    .then((exists):Promise|null ->
-      !exists ? createFirefoxProfileFiles() : null
-    )
-    .then(() -> blueLossSettingsFilePath)
-
+    .then(exists => {
+      if !exists: createFirefoxProfileFiles()
+    })
 
 createChromiumProfileFiles():Promise ->
   fs.ensureFile(blueLossConfigChromiumPrefsFilePath)
@@ -42,4 +40,5 @@ export {
   createBlueLossConfig,
   blueLossLogsFolderPath,
   blueLossConfigFolderPath,
+  blueLossSettingsFilePath,
 }
