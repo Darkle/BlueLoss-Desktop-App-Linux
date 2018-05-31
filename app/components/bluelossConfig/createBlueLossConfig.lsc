@@ -15,7 +15,7 @@ blueLossConfigFirefoxPrefsFilePath = path.join(blueLossConfigFolderPath, 'Browse
 createBlueLossConfig():Promise -/>
   exists <- fs.pathExists(blueLossSettingsFilePath)
   if exists: return Promise.resolve()
-  return Promise.all([
+  Promise.all([
     fs.ensureFile(blueLossSettingsFilePath),
     fs.ensureDir(blueLossLogsFolderPath),
     createChromiumProfileFiles(),
