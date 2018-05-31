@@ -21,7 +21,7 @@ initTrayMenu():Promise ->
     systray.onReady(resolve)
   )
 
-systrayClickHandler(action):void ->
+systrayClickHandler(action:Object):void ->
   if action.seq_id === 0: //Open settings window
     console.log('open settings window here')
   if action.seq_id === 1: //Enable/Disable BlueLoss
@@ -33,7 +33,7 @@ systrayClickHandler(action):void ->
   if action.seq_id === 3: //Exit BlueLoss
     systray.kill()
 
-updateEnabledDisabledMenuItem(action):void ->
+updateEnabledDisabledMenuItem(action:Object):void ->
   systray.sendAction({
     type: 'update-item',
     item: {
@@ -44,7 +44,7 @@ updateEnabledDisabledMenuItem(action):void ->
     seq_id: action.seq_id,
   })
 
-updateSystrayIcon(action):void ->
+updateSystrayIcon(action:Object):void ->
   systray.sendAction({
     type: 'update-menu',
     menu: {
