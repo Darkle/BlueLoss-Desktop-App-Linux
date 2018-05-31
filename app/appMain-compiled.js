@@ -510,10 +510,10 @@ const bluelossDesktopFilePath = _path2.default.join(autoStartFolder, 'BlueLoss.d
 
 function enableRunOnStartup(firstRun) {
   if (firstRun && true) return;
-  _fsExtra2.default.outputFile(bluelossDesktopFilePath, gernerateDesktopFile()).catch(_logging.logger.error);
+  _fsExtra2.default.outputFile(bluelossDesktopFilePath, generateDesktopFile()).catch(_logging.logger.error);
 }function disableRunOnStartup() {
   _fsExtra2.default.remove(bluelossDesktopFilePath).catch(_logging.logger.error);
-}function gernerateDesktopFile() {
+}function generateDesktopFile() {
   return `
 [Desktop Entry]
 Type=Application

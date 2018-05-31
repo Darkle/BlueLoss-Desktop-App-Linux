@@ -10,13 +10,13 @@ bluelossDesktopFilePath = path.join(autoStartFolder, 'BlueLoss.desktop')
 
 enableRunOnStartup(firstRun):void ->
   if firstRun and ISDEV: return
-  fs.outputFile(bluelossDesktopFilePath, gernerateDesktopFile())
+  fs.outputFile(bluelossDesktopFilePath, generateDesktopFile())
     .catch(logger.error)
 
 disableRunOnStartup():void ->
   fs.remove(bluelossDesktopFilePath).catch(logger.error)
 
-gernerateDesktopFile():String -> `
+generateDesktopFile():String -> `
 [Desktop Entry]
 Type=Application
 Version=1.0
