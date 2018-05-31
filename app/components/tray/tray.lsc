@@ -6,7 +6,6 @@ import { base64IconData } from './iconsData.lsc'
 let systray = null
 
 initTrayMenu():Promise ->
-  console.log('initTrayMenu ')
   new Promise((resolve):void ->
     now systray = new SysTray({
       menu: {
@@ -38,29 +37,27 @@ initTrayMenu():Promise ->
       debug: false,
       copyDir: true, // copy go tray binary to outside directory, useful for packing tool like pkg.
     })
-    systray.onClick((action):void ->
-      if action.seq_id === 0:
-        console.log('open settings window here')
-      if action.seq_id === 1:
-        newBlueLossEnbaledVal = !checkIfBlueLossEnabled()
-        systray.sendAction({
-          type: 'update-item',
-          item: {
-            ...action.item,
-            title: generateEnabledDisabledLabel(newBlueLossEnbaledVal),
-            tooltip: generateEnabledDisabledLabel(newBlueLossEnbaledVal),
-          },
-          seq_id: action.seq_id,
-        })
-        updateSetting('blueLossEnabled', newBlueLossEnbaledVal)
-      if action.seq_id === 2:
-        systray.kill()
-    )
-    systray.onReady(() ->
-      console.log('onready')
-      resolve()
-    )
+    systray.onClick(systrayClickHandler)
+    systray.onReady(resolve)
   )
+
+systrayClickHandler(action):void ->
+  if action.seq_id === 0:
+    console.log('open settings window here')
+  if action.seq_id === 1:
+    newBlueLossEnbaledVal = !checkIfBlueLossEnabled()
+    systray.sendAction({
+      type: 'update-item',
+      item: {
+        ...action.item,
+        title: generateEnabledDisabledLabel(newBlueLossEnbaledVal),
+        tooltip: generateEnabledDisabledLabel(newBlueLossEnbaledVal),
+      },
+      seq_id: action.seq_id,
+    })
+    updateSetting('blueLossEnabled', newBlueLossEnbaledVal)
+  if action.seq_id === 2:
+    systray.kill()
 
 checkIfBlueLossEnabled():Boolean -> getSettings().blueLossEnabled
 

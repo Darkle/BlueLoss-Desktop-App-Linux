@@ -116,24 +116,24 @@ var _runOnStartup = __webpack_require__(/*! ./components/runOnStartup.lsc */ "./
 (0, _makeSingleInstance.makeSingleInstance)().then(_settings.initSettings).then(_logging.addWinstonFileLogging).then(_tray.initTrayMenu).then(_utils.setUpDev)
 // // .then(startBluetoothScanning)
 // // .then(checkForAppUpdate)
-.then(function () {
+.then(() => {
   const { firstRun } = (0, _settings.getSettings)();
   if (firstRun) {
     (0, _settings.updateSetting)('firstRun', !firstRun);
     // showSettingsWindow()
-    (0, _runOnStartup.enableRunOnStartup)(firstRun);
+    return (0, _runOnStartup.enableRunOnStartup)(firstRun);
   }
-}).catch(function (err) {
+}).catch(err => {
   _logging.logger.error(err);
-  process.exit(1);
+  return process.exit(1);
 });
 // // import { showSettingsWindow } from '../'
 
 
 process.on('unhandledRejection', _logging.logger.error);
-process.on('uncaughtException', function (err) {
+process.on('uncaughtException', err => {
   _logging.logger.error(err);
-  process.exit(1);
+  return process.exit(1);
 });
 
 /***/ }),
@@ -803,7 +803,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 let systray = null;
 
 function initTrayMenu() {
-  console.log('initTrayMenu ');
   return new Promise(function (resolve) {
     systray = new _systray2.default({
       menu: {
@@ -830,29 +829,26 @@ function initTrayMenu() {
       debug: false,
       copyDir: true // copy go tray binary to outside directory, useful for packing tool like pkg.
     });
-    systray.onClick(function (action) {
-      if (action.seq_id === 0) {
-        console.log('open settings window here');
-      }if (action.seq_id === 1) {
-        const newBlueLossEnbaledVal = !checkIfBlueLossEnabled();
-        systray.sendAction({
-          type: 'update-item',
-          item: _extends({}, action.item, {
-            title: generateEnabledDisabledLabel(newBlueLossEnbaledVal),
-            tooltip: generateEnabledDisabledLabel(newBlueLossEnbaledVal)
-          }),
-          seq_id: action.seq_id
-        });
-        (0, _settings.updateSetting)('blueLossEnabled', newBlueLossEnbaledVal);
-      }if (action.seq_id === 2) {
-        systray.kill();
-      }
-    });
-    systray.onReady(function () {
-      console.log('onready');
-      return resolve();
-    });
+    systray.onClick(systrayClickHandler);
+    systray.onReady(resolve);
   });
+}function systrayClickHandler(action) {
+  if (action.seq_id === 0) {
+    console.log('open settings window here');
+  }if (action.seq_id === 1) {
+    const newBlueLossEnbaledVal = !checkIfBlueLossEnabled();
+    systray.sendAction({
+      type: 'update-item',
+      item: _extends({}, action.item, {
+        title: generateEnabledDisabledLabel(newBlueLossEnbaledVal),
+        tooltip: generateEnabledDisabledLabel(newBlueLossEnbaledVal)
+      }),
+      seq_id: action.seq_id
+    });
+    (0, _settings.updateSetting)('blueLossEnabled', newBlueLossEnbaledVal);
+  }if (action.seq_id === 2) {
+    systray.kill();
+  }
 }function checkIfBlueLossEnabled() {
   return (0, _settings.getSettings)().blueLossEnabled;
 }function getTrayIconColor() {
