@@ -728,10 +728,6 @@ Object.defineProperty(exports, "__esModule", {
 function initSettingsObservers() {
   ({});
 } // initSettingsObservers(settings):void ->
-// gawk.watch(settings, ['blueLossEnabled'], (enabled: boolean):void ->
-//   settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
-//   updateTrayMenuEnabledItem()
-// )
 // gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->
 //   if enabled: addRollbarLogging()
 //   else: removeRollbarLogging()
@@ -740,7 +736,6 @@ function initSettingsObservers() {
 //   if enabled: enableRunOnStartup()
 //   else: disableRunOnStartup()
 // )
-// gawk.watch(settings, ['trayIconColor'], changeTrayIcon)
 
 exports.initSettingsObservers = initSettingsObservers;
 
@@ -782,7 +777,7 @@ exports.base64IconData = base64IconData;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateTrayMenuEnabledItem = exports.initTrayMenu = undefined;
+exports.initTrayMenu = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -805,22 +800,7 @@ function initTrayMenu() {
         icon: _iconsData.base64IconData[getTrayIconColor()],
         title: "BlueLoss",
         tooltip: "BlueLoss",
-        items: [{
-          title: "Open BlueLoss Settings",
-          tooltip: "Open BlueLoss Settings",
-          checked: false,
-          enabled: true
-        }, {
-          title: generateEnabledDisabledLabel(checkIfBlueLossEnabled()),
-          tooltip: generateEnabledDisabledLabel(checkIfBlueLossEnabled()),
-          checked: false,
-          enabled: true
-        }, {
-          title: "Quit BlueLoss",
-          tooltip: "Quit BlueLoss",
-          checked: false,
-          enabled: true
-        }]
+        items: generateMenuItems()
       },
       debug: false,
       copyDir: true // copy go tray binary to outside directory, useful for packing tool like pkg.
@@ -832,43 +812,61 @@ function initTrayMenu() {
   if (action.seq_id === 0) {
     console.log('open settings window here');
   }if (action.seq_id === 1) {
-    const newBlueLossEnbaledVal = !checkIfBlueLossEnabled();
+    (0, _settings.updateSetting)('blueLossEnabled', !(0, _settings.getSettings)().blueLossEnabled);
     systray.sendAction({
       type: 'update-item',
       item: _extends({}, action.item, {
-        title: generateEnabledDisabledLabel(newBlueLossEnbaledVal),
-        tooltip: generateEnabledDisabledLabel(newBlueLossEnbaledVal)
+        title: generateEnabledDisabledLabel(),
+        tooltip: generateEnabledDisabledLabel()
       }),
       seq_id: action.seq_id
     });
-    (0, _settings.updateSetting)('blueLossEnabled', newBlueLossEnbaledVal);
   }if (action.seq_id === 2) {
+    systray.sendAction({
+      type: 'update-menu',
+      menu: {
+        icon: _iconsData.base64IconData[toggleIconColor()],
+        title: "BlueLoss",
+        tooltip: "BlueLoss",
+        items: generateMenuItems()
+      },
+      seq_id: action.seq_id
+    });
+  }if (action.seq_id === 3) {
     systray.kill();
   }
-}function checkIfBlueLossEnabled() {
-  return (0, _settings.getSettings)().blueLossEnabled;
+}function generateMenuItems() {
+  return [{
+    title: "Open BlueLoss Settings",
+    tooltip: "Open BlueLoss Settings",
+    enabled: true
+  }, {
+    title: generateEnabledDisabledLabel(),
+    tooltip: generateEnabledDisabledLabel(),
+    enabled: true
+  }, {
+    title: "Toggle Tray Icon Color",
+    tooltip: "Toggle Tray Icon Color",
+    enabled: true
+  }, {
+    title: "Quit BlueLoss",
+    tooltip: "Quit BlueLoss",
+    enabled: true
+  }];
 }function getTrayIconColor() {
-  return  true ? 'white' : undefined;
-} /*****
-  * We can't just check for getSettings().blueLossEnabled in generateEnabledDisabledLabel, because in
-  * in systray.onClick we don't have the ability to wait for updateSetting to finish before running
-  * systray.sendAction, so
-  */
-function generateEnabledDisabledLabel(blueLossEnabled) {
-  return `${blueLossEnabled ? 'Disable' : 'Enable'} BlueLoss`;
-}function updateTrayMenuEnabledItem() {
-  systray.sendAction({
-    type: 'update-item',
-    item: {
-      checked: false,
-      enabled: true,
-      title: generateEnabledDisabledLabel(checkIfBlueLossEnabled()),
-      tooltip: generateEnabledDisabledLabel(checkIfBlueLossEnabled())
-    },
-    seq_id: 1
-  });
+  if (true) return 'white';else {}
+}function toggleIconColor() {
+  const { trayIconColor } = (0, _settings.getSettings)();
+  if (trayIconColor === 'white') {
+    (0, _settings.updateSetting)('trayIconColor', 'blue');
+    return 'blue';
+  } else {
+    (0, _settings.updateSetting)('trayIconColor', 'white');
+    return 'white';
+  }
+}function generateEnabledDisabledLabel() {
+  return `${(0, _settings.getSettings)().blueLossEnabled ? 'Disable' : 'Enable'} BlueLoss`;
 }exports.initTrayMenu = initTrayMenu;
-exports.updateTrayMenuEnabledItem = updateTrayMenuEnabledItem;
 
 /***/ }),
 

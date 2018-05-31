@@ -12,27 +12,7 @@ initTrayMenu():Promise ->
         icon: base64IconData[getTrayIconColor()],
         title: "BlueLoss",
         tooltip: "BlueLoss",
-        items: [
-          {
-            title: "Open BlueLoss Settings",
-            tooltip: "Open BlueLoss Settings",
-            checked: false,
-            enabled: true
-          },
-          {
-            title: generateEnabledDisabledLabel(checkIfBlueLossEnabled()),
-            tooltip: generateEnabledDisabledLabel(checkIfBlueLossEnabled()),
-            checked: false,
-            enabled: true
-          },
-
-          {
-            title: "Quit BlueLoss",
-            tooltip: "Quit BlueLoss",
-            checked: false,
-            enabled: true
-          }
-        ]
+        items: generateMenuItems()
       },
       debug: false,
       copyDir: true, // copy go tray binary to outside directory, useful for packing tool like pkg.
@@ -45,45 +25,71 @@ systrayClickHandler(action):void ->
   if action.seq_id === 0:
     console.log('open settings window here')
   if action.seq_id === 1:
-    newBlueLossEnbaledVal = !checkIfBlueLossEnabled()
+    updateSetting('blueLossEnabled', !getSettings().blueLossEnabled)
     systray.sendAction({
       type: 'update-item',
       item: {
         ...action.item,
-        title: generateEnabledDisabledLabel(newBlueLossEnbaledVal),
-        tooltip: generateEnabledDisabledLabel(newBlueLossEnbaledVal),
+        title: generateEnabledDisabledLabel(),
+        tooltip: generateEnabledDisabledLabel(),
       },
       seq_id: action.seq_id,
     })
-    updateSetting('blueLossEnabled', newBlueLossEnbaledVal)
   if action.seq_id === 2:
+    systray.sendAction({
+      type: 'update-menu',
+      menu: {
+        icon: base64IconData[toggleIconColor()],
+        title: "BlueLoss",
+        tooltip: "BlueLoss",
+        items: generateMenuItems()
+      },
+      seq_id: action.seq_id
+    })
+  if action.seq_id === 3:
     systray.kill()
 
-checkIfBlueLossEnabled():Boolean -> getSettings().blueLossEnabled
-
-getTrayIconColor():String -> if ISDEV: 'white' else: getSettings().trayIconColor
-
-/*****
-* We can't just check for getSettings().blueLossEnabled in generateEnabledDisabledLabel, because in
-* in systray.onClick we don't have the ability to wait for updateSetting to finish before running
-* systray.sendAction, so
-*/
-generateEnabledDisabledLabel(blueLossEnabled):string ->
-  `${ if blueLossEnabled: 'Disable' else: 'Enable' } BlueLoss`
-
-updateTrayMenuEnabledItem():void ->
-  systray.sendAction({
-    type: 'update-item',
-    item: {
-      checked: false,
+generateMenuItems():Array ->
+  [
+    {
+      title: "Open BlueLoss Settings",
+      tooltip: "Open BlueLoss Settings",
       enabled: true
-      title: generateEnabledDisabledLabel(checkIfBlueLossEnabled()),
-      tooltip: generateEnabledDisabledLabel(checkIfBlueLossEnabled()),
     },
-    seq_id: 1,
-  })
+    {
+      title: generateEnabledDisabledLabel(),
+      tooltip: generateEnabledDisabledLabel(),
+      enabled: true
+    },
+
+    {
+      title: "Toggle Tray Icon Color",
+      tooltip: "Toggle Tray Icon Color",
+      enabled: true
+    },
+
+    {
+      title: "Quit BlueLoss",
+      tooltip: "Quit BlueLoss",
+      enabled: true
+    }
+  ]
+
+getTrayIconColor():String ->
+  if ISDEV: 'white' else: getSettings().trayIconColor
+
+toggleIconColor():String ->
+  { trayIconColor } = getSettings()
+  if trayIconColor === 'white':
+    updateSetting('trayIconColor', 'blue')
+    return 'blue'
+  else:
+    updateSetting('trayIconColor', 'white')
+    return 'white'
+
+generateEnabledDisabledLabel():string ->
+  `${ if getSettings().blueLossEnabled: 'Disable' else: 'Enable' } BlueLoss`
 
 export {
   initTrayMenu,
-  updateTrayMenuEnabledItem,
 }

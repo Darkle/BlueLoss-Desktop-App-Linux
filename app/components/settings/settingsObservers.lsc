@@ -8,10 +8,6 @@
 
 initSettingsObservers():void -> {}
 // initSettingsObservers(settings):void ->
-  // gawk.watch(settings, ['blueLossEnabled'], (enabled: boolean):void ->
-  //   settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
-  //   updateTrayMenuEnabledItem()
-  // )
   // gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->
   //   if enabled: addRollbarLogging()
   //   else: removeRollbarLogging()
@@ -20,7 +16,6 @@ initSettingsObservers():void -> {}
   //   if enabled: enableRunOnStartup()
   //   else: disableRunOnStartup()
   // )
-  // gawk.watch(settings, ['trayIconColor'], changeTrayIcon)
 
 export {
   initSettingsObservers
