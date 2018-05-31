@@ -1,9 +1,11 @@
 import tp from 'timeproxy'
 import is from 'typa'
 
-import { showSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
+import packageJson from '../../package.json'
 
-setUpDev(firstRun):void -> if !ISDEV && !firstRun: showSettingsWindow()
+getAppVersion():String -> packageJson.version
+// setUpDev(firstRun):void -> if !ISDEV && !firstRun: showSettingsWindow()
+setUpDev():void -> { console.log('setUpDev')}
 omitGawkFromSettings(settings) -> recursivelyOmitObjProperties(settings, ['__gawk__'])
 noop() -> return
 pipe(...fns) -> param -> fns.reduce((result, fn) -> fn(result), param)
@@ -35,6 +37,7 @@ generateLogTimeStamp():String ->
   `[${ today.getHours() }:${ today.getMinutes() }:${ today.getSeconds() }]`
 
 export {
+  getAppVersion,
   setUpDev,
   omitGawkFromSettings,
   omitInheritedProperties,

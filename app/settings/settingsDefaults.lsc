@@ -1,4 +1,3 @@
-import { SettingsWindowPositionType } from '../types/types.lsc'
 
 defaultSettings: {
   blueLossEnabled: boolean,
@@ -8,7 +7,6 @@ defaultSettings: {
   timeToLock: number,
   reportErrors: boolean,
   firstRun: boolean,
-  settingsWindowPosition: SettingsWindowPositionType,
   dateLastCheckedForAppUpdate: number,
   skipUpdateVersion: string,
 } = {
@@ -19,7 +17,6 @@ defaultSettings: {
   timeToLock: 3,
   reportErrors: true,
   firstRun: true,
-  settingsWindowPosition: null,
   dateLastCheckedForAppUpdate: Date.now(),
   skipUpdateVersion: '0',
 }

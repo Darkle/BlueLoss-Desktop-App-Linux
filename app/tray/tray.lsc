@@ -1,54 +1,95 @@
 import path from 'path'
-import { Tray, Menu, app as electronApp } from 'electron'
+import fs from 'fs'
 
-import { showSettingsWindow, toggleSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
+import SysTray from 'systray'
+
 import { updateSetting, getSettings } from '../settings/settings.lsc'
+iconDirPath = path.resolve(__dirname, '..', 'tray', 'icons',)
+let systray = null
 
-let tray = null
-trayIconsFolder = path.resolve(__dirname, '..', 'tray', 'icons')
+initTrayMenu():Promise ->
+  console.log('initTrayMenu ')
+  new Promise((resolve):void ->
+    now systray = new SysTray({
+      menu: {
+        icon: getTrayIconAsBase64(),
+        title: "BlueLoss",
+        tooltip: "BlueLoss",
+        items: [
+          {
+            title: "Open BlueLoss Settings",
+            tooltip: "Open BlueLoss Settings",
+            checked: false,
+            enabled: true
+          },
+          {
+            title: generateEnabledDisabledLabel(checkIfBlueLossEnabled()),
+            tooltip: generateEnabledDisabledLabel(checkIfBlueLossEnabled()),
+            checked: false,
+            enabled: true
+          },
 
-initTrayMenu():void ->
-  now tray = new Tray(getNewTrayIconPath(getSettings().trayIconColor))
-  tray.setContextMenu(createContextMenu())
-  tray.setToolTip('BlueLoss')
-  tray.on('double-click', toggleSettingsWindow)
-
-createContextMenu():Object ->
-  Menu.buildFromTemplate(
-    [
-      {
-        label: 'Open BlueLoss Settings',
-        click: showSettingsWindow
+          {
+            title: "Quit BlueLoss",
+            tooltip: "Quit BlueLoss",
+            checked: false,
+            enabled: true
+          }
+        ]
       },
-      {
-        label: generateEnabledDisabledLabel(),
-        click: toggleEnabledFromTray
-      },
-      {
-        label: 'Quit BlueLoss',
-        click: electronApp.quit
-      }
-    ]
+      debug: false,
+      copyDir: true, // copy go tray binary to outside directory, useful for packing tool like pkg.
+    })
+    systray.onClick((action):void ->
+      if action.seq_id === 0:
+        console.log('open settings window here')
+      if action.seq_id === 1:
+        newBlueLossEnbaledVal = !checkIfBlueLossEnabled()
+        systray.sendAction({
+          type: 'update-item',
+          item: {
+            ...action.item,
+            title: generateEnabledDisabledLabel(newBlueLossEnbaledVal),
+            tooltip: generateEnabledDisabledLabel(newBlueLossEnbaledVal),
+          },
+          seq_id: action.seq_id,
+        })
+        updateSetting('blueLossEnabled', newBlueLossEnbaledVal)
+      if action.seq_id === 2:
+        systray.kill()
+    )
+    systray.onReady(resolve)
   )
 
-getNewTrayIconPath(trayIconColor: string):string ->
-  path.join(trayIconsFolder, `BlueLoss-${ trayIconColor }-128x128.png`)
+checkIfBlueLossEnabled():Boolean -> getSettings().blueLossEnabled
 
-generateEnabledDisabledLabel():string ->
-  `${ if getSettings().blueLossEnabled: 'Disable' else: 'Enable' } BlueLoss`
+getTrayIconColor():String -> if ISDEV: 'White' else: getSettings().trayIconColor
 
-changeTrayIcon(newTrayIconColor: string):void ->
-  tray.setImage(getNewTrayIconPath(newTrayIconColor))
+getTrayIconAsBase64():String->
+  fs.readFileSync(path.join(iconDirPath, `BlueLoss-${ getTrayIconColor() }-128x128.png`))
+    .toString('base64')
 
-updateTrayMenu():void ->
-  tray.setContextMenu(createContextMenu())
+/*****
+* We can't just check for getSettings().blueLossEnabled in generateEnabledDisabledLabel, because in
+* in systray.onClick we don't have the ability to wait for updateSetting to finish before running
+* systray.sendAction, so
+*/
+generateEnabledDisabledLabel(blueLossEnabled):string ->
+  `${ if blueLossEnabled: 'Disable' else: 'Enable' } BlueLoss`
 
-toggleEnabledFromTray():void ->
-  updateSetting('blueLossEnabled', !getSettings().blueLossEnabled)
+updateTrayMenuEnabledItem():void ->
+  systray.sendAction({
+    type: 'update-item',
+    item: {
+      checked: false,
+      enabled: true
+      title: generateEnabledDisabledLabel(checkIfBlueLossEnabled()),
+      tooltip: generateEnabledDisabledLabel(checkIfBlueLossEnabled()),
+    },
+    seq_id: 1,
+  })
 
 export {
   initTrayMenu,
-  changeTrayIcon,
-  createContextMenu,
-  updateTrayMenu,
+  updateTrayMenuEnabledItem,
 }

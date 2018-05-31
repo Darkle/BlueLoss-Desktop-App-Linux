@@ -1,20 +1,15 @@
+import path from 'path'
 
-import { ipcMain } from 'electron'
 import winston from 'winston'
 
 import { CustomRollbarTransport, rollbarLogger } from './customRollbarTransport.lsc'
-import { UserDebugLoggerTransport } from './userDebugLogger.lsc'
 import { getSettings } from '../../settings/settings.lsc'
+import { blueLossLogsFolderPath } from '../../bluelossConfig/createBlueLossConfig.lsc'
 
+bluelossLogFilePath = path.join(blueLossLogsFolderPath, 'BlueLoss.log.txt')
 rollbarTransportOptions = {
   name: 'rollbarTransport',
   level: 'error',
-  handleExceptions: true,
-  humanReadableUnhandledException: true,
-}
-userDebugTransportOptions = {
-  name: 'userDebugTransport',
-  level: 'debug',
   handleExceptions: true,
   humanReadableUnhandledException: true,
 }
@@ -32,10 +27,7 @@ if ISDEV:
     // json: true
   })
 // dont send errors to rollbar in dev && only if enabled.
-if !ISDEV and getSettings().reportErrors:
-  addRollbarLogging()
-
-logger.add(UserDebugLoggerTransport, userDebugTransportOptions)
+if !ISDEV and getSettings().reportErrors: addRollbarLogging()
 /**
 * We also need to enable/disable the rollbar module itself as well,
 * as it is set to report uncaught exceptions as well as logging
@@ -49,16 +41,21 @@ removeRollbarLogging():void ->
   rollbarLogger.configure({enabled: false})
   logger.remove('rollbarTransport')
 
-ipcMain.on('settings-renderer:error-sent', (event, error):void ->
-  logger.error('settings-renderer:error-sent', error)
-)
-ipcMain.on('bluetooth-scan-window-renderer:error-sent', (event, error):void ->
-  logger.error('bluetooth-scan-window-renderer:error-sent', error)
-)
-
+addWinstonFileLogging():Promise ->
+  winston.add(
+    winston.transports.File,
+    {
+      filename: bluelossLogFilePath ,
+      maxsize: 500000,  // 500KB
+      maxFiles: 6,
+      prettyPrint: true,
+      depth: 10
+    }
+  )
 
 export {
   logger,
   addRollbarLogging,
   removeRollbarLogging,
+  addWinstonFileLogging,
 }

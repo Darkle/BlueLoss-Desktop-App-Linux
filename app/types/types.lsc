@@ -1,12 +1,9 @@
 
 
 type DeviceType = { deviceName: string, deviceId: string, lastSeen: ?number }
-type SettingsWindowPositionType = null | { x: number, y: number, width: number, height: number }
-type SettingsTypes = number | boolean | string | Array<DeviceType> | SettingsWindowPositionType
-
+type SettingsTypes = number | boolean | string | Array<DeviceType>
 
 export type {
   DeviceType,
-  SettingsWindowPositionType,
   SettingsTypes,
 }

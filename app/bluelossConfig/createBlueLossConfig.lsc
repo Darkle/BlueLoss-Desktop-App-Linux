@@ -7,17 +7,19 @@ import { getChromePrefs, getFirefoxUserChrome, getFirefoxPrefsJs } from './brows
 
 blueLossConfigFolderPath = path.join(os.homedir(), '.config', 'BlueLoss')
 blueLossSettingsFilePath = path.join(blueLossConfigFolderPath, 'blueloss-settings.json')
+blueLossLogsFolderPath = path.join(blueLossConfigFolderPath, 'logs')
 blueLossConfigChromiumPrefsFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Chromium', 'Default', 'Preferences')
 blueLossConfigFirefoxUserChromeFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Firefox', 'chrome', 'userChrome.css')
 blueLossConfigFirefoxPrefsFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Firefox', 'prefs.js')
 
-createSettingsFolders():Promise ->
+createBlueLossConfig():Promise ->
   fs.ensureFile(blueLossSettingsFilePath)
-    .then(fs.pathExists(blueLossConfigChromiumPrefsFilePath))
+    .then(() -> fs.ensureDir(blueLossLogsFolderPath))
+    .then(() -> fs.pathExists(blueLossConfigChromiumPrefsFilePath))
     .then((exists):Promise|null ->
       !exists ? createChromiumProfileFiles() : null
     )
-    .then(fs.pathExists(blueLossConfigFirefoxUserChromeFilePath))
+    .then(() -> fs.pathExists(blueLossConfigFirefoxUserChromeFilePath))
     .then((exists):Promise|null ->
       !exists ? createFirefoxProfileFiles() : null
     )
@@ -26,16 +28,17 @@ createSettingsFolders():Promise ->
 
 createChromiumProfileFiles():Promise ->
   fs.ensureFile(blueLossConfigChromiumPrefsFilePath)
-    .then(fs.writeJson(blueLossConfigChromiumPrefsFilePath, getChromePrefs()))
+    .then(() -> fs.writeJson(blueLossConfigChromiumPrefsFilePath, getChromePrefs()))
 
 createFirefoxProfileFiles():Promise ->
   fs.ensureFile(blueLossConfigFirefoxUserChromeFilePath)
-    .then(fs.ensureFile(blueLossConfigFirefoxPrefsFilePath))
-    .then(fs.outputFile(blueLossConfigFirefoxUserChromeFilePath, getFirefoxUserChrome()))
-    .then(fs.outputFile(blueLossConfigFirefoxPrefsFilePath, getFirefoxPrefsJs()))
+    .then(() -> fs.ensureFile(blueLossConfigFirefoxPrefsFilePath))
+    .then(() -> fs.outputFile(blueLossConfigFirefoxUserChromeFilePath, getFirefoxUserChrome()))
+    .then(() -> fs.outputFile(blueLossConfigFirefoxPrefsFilePath, getFirefoxPrefsJs()))
 
 
 
 export {
-  createSettingsFolders
+  createBlueLossConfig,
+  blueLossLogsFolderPath
 }

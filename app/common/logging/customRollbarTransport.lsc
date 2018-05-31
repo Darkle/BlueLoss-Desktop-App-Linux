@@ -3,7 +3,7 @@ import util from 'util'
 import winston from 'winston'
 import Rollbar from 'rollbar'
 
-import { getProperAppVersion } from '../utils.lsc'
+import { getAppVersion } from '../utils.lsc'
 
 rollbarConfig = {
   accessToken: process.env.rollbarAccessToken,
@@ -13,11 +13,7 @@ rollbarConfig = {
   environment: process.env.NODE_ENV,
   reportLevel: 'error',
   payload: {
-      mainOrRenderer: 'main',
-      platform: process.platform,
-      processVersions: process.versions,
-      arch: process.arch,
-      BlueLossVersion: getProperAppVersion()
+      BlueLossVersion: getAppVersion()
     },
     // Ignore the server stuff cause that includes info about the host pc name.
     transform(payload){

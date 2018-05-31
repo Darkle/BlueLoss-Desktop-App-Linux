@@ -1,19 +1,19 @@
 
 getFirefoxUserChrome():string -> `
-  @-moz-document url(chrome://browser/content/browser.xul) {
-  #TabsToolbar {
-    visibility: collapse !important;
-  }
-  #nav-bar {
-    visibility: collapse !important;
-  }
-  `
+@-moz-document url(chrome://browser/content/browser.xul) {
+#TabsToolbar {
+  visibility: collapse !important;
+}
+#nav-bar {
+  visibility: collapse !important;
+}
+`
 
 getFirefoxPrefsJs():String -> `
-  user_pref("browser.tabs.warnOnClose", false);
-  user_pref("browser.sessionstore.restore_on_demand", false);
-  user_pref("browser.tabs.warnOnCloseOtherTabs", false);
-  `
+user_pref("browser.tabs.warnOnClose", false);
+user_pref("browser.sessionstore.restore_on_demand", false);
+user_pref("browser.tabs.warnOnCloseOtherTabs", false);
+`
 
 getChromePrefs():Object ->
   ({

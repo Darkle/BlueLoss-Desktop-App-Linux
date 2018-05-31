@@ -1,25 +1,25 @@
 
 import gawk from 'gawk'
 
-import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import { addRollbarLogging, removeRollbarLogging } from '../common/logging/logging.lsc'
-import { changeTrayIcon, updateTrayMenu } from '../tray/tray.lsc'
-import { enableRunOnStartup, disableRunOnStartup } from '../common/runOnStartup.lsc'
+// import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
+// import { addRollbarLogging, removeRollbarLogging } from '../common/logging/logging.lsc'
+// import { changeTrayIcon, updateTrayMenuEnabledItem } from '../tray/tray.lsc'
+// import { enableRunOnStartup, disableRunOnStartup } from '../common/runOnStartup.lsc'
 
-initSettingsObservers(settings):void ->
-  gawk.watch(settings, ['blueLossEnabled'], (enabled: boolean):void ->
-    settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
-    updateTrayMenu()
-  )
-  gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->
-    if enabled: addRollbarLogging()
-    else: removeRollbarLogging()
-  )
-  gawk.watch(settings, ['runOnStartup'], (enabled: boolean):void ->
-    if enabled: enableRunOnStartup()
-    else: disableRunOnStartup()
-  )
-  gawk.watch(settings, ['trayIconColor'], changeTrayIcon)
+initSettingsObservers(settings):void -> {}
+  // gawk.watch(settings, ['blueLossEnabled'], (enabled: boolean):void ->
+  //   settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
+  //   updateTrayMenuEnabledItem()
+  // )
+  // gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->
+  //   if enabled: addRollbarLogging()
+  //   else: removeRollbarLogging()
+  // )
+  // gawk.watch(settings, ['runOnStartup'], (enabled: boolean):void ->
+  //   if enabled: enableRunOnStartup()
+  //   else: disableRunOnStartup()
+  // )
+  // gawk.watch(settings, ['trayIconColor'], changeTrayIcon)
 
 export {
   initSettingsObservers
