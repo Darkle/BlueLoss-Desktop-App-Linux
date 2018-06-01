@@ -13,8 +13,8 @@ initSettingsObservers():void -> {}
   //   else: removeRollbarLogging()
   // )
   // gawk.watch(settings, ['runOnStartup'], (enabled: boolean):void ->
-  //   if enabled: enableRunOnStartup()
-  //   else: disableRunOnStartup()
+  //   if enabled: enableRunOnStartup() .catch()
+  //   else: disableRunOnStartup().catch()
   // )
 
 export {

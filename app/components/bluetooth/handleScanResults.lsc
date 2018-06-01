@@ -12,7 +12,6 @@ handleScanResults(spawnCommandResult:Object):void ->
 
   { devicesToSearchFor } = getSettings()
   timeStampedDeviceList = addTimeStampToSeenDevices(deviceList)
-  console.log(timeStampedDeviceList)
   // settingsWindow?.webContents?.send(
   //   'mainprocess:update-of-bluetooth-devices-can-see',
   //   { devicesCanSee: timeStampedDeviceList }

@@ -6,10 +6,8 @@ const nodeExternals = require('webpack-node-externals')
 const projectDir = path.resolve(__dirname)
 const appDir = path.join(projectDir, 'app')
 const mainAppEntryPoint = path.join(appDir, 'appMain.lsc')
-// const settingsWindowRendererDir = path.join(appDir, 'settingsWindow', 'renderer')
-// const settingsWindowRendererEntryPoint = path.join(settingsWindowRendererDir, 'settingsWindowRendererMain.lsc')
-// const bluetoothRendererDir = path.join(appDir, 'bluetooth', 'renderer')
-// const bluetoothRendererEntryPoint = path.join(bluetoothRendererDir, 'bluetoothRendererMain.lsc')
+const frontEndJsPath = path.join(appDir, 'components', 'settingsWindow', 'frontEnd', 'js')
+const settingsWindowMainEntryPoint = path.join(frontEndJsPath, 'settingsWindowWeb.lsc')
 const isDev = process.env.NODE_ENV !== 'production'
 const debugging = isDev && process.env.nodeDebug === 'true'
 
@@ -80,19 +78,19 @@ const electronMainWebpackOptions = {
   }
 }
 
-// const electronSettingsRendererWebpackOptions = {
-//   ...commonWebpackOptions,
-//   ...{
-//     target: 'web',
-//     entry: settingsWindowRendererEntryPoint,
-//     output: {
-//       filename: 'settingsWindowRendererMain-compiled.js',
-//       path: settingsWindowRendererDir
-//     }
-//   }
-// }
+const frontEndWebpackOptions = {
+  ...commonWebpackOptions,
+  ...{
+    target: 'web',
+    entry: settingsWindowMainEntryPoint,
+    output: {
+      filename: 'settingsWindowMain-compiled.js',
+      path: frontEndJsPath
+    }
+  }
+}
 
 module.exports = [
   electronMainWebpackOptions,
-  // electronSettingsRendererWebpackOptions,
+  frontEndWebpackOptions,
 ]

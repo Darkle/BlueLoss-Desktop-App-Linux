@@ -1,0 +1,38 @@
+import path from 'path'
+
+import express from 'express'
+import internalIP from 'internal-ip'
+
+import { logger } from '../logging/logging.lsc'
+
+let serverAddress = null
+frontEndDirPath = path.resolve(__dirname, '..', 'app', 'components', 'settingsWindow', 'frontEnd')
+settingsPagePath = path.join(frontEndDirPath, 'html', 'settingsWindow.html')
+assetsPath = path.join(frontEndDirPath, 'assets')
+jsPath = path.join(frontEndDirPath, 'js')
+expressApp = express()
+
+expressApp.use('/assets', express.static(assetsPath))
+expressApp.use('/js', express.static(jsPath))
+expressApp.get('/', (req, res) -> res.sendFile(settingsPagePath))
+
+/*****
+* If port is 0, the operating system will assign an arbitrary unused port.
+*/
+startServer():Promise ->
+  new Promise(resolve => {
+    listener = expressApp.listen(0, () => {
+      storeServerAddress(listener.address())
+      resolve()
+    })
+  })
+
+storeServerAddress({family, address, port}):void ->
+  ip = if family.toLowerCase() === 'ipv6': `[${ address }]` else: address
+  now serverAddress = `http://${ ip }:${ port }`
+  logger.debug('serverAddress: ', serverAddress)
+
+export{
+  startServer,
+  serverAddress,
+}

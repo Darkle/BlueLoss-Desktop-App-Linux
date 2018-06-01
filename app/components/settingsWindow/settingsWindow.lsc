@@ -1,0 +1,41 @@
+import path from 'path'
+
+import opn from 'opn'
+import execa from 'execa'
+import pRatRace from 'promise-rat-race'
+
+// import { logger } from '../logging/logging.lsc'
+import { serverAddress } from '../server/server.lsc'
+import { blueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
+
+firefoxProfilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Firefox')
+chromiumProfilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Chromium')
+firefoxCliSpawnParams = 'firefox -new-instance --width=786 --height=616'
+
+openSettingsWindow():Promise ->
+  //send a message to all open windows via websockets to close themselves, then
+  // open a new settings window
+  // https://github.com/Financial-Times/promise-rat-race#promise-rat-race
+  pRatRace([
+    execa.shell('command -v google-chrome'),
+    // execa.shell('command -v chromium-browser'),
+    // execa.shell('command -v firefox'),
+  ])
+  .then(result ->
+    browserPath = result?.data?.out
+    if !browserPath: throw new Error()
+    browser = browserPath.slice(browserPath.lastIndexOf('/') +1)
+    openSettingsWindowInBrowser(browser)
+  )
+  //fall back to opening with OS's default browser
+  .catch(err -> opn(serverAddress))  // eslint-disable-line handle-callback-err, no-unused-vars
+
+openSettingsWindowInBrowser(browser):Promise ->
+  if browser === 'firefox':
+    return execa.shell(`${ firefoxCliSpawnParams } -profile ${ firefoxProfilePath } ${ serverAddress }`)
+  execa.shell(`${ browser } --app=${ serverAddress } --user-data-dir=${ chromiumProfilePath }`)
+
+
+export {
+  openSettingsWindow
+}

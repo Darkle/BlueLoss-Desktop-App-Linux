@@ -1,12 +1,23 @@
 import tp from 'timeproxy'
 import is from 'typa'
+import execa from 'execa'
 
 import packageJson from '../../package.json'
+import { openSettingsWindow } from '../components/settingsWindow/settingsWindow.lsc'
+import { logger } from '../components/logging/logging.lsc'
+import { getSettings } from './settings/settings.lsc'
+
+getScreenResolution():Object ->
+  try:
+    { stdout } = execa.shellSync(`xrandr | grep '*'`)
+    [ width, height ] = stdout.trim().split(' ')[0].split('x')
+    return { width: Number(width), height: Number(height) }
+  catch(e):
+    logger.error(e)
 
 getAppVersion():String -> packageJson.version
 
-// setUpDev(firstRun):void -> if !ISDEV && !firstRun: showSettingsWindow()
-setUpDev():void -> { console.log('setUpDev')}
+setUpDev():void -> if ISDEV && !getSettings().firstRun: openSettingsWindow().catch(logger.error)
 
 omitGawkFromSettings(settings) -> recursivelyOmitObjProperties(settings, ['__gawk__'])
 
@@ -47,6 +58,7 @@ generateLogTimeStamp():String ->
   `[${ today.getHours() }:${ today.getMinutes() }:${ today.getSeconds() }]`
 
 export {
+  getScreenResolution,
   getAppVersion,
   setUpDev,
   omitGawkFromSettings,

@@ -1,3 +1,4 @@
+import { getScreenResolution } from '../../utils.lsc'
 
 getFirefoxUserChrome():string -> `
 @-moz-document url(chrome://browser/content/browser.xul) {
@@ -14,32 +15,72 @@ user_pref("browser.tabs.warnOnClose", false);
 user_pref("browser.sessionstore.restore_on_demand", false);
 user_pref("browser.tabs.warnOnCloseOtherTabs", false);
 `
-
+/*****
+* Localhost addresses
+* ::
+* ::1
+* 0.0.0.0
+* 127.0.0.1
+*/
 getChromePrefs():Object ->
+  screenResolution = getScreenResolution()
   ({
     "browser": {
       "app_window_placement": {
-        "www": {
-          "google": {
-            "com_/": {
-              "bottom": 1201,
-              "left": 391,
-              "maximized": false,
-              "right": 1251,
-              "top": 404,
-              "work_area_bottom": 1398,
-              "work_area_left": 0,
-              "work_area_right": 2560,
-              "work_area_top": 0
+        "[::]_/": {
+          "maximized": false,
+          "bottom": 893,
+          "left": 0,
+          "right": 1308,
+          "top": 0,
+        },
+        "[::1]_/": {
+          "maximized": false,
+          "bottom": 1244,
+          "left": 132,
+          "right": 1086,
+          "top": 332,
+        },
+        "0": {
+          "0": {
+            "0": {
+              "0_/": {
+                "maximized": false,
+                "bottom": 1398,
+                "left": 18,
+                "right": 1283,
+                "top": 29,
+              }
             }
           }
-        }
+        },
+        "127": {
+          "0": {
+            "0": {
+              "1_/": {
+                "maximized": false,
+                "bottom": 1079,
+                "left": 507,
+                "right": 1546,
+                "top": 192,
+              }
+            }
+          }
+        },
       },
-      "has_seen_welcome_page": true
     }
   })
 
-
+/*****
+* We want the chromium browser to end up in the center of the screen
+* with a width of 786px and a height of 616px. It's ok if the users screen
+* dimensions change later as when they move the window and close it, chromium
+* updates that in the Preferences file.
+*/
+generateBottom(screenResolution)
+generateLeft(screenResolution)
+generateRight(screenResolution)
+generateTop(screenResolution)
 
 export {
   getFirefoxUserChrome,

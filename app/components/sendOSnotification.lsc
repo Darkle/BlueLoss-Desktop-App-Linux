@@ -1,17 +1,17 @@
-import Spawner from 'promise-spawner'
+import execa from 'execa'
 import pRatRace from 'promise-rat-race'
 
 import { noop } from './utils.lsc'
 
 sendOSnotification(message:String):void ->
   pRatRace([
-    new Spawner().spawn('command -v zenity'),
-    new Spawner().spawn('command -v notify-send'),
+    execa.shell('command -v zenity'),
+    execa.shell('command -v notify-send'),
   ])
   .then(({data: {out}}):Promise ->
     if out[0].endsWith('zenity'):
-      return new Spawner().spawn(`zenity --notification --text="${ message }"`).catch(noop)
-    new Spawner().spawn(`notify-send "${ message }"`).catch(noop)
+      return execa.shell(`zenity --notification --text="${ message }"`).catch(noop)
+    execa.shell(`notify-send "${ message }"`).catch(noop)
   )
   .catch(noop)
 

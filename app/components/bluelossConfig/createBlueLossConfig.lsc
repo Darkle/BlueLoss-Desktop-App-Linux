@@ -8,6 +8,7 @@ import { getChromePrefs, getFirefoxUserChrome, getFirefoxPrefsJs } from './brows
 blueLossConfigFolderPath = path.join(os.homedir(), '.config', 'BlueLoss')
 blueLossSettingsFilePath = path.join(blueLossConfigFolderPath, 'blueloss-settings.json')
 blueLossLogsFolderPath = path.join(blueLossConfigFolderPath, 'logs')
+blueLossConfigChromiumFirstRunFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Chromium', 'First Run')
 blueLossConfigChromiumPrefsFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Chromium', 'Default', 'Preferences')
 blueLossConfigFirefoxUserChromeFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Firefox', 'chrome', 'userChrome.css')
 blueLossConfigFirefoxPrefsFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Firefox', 'prefs.js')
@@ -25,6 +26,7 @@ createBlueLossConfig():Promise -/>
 createChromiumProfileFiles():Promise ->
   fs.ensureFile(blueLossConfigChromiumPrefsFilePath)
     .then(() -> fs.writeJson(blueLossConfigChromiumPrefsFilePath, getChromePrefs()))
+    .then(() -> fs.ensureFile(blueLossConfigChromiumFirstRunFilePath))
 
 createFirefoxProfileFiles():Promise ->
   fs.ensureFile(blueLossConfigFirefoxUserChromeFilePath)

@@ -11,8 +11,8 @@ const stringifyObject = require('stringify-object')
 
 const basePath = path.resolve(__dirname, '..')
 const inputJSfile = path.join(basePath, 'app', 'appMain-compiled.js')
-const stylusInput = path.join(basePath, 'app', 'frontEnd', 'assets', 'styles', 'stylus', 'index.styl')
-const stylusOutput = path.join(basePath, 'app', 'frontEnd', 'assets', 'styles', 'css', 'settingsWindowCss-compiled.css')
+const stylusInput = path.join(basePath, 'app', 'components', 'settingsWindow', 'frontEnd', 'assets', 'styles', 'stylus', 'index.styl')
+const stylusOutput = path.join(basePath, 'app', 'components', 'settingsWindow', 'frontEnd', 'assets', 'styles', 'css', 'settingsWindowCss-compiled.css')
 // const appVersion = require(path.join(basePath, 'package.json')).version
 const platformBuildFolder = path.join(basePath, 'build')
 const globsForCleanPlatformFolder = [path.join(platformBuildFolder, '**', '*.*'), path.join(platformBuildFolder, '**'), `!${ platformBuildFolder }`]

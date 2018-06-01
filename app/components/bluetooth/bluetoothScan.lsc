@@ -1,4 +1,4 @@
-import Spawner from 'promise-spawner'
+import execa from 'execa'
 
 import { handleScanResults } from './handleScanResults.lsc'
 import { logger } from '../logging/logging.lsc'
@@ -7,7 +7,7 @@ import { getSettings } from '../settings/settings.lsc'
 scanForBlueToothDevices():void ->
   if !getSettings().blueLossEnabled: return scheduleScan()
   logger.debug('=======New Scan Started=======')
-  new Spawner().spawn('hcitool scan').then(handleScanResults).catch(logger.error)
+  execa.shell('hcitool scan').then(handleScanResults).catch(logger.error)
   scheduleScan()
 
 scheduleScan():void ->
