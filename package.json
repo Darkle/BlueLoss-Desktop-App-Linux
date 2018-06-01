@@ -34,8 +34,9 @@
     "lowdb": "^1.0.0",
     "ono": "^4.0.5",
     "parallel-webpack": "^2.3.0",
+    "promise-rat-race": "^1.5.1",
+    "promise-spawner": "^2.0.0",
     "rollbar": "^2.3.9",
-    "stringify-object": "^3.2.2",
     "systray": "^1.0.5",
     "the-answer": "^1.0.0",
     "timeproxy": "^1.2.1",
@@ -73,6 +74,7 @@
     "semver": "^5.5.0",
     "sleep-ms": "^2.0.1",
     "snyk": "^1.82.0",
+    "stringify-object": "^3.2.2",
     "stylus": "^0.54.5",
     "webpack": "^4.10.2",
     "webpack-node-externals": "^1.7.2"

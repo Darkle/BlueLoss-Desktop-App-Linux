@@ -8,7 +8,8 @@ defaultSettings: {
   reportErrors: Boolean,
   firstRun: Boolean,
   dateLastCheckedForAppUpdate: Number,
-  skipUpdateVersion: String
+  skipUpdateVersion: String,
+  scanInterval: Number
 } = {
   blueLossEnabled: true,
   runOnStartup: true,
@@ -18,7 +19,8 @@ defaultSettings: {
   reportErrors: true,
   firstRun: true,
   dateLastCheckedForAppUpdate: Date.now(),
-  skipUpdateVersion: '0'
+  skipUpdateVersion: '0',
+  scanInterval: 30000
 }
 
 export {

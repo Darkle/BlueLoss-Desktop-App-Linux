@@ -1,75 +1,20 @@
-import path from 'path'
-import url from 'url'
-import { BrowserWindow } from 'electron'
-
-import tp from 'timeproxy'
+import Spawner from 'promise-spawner'
 
 import { handleScanResults } from './handleScanResults.lsc'
-import { logger } from '../common/logging/logging.lsc'
+import { logger } from '../logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
-import { lockSystemIfDeviceLost } from './lockCheck.lsc'
 
-bluetoothHiddenWindowHTMLpath = url.format({
-  protocol: 'file',
-  slashes: true,
-  pathname: path.resolve(__dirname, '..', 'bluetooth', 'renderer', 'bluetoothHiddenWindow.html')
-})
-bluetoothHiddenWindowProperties = {
-  show: false,
-  webPreferences: {
-    experimentalFeatures: true // for web-bluetooth
-  }
-}
-invokeUserGesture = true
-let scannerWindow = null  // so it doesn't get garbage collected
-
-init():void ->
-  createBluetoothScannerWindow().then(scanforDevices)
-
-createBluetoothScannerWindow():Promise ->
-  new Promise((resolve):void ->
-    now scannerWindow = new BrowserWindow(bluetoothHiddenWindowProperties)
-    scannerWindow.loadURL(bluetoothHiddenWindowHTMLpath)
-    if ISDEV: scannerWindow.webContents.openDevTools({ mode: 'undocked'})
-
-    scannerWindow.webContents.once('dom-ready', resolve)
-    scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)
-    scannerWindow.webContents.once('crashed', (event):void ->
-      logger.error('scannerWindow.webContents crashed', event)
-    )
-    scannerWindow.once('unresponsive', (event):void ->
-      logger.error('scannerWindow unresponsive', event)
-    )
-  )
-
-scanforDevices():void ->
-  if !getSettings().blueLossEnabled: return scanIn20Seconds()
-
+scanForBlueToothDevices():void ->
+  if !getSettings().blueLossEnabled: return scheduleScan()
   logger.debug('=======New Scan Started=======')
+  new Spawner().spawn('hcitool scan').then(handleScanResults).catch(logger.error)
+  scheduleScan()
 
-  scannerWindow
-    .webContents
-    .executeJavaScript(
-      `navigator.bluetooth.requestDevice({acceptAllDevices: true})`,
-      invokeUserGesture
-    )
-    .catch(handleRequestDeviceError)
-
-    lockSystemIfDeviceLost()
-    scanIn20Seconds()
-
-scanIn20Seconds():void ->
-  setTimeout(scanforDevices, tp.TWENTY_SECONDS)
-
-/**
- * NotFoundError is the norm.
- */
-handleRequestDeviceError(err):void ->
-  if err?.name === 'NotFoundError': return
-  logger.error(err)
+scheduleScan():void ->
+  setTimeout(scanForBlueToothDevices, getSettings().scanInterval)
 
 
 export {
-  init,
+  scanForBlueToothDevices,
 }
 

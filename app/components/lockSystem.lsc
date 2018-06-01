@@ -1,7 +1,7 @@
 import lockSystem from 'lock-system'
 
 import { logger } from './logging/logging.lsc'
-import { getSettings } from '../settings/settings.lsc'
+import { getSettings } from './settings/settings.lsc'
 
 lockTheSystem():void ->
   if !getSettings().blueLossEnabled: return

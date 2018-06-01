@@ -1,30 +1,22 @@
 import isEmpty from 'is-empty'
 
-import { logger } from '../common/logging/logging.lsc'
+import { logger } from '../logging/logging.lsc'
 import { DeviceType } from '../types/types.lsc'
 import { getSettings, updateDeviceInDevicesToSearchFor } from '../settings/settings.lsc'
-import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-import { compose } from '../common/utils.lsc'
+// import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
+import { lockSystemIfDeviceLost } from './lockCheck.lsc'
 
-processDeviceList = compose(addTimeStampToSeenDevices, dedupeDeviceList)
-/**
- * Note: handleScanResults doesn't get called from
- * ` scannerWindow.webContents.on('select-bluetooth-device', handleScanResults)`
- * if there are no results from the
- * `executeJavaScript(`navigator.bluetooth.requestDevice({acceptAllDevices: true})`, true)`
- * call. That's why we do the lockCheck in scanforDevices.
- */
-handleScanResults(event, deviceList:Array<DeviceType>, callback):void ->
-  event.preventDefault()
+handleScanResults(spawnCommandResult:Object):void ->
+  deviceList = processScanResultsText(spawnCommandResult)
   logger.debug(`Found these Bluetooth devices in scan: `, { deviceList })
 
   { devicesToSearchFor } = getSettings()
-  timeStampedDeviceList = processDeviceList(deviceList)
-
-  settingsWindow?.webContents?.send(
-    'mainprocess:update-of-bluetooth-devices-can-see',
-    { devicesCanSee: timeStampedDeviceList }
-  )
+  timeStampedDeviceList = addTimeStampToSeenDevices(deviceList)
+  console.log(timeStampedDeviceList)
+  // settingsWindow?.webContents?.send(
+  //   'mainprocess:update-of-bluetooth-devices-can-see',
+  //   { devicesCanSee: timeStampedDeviceList }
+  // )
 
   if isEmpty(devicesToSearchFor): return
   /**
@@ -33,42 +25,28 @@ handleScanResults(event, deviceList:Array<DeviceType>, callback):void ->
    */
   for elem { deviceId } in deviceList:
     if devicesToSearchFor[deviceId]:
-      updateDeviceSearchingFor(deviceId, Date.now())
+      updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', Date.now())
 
-  callback('')  // http://bit.ly/2kZhD74
+  lockSystemIfDeviceLost()
 
+/*****
+* spawnCommandResult looks like:
+* {"code":0,"data":{"out":["Scanning ...\tE0:88:61:CF:F3:52\tMotoG3\n\t12:30:D3:CD:32:51\tn/a\n"],"err":[]}}
+*/
+processScanResultsText(spawnCommandResult:Object):Array<DeviceType> ->
+  results = spawnCommandResult?.data?.out?[0]?.trim()?.replace('Scanning ...', '')
+  if !results?.length: return []
+
+  results.split('\n').reduce((resultsArr, nextResult) ->
+    splitIDandName = nextResult.trim().split('\t')
+    deviceId = splitIDandName[0].trim()
+    deviceName = splitIDandName[1].trim()
+    [...resultsArr, ...[ {deviceId, deviceName} ] ]
+  , [])
 
 addTimeStampToSeenDevices(deviceList: Array<DeviceType>):Array<DeviceType> ->
   [ ...for elem device in deviceList: [{...device, lastSeen: Date.now()}] ]
 
-/*****
-* Check for duplicates in deviceList cause of this bug (which I've run into too):
-* https://github.com/electron/electron/issues/10800
-* We remove duplicates, but also for any duplicates, we prefer to take the duplicate
-* that has a device name (sometimes they have an empty string for a device name).
-*/
-dedupeDeviceList(deviceList: Array<DeviceType>):Array<DeviceType> ->
-  deviceList.reduce((newDeviceList, newDevice) ->
-    newDeviceId = newDevice.deviceId
-
-    existingDevice = newDeviceList.find(device -> device.deviceId === newDeviceId )
-
-    if !existingDevice:
-      return [...newDeviceList, newDevice]
-
-    if betterNamedDevice(existingDevice, newDevice):
-      return [...newDeviceList.filter(device -> device.deviceId !== newDeviceId ), newDevice]
-
-    newDeviceList
-  , [])
-
-betterNamedDevice(existingDevice, newDevice:Object):Boolean ->
-  existingDevice.deviceName.length === 0 and newDevice.deviceName.length > 0
-
-updateDeviceSearchingFor(deviceId:String, timeStamp:Number):void ->
-  updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', timeStamp)
-
 export {
   handleScanResults,
-  updateDeviceSearchingFor,
 }

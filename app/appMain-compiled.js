@@ -104,6 +104,8 @@ var _makeSingleInstance = __webpack_require__(/*! ./components/makeSingleInstanc
 
 var _logging = __webpack_require__(/*! ./components/logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
+var _bluetoothScan = __webpack_require__(/*! ./components/bluetooth/bluetoothScan.lsc */ "./app/components/bluetooth/bluetoothScan.lsc");
+
 var _settings = __webpack_require__(/*! ./components/settings/settings.lsc */ "./app/components/settings/settings.lsc");
 
 var _utils = __webpack_require__(/*! ./components/utils.lsc */ "./app/components/utils.lsc");
@@ -114,9 +116,7 @@ var _runOnStartup = __webpack_require__(/*! ./components/runOnStartup.lsc */ "./
 
 // // import { checkForUpdate as checkForAppUpdate } from '../appUpdates/appUpdates.lsc'
 
-// // import { init as startBluetoothScanning } from '../bluetooth/blueToothMain.lsc'
-(0, _createBlueLossConfig.createBlueLossConfig)().then(_makeSingleInstance.makeSingleInstance).then(_settings.initSettings).then(_logging.addWinstonFileLogging).then(_tray.initTrayMenu).then(_utils.setUpDev)
-// // .then(startBluetoothScanning)
+(0, _createBlueLossConfig.createBlueLossConfig)().then(_makeSingleInstance.makeSingleInstance).then(_settings.initSettings).then(_logging.addWinstonFileLogging).then(_tray.initTrayMenu).then(_utils.setUpDev).then(_bluetoothScan.scanForBlueToothDevices)
 // // .then(checkForAppUpdate)
 .then(() => {
   const { firstRun } = (0, _settings.getSettings)();
@@ -259,6 +259,214 @@ async function createBlueLossConfig() {
 exports.blueLossLogsFolderPath = blueLossLogsFolderPath;
 exports.blueLossConfigFolderPath = blueLossConfigFolderPath;
 exports.blueLossSettingsFilePath = blueLossSettingsFilePath;
+
+/***/ }),
+
+/***/ "./app/components/bluetooth/bluetoothScan.lsc":
+/*!****************************************************!*\
+  !*** ./app/components/bluetooth/bluetoothScan.lsc ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.scanForBlueToothDevices = undefined;
+
+var _promiseSpawner = __webpack_require__(/*! promise-spawner */ "promise-spawner");
+
+var _promiseSpawner2 = _interopRequireDefault(_promiseSpawner);
+
+var _handleScanResults = __webpack_require__(/*! ./handleScanResults.lsc */ "./app/components/bluetooth/handleScanResults.lsc");
+
+var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
+
+var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function scanForBlueToothDevices() {
+  if (!(0, _settings.getSettings)().blueLossEnabled) return scheduleScan();
+  _logging.logger.debug('=======New Scan Started=======');
+  new _promiseSpawner2.default().spawn('hcitool scan').then(_handleScanResults.handleScanResults).catch(_logging.logger.error);
+  scheduleScan();
+}function scheduleScan() {
+  setTimeout(scanForBlueToothDevices, (0, _settings.getSettings)().scanInterval);
+}exports.scanForBlueToothDevices = scanForBlueToothDevices;
+
+/***/ }),
+
+/***/ "./app/components/bluetooth/handleScanResults.lsc":
+/*!********************************************************!*\
+  !*** ./app/components/bluetooth/handleScanResults.lsc ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.handleScanResults = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+// import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
+
+
+var _isEmpty = __webpack_require__(/*! is-empty */ "is-empty");
+
+var _isEmpty2 = _interopRequireDefault(_isEmpty);
+
+var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
+
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
+
+var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+var _lockCheck = __webpack_require__(/*! ./lockCheck.lsc */ "./app/components/bluetooth/lockCheck.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function handleScanResults(spawnCommandResult) {
+  const deviceList = processScanResultsText(spawnCommandResult);
+  _logging.logger.debug(`Found these Bluetooth devices in scan: `, { deviceList });
+
+  const { devicesToSearchFor } = (0, _settings.getSettings)();
+  const timeStampedDeviceList = addTimeStampToSeenDevices(deviceList);
+  console.log(timeStampedDeviceList);
+  // settingsWindow?.webContents?.send(
+  //   'mainprocess:update-of-bluetooth-devices-can-see',
+  //   { devicesCanSee: timeStampedDeviceList }
+  // )
+
+  if ((0, _isEmpty2.default)(devicesToSearchFor)) return;
+  /**
+   * If any devices we are looking for showed up in the latest scan,
+   * update the device's lastSeen value to now in devicesToSearchFor.
+   */
+  for (let _i = 0, _len = deviceList.length; _i < _len; _i++) {
+    const { deviceId } = deviceList[_i];
+    if (devicesToSearchFor[deviceId]) {
+      (0, _settings.updateDeviceInDevicesToSearchFor)(deviceId, 'lastSeen', Date.now());
+    }
+  }(0, _lockCheck.lockSystemIfDeviceLost)();
+} /*****
+  * spawnCommandResult looks like:
+  * {"code":0,"data":{"out":["Scanning ...\tE0:88:61:CF:F3:52\tMotoG3\n\t12:30:D3:CD:32:51\tn/a\n"],"err":[]}}
+  */
+function processScanResultsText(spawnCommandResult) {
+  var _spawnCommandResult$d, _spawnCommandResult$d2, _spawnCommandResult$d3, _spawnCommandResult$d4;
+
+  const results = spawnCommandResult == null ? void 0 : (_spawnCommandResult$d = spawnCommandResult.data) == null ? void 0 : (_spawnCommandResult$d2 = _spawnCommandResult$d.out) == null ? void 0 : (_spawnCommandResult$d3 = _spawnCommandResult$d2[0]) == null ? void 0 : (_spawnCommandResult$d4 = _spawnCommandResult$d3.trim()) == null ? void 0 : _spawnCommandResult$d4.replace('Scanning ...', '');
+  if (!(results == null ? void 0 : results.length)) return [];
+
+  return results.split('\n').reduce(function (resultsArr, nextResult) {
+    const splitIDandName = nextResult.trim().split('\t');
+    const deviceId = splitIDandName[0].trim();
+    const deviceName = splitIDandName[1].trim();
+    return [...(resultsArr === void 0 ? [] : resultsArr), ...[{ deviceId, deviceName }]];
+  }, []);
+}function addTimeStampToSeenDevices(deviceList) {
+  return (() => {
+    const _arr = [];for (let _i2 = 0, _len2 = deviceList.length; _i2 < _len2; _i2++) {
+      const device = deviceList[_i2];_arr.push(_extends({}, device, { lastSeen: Date.now() }));
+    }return _arr;
+  })();
+}
+
+exports.handleScanResults = handleScanResults;
+
+/***/ }),
+
+/***/ "./app/components/bluetooth/lockCheck.lsc":
+/*!************************************************!*\
+  !*** ./app/components/bluetooth/lockCheck.lsc ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.lockSystemIfDeviceLost = undefined;
+
+var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
+
+var _timeproxy2 = _interopRequireDefault(_timeproxy);
+
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
+
+var _lockSystem = __webpack_require__(/*! ../lockSystem.lsc */ "./app/components/lockSystem.lsc");
+
+var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+* If a device is lost we lock the computer, however, after that, if
+* the computer is unlocked without the device coming back, we don't want
+* to keep locking the computer because the device is still lost. So we
+* give the device that has just been lost a lastSeen value of 10 years
+* from now (not using Infinity cause it doesn't JSON.stringify for storage).
+*/
+function lockSystemIfDeviceLost() {
+  const { devicesToSearchFor, timeToLock } = (0, _settings.getSettings)();
+  for (let _i = 0, _keys = Object.keys(devicesToSearchFor), _len = _keys.length; _i < _len; _i++) {
+    const _k = _keys[_i];const { lastSeen, deviceId } = devicesToSearchFor[_k];
+    if (deviceHasBeenLost(lastSeen, timeToLock)) {
+      (0, _lockSystem.lockTheSystem)();
+      (0, _settings.updateDeviceInDevicesToSearchFor)(deviceId, 'lastSeen', (0, _utils.tenYearsFromNow)());
+    }
+  }
+}function deviceHasBeenLost(lastTimeSawDevice, timeToLock) {
+  return Date.now() > lastTimeSawDevice + _timeproxy2.default`${timeToLock} minutes`;
+}exports.lockSystemIfDeviceLost = lockSystemIfDeviceLost;
+
+/***/ }),
+
+/***/ "./app/components/lockSystem.lsc":
+/*!***************************************!*\
+  !*** ./app/components/lockSystem.lsc ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.lockTheSystem = undefined;
+
+var _lockSystem = __webpack_require__(/*! lock-system */ "lock-system");
+
+var _lockSystem2 = _interopRequireDefault(_lockSystem);
+
+var _logging = __webpack_require__(/*! ./logging/logging.lsc */ "./app/components/logging/logging.lsc");
+
+var _settings = __webpack_require__(/*! ./settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function lockTheSystem() {
+  if (!(0, _settings.getSettings)().blueLossEnabled) return;
+  // lockSystem throws on error, so use try/catch
+  try {
+    (0, _lockSystem2.default)();
+  } catch (err) {
+    _logging.logger.error('Error occured trying to lock the system : ', err);
+  }
+}exports.lockTheSystem = lockTheSystem;
 
 /***/ }),
 
@@ -434,6 +642,7 @@ let weCreatedFileLock = false;
 const anotherInstanceErrorMessage = 'BlueLoss is already running (BlueLoss.lock file already exists), exiting...';
 
 function makeSingleInstance() {
+  if (true) return Promise.resolve();
   return _fsExtra2.default.pathExists(getLockFilePath()).then(exists => {
     if (exists) {
       console.error(new Error(anotherInstanceErrorMessage));
@@ -523,6 +732,43 @@ Categories=Utility;
 `.trim();
 }exports.enableRunOnStartup = enableRunOnStartup;
 exports.disableRunOnStartup = disableRunOnStartup;
+
+/***/ }),
+
+/***/ "./app/components/sendOSnotification.lsc":
+/*!***********************************************!*\
+  !*** ./app/components/sendOSnotification.lsc ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.sendOSnotification = undefined;
+
+var _promiseSpawner = __webpack_require__(/*! promise-spawner */ "promise-spawner");
+
+var _promiseSpawner2 = _interopRequireDefault(_promiseSpawner);
+
+var _promiseRatRace = __webpack_require__(/*! promise-rat-race */ "promise-rat-race");
+
+var _promiseRatRace2 = _interopRequireDefault(_promiseRatRace);
+
+var _utils = __webpack_require__(/*! ./utils.lsc */ "./app/components/utils.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function sendOSnotification(message) {
+  (0, _promiseRatRace2.default)([new _promiseSpawner2.default().spawn('command -v zenity'), new _promiseSpawner2.default().spawn('command -v notify-send')]).then(function ({ data: { out } }) {
+    if (out[0].endsWith('zenity')) {
+      return new _promiseSpawner2.default().spawn(`zenity --notification --text="${message}"`).catch(_utils.noop);
+    }return new _promiseSpawner2.default().spawn(`notify-send "${message}"`).catch(_utils.noop);
+  }).catch(_utils.noop);
+}exports.sendOSnotification = sendOSnotification;
 
 /***/ }),
 
@@ -669,7 +915,8 @@ const defaultSettings = {
   reportErrors: true,
   firstRun: true,
   dateLastCheckedForAppUpdate: Date.now(),
-  skipUpdateVersion: '0'
+  skipUpdateVersion: '0',
+  scanInterval: 30000
 };
 
 exports.defaultSettings = defaultSettings;
@@ -785,9 +1032,17 @@ var _systray = __webpack_require__(/*! systray */ "systray");
 
 var _systray2 = _interopRequireDefault(_systray);
 
+var _opn = __webpack_require__(/*! opn */ "opn");
+
+var _opn2 = _interopRequireDefault(_opn);
+
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
 
 var _iconsData = __webpack_require__(/*! ./iconsData.lsc */ "./app/components/tray/iconsData.lsc");
+
+var _sendOSnotification = __webpack_require__(/*! ../sendOSnotification.lsc */ "./app/components/sendOSnotification.lsc");
+
+var _createBlueLossConfig = __webpack_require__(/*! ../bluelossConfig/createBlueLossConfig.lsc */ "./app/components/bluelossConfig/createBlueLossConfig.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -816,11 +1071,15 @@ function initTrayMenu() {
     //Enable/Disable BlueLoss
     (0, _settings.updateSetting)('blueLossEnabled', !(0, _settings.getSettings)().blueLossEnabled);
     updateEnabledDisabledMenuItem(action);
+    (0, _sendOSnotification.sendOSnotification)(generateNotifcationText());
   }if (action.seq_id === 2) {
     //Toggle system tray icon color
     toggleTrayIconColorSetting();
     updateSystrayIcon(action);
   }if (action.seq_id === 3) {
+    //Open logs folder
+    (0, _opn2.default)(_createBlueLossConfig.blueLossLogsFolderPath);
+  }if (action.seq_id === 4) {
     //Exit BlueLoss
     systray.kill();
   }
@@ -858,6 +1117,10 @@ function initTrayMenu() {
     tooltip: "Toggle Tray Icon Color",
     enabled: true
   }, {
+    title: "Open Logs",
+    tooltip: "Open Logs",
+    enabled: true
+  }, {
     title: "Quit BlueLoss",
     tooltip: "Quit BlueLoss",
     enabled: true
@@ -867,6 +1130,8 @@ function initTrayMenu() {
 }function toggleTrayIconColorSetting() {
   const newColor = (0, _settings.getSettings)().trayIconColor === 'white' ? 'blue' : 'white';
   (0, _settings.updateSetting)('trayIconColor', newColor);
+}function generateNotifcationText() {
+  if ((0, _settings.getSettings)().blueLossEnabled) return 'BlueLoss Enabled';else return 'BlueLoss Disabled';
 }function generateEnabledDisabledLabel() {
   return `${(0, _settings.getSettings)().blueLossEnabled ? 'Disable' : 'Enable'} BlueLoss`;
 }exports.initTrayMenu = initTrayMenu;
@@ -1026,7 +1291,7 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.30.5","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect-brk app/appMain-compiled.js","rollupWatchMain":"cross-env NODE_ENV=development rollup --config rollup.config.main.js --watch","rollupWatchSettingsPage":"cross-env NODE_ENV=development rollup --config rollup.config.frontEnd.js --watch","styleWatch":"cross-env NODE_ENV=development stylus -w app/frontEnd/assets/styles/stylus/index.styl -o app/frontEnd/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^5.0.1","formbase":"^6.0.4","fs-extra":"^6.0.1","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","parallel-webpack":"^2.3.0","rollbar":"^2.3.9","stringify-object":"^3.2.2","systray":"^1.0.5","the-answer":"^1.0.0","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","nexe":"^2.0.0-rc.28","nodemon":"^1.17.5","pkg":"^4.3.1","rollup":"^0.59.4","rollup-plugin-babel":"^3.0.4","rollup-plugin-commonjs":"^9.1.3","rollup-plugin-json":"^3.0.0","rollup-plugin-node-resolve":"^3.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.82.0","stylus":"^0.54.5","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect-brk app/appMain-compiled.js","rollupWatchMain":"cross-env NODE_ENV=development rollup --config rollup.config.main.js --watch","rollupWatchSettingsPage":"cross-env NODE_ENV=development rollup --config rollup.config.frontEnd.js --watch","styleWatch":"cross-env NODE_ENV=development stylus -w app/frontEnd/assets/styles/stylus/index.styl -o app/frontEnd/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^5.0.1","formbase":"^6.0.4","fs-extra":"^6.0.1","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","parallel-webpack":"^2.3.0","promise-rat-race":"^1.5.1","promise-spawner":"^2.0.0","rollbar":"^2.3.9","systray":"^1.0.5","the-answer":"^1.0.0","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.1","nexe":"^2.0.0-rc.28","nodemon":"^1.17.5","pkg":"^4.3.1","rollup":"^0.59.4","rollup-plugin-babel":"^3.0.4","rollup-plugin-commonjs":"^9.1.3","rollup-plugin-json":"^3.0.0","rollup-plugin-node-resolve":"^3.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","stylus":"^0.54.5","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
 
 /***/ }),
 
@@ -1063,6 +1328,28 @@ module.exports = require("gawk");
 
 /***/ }),
 
+/***/ "is-empty":
+/*!***************************!*\
+  !*** external "is-empty" ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("is-empty");
+
+/***/ }),
+
+/***/ "lock-system":
+/*!******************************!*\
+  !*** external "lock-system" ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("lock-system");
+
+/***/ }),
+
 /***/ "lowdb":
 /*!************************!*\
   !*** external "lowdb" ***!
@@ -1085,6 +1372,17 @@ module.exports = require("lowdb/adapters/FileSync");
 
 /***/ }),
 
+/***/ "opn":
+/*!**********************!*\
+  !*** external "opn" ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("opn");
+
+/***/ }),
+
 /***/ "os":
 /*!*********************!*\
   !*** external "os" ***!
@@ -1104,6 +1402,28 @@ module.exports = require("os");
 /***/ (function(module, exports) {
 
 module.exports = require("path");
+
+/***/ }),
+
+/***/ "promise-rat-race":
+/*!***********************************!*\
+  !*** external "promise-rat-race" ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("promise-rat-race");
+
+/***/ }),
+
+/***/ "promise-spawner":
+/*!**********************************!*\
+  !*** external "promise-spawner" ***!
+  \**********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("promise-spawner");
 
 /***/ }),
 

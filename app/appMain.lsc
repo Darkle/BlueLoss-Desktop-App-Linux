@@ -3,7 +3,7 @@ import './config/env.lsc'
 import { createBlueLossConfig as initAppConfigFiles } from './components/bluelossConfig/createBlueLossConfig.lsc'
 import { makeSingleInstance } from './components/makeSingleInstance.lsc'
 import { logger, addWinstonFileLogging } from './components/logging/logging.lsc'
-// // import { init as startBluetoothScanning } from '../bluetooth/blueToothMain.lsc'
+import { scanForBlueToothDevices } from './components/bluetooth/bluetoothScan.lsc'
 import { initSettings, updateSetting, getSettings } from './components/settings/settings.lsc'
 import { setUpDev } from './components/utils.lsc'
 import { initTrayMenu } from './components/tray/tray.lsc'
@@ -17,7 +17,7 @@ initAppConfigFiles()
   .then(addWinstonFileLogging)
   .then(initTrayMenu)
   .then(setUpDev)
-  // // .then(startBluetoothScanning)
+  .then(scanForBlueToothDevices)
   // // .then(checkForAppUpdate)
   .then(() => {
     { firstRun } = getSettings()

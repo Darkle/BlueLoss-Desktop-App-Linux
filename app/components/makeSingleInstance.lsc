@@ -8,6 +8,7 @@ let weCreatedFileLock = false
 anotherInstanceErrorMessage = 'BlueLoss is already running (BlueLoss.lock file already exists), exiting...'
 
 makeSingleInstance():Promise ->
+  if ISDEV: return Promise.resolve()
   fs.pathExists(getLockFilePath())
     .then(exists => {
       if exists:

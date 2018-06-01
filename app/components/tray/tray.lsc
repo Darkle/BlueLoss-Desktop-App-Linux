@@ -1,7 +1,10 @@
 import SysTray from 'systray'
+import opn from 'opn'
 
 import { updateSetting, getSettings } from '../settings/settings.lsc'
 import { base64IconData } from './iconsData.lsc'
+import { sendOSnotification } from '../sendOSnotification.lsc'
+import { blueLossLogsFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 
 let systray = null
 
@@ -27,10 +30,13 @@ systrayClickHandler(action:Object):void ->
   if action.seq_id === 1: //Enable/Disable BlueLoss
     updateSetting('blueLossEnabled', !getSettings().blueLossEnabled)
     updateEnabledDisabledMenuItem(action)
+    sendOSnotification(generateNotifcationText())
   if action.seq_id === 2: //Toggle system tray icon color
     toggleTrayIconColorSetting()
     updateSystrayIcon(action)
-  if action.seq_id === 3: //Exit BlueLoss
+  if action.seq_id === 3: //Open logs folder
+    opn(blueLossLogsFolderPath)
+  if action.seq_id === 4: //Exit BlueLoss
     systray.kill()
 
 updateEnabledDisabledMenuItem(action:Object):void ->
@@ -73,7 +79,11 @@ generateMenuItems():Array ->
       tooltip: "Toggle Tray Icon Color",
       enabled: true
     },
-
+    {
+      title: "Open Logs",
+      tooltip: "Open Logs",
+      enabled: true
+    },
     {
       title: "Quit BlueLoss",
       tooltip: "Quit BlueLoss",
@@ -87,6 +97,9 @@ getTrayIconColor():String ->
 toggleTrayIconColorSetting():void ->
   newColor = if getSettings().trayIconColor === 'white': 'blue' else: 'white'
   updateSetting('trayIconColor', newColor)
+
+generateNotifcationText():String ->
+  if getSettings().blueLossEnabled: 'BlueLoss Enabled' else: 'BlueLoss Disabled'
 
 generateEnabledDisabledLabel():string ->
   `${ if getSettings().blueLossEnabled: 'Disable' else: 'Enable' } BlueLoss`
