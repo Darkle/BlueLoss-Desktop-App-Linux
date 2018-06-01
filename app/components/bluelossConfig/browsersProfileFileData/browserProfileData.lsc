@@ -24,32 +24,33 @@ user_pref("browser.tabs.warnOnCloseOtherTabs", false);
 */
 getChromePrefs():Object ->
   screenResolution = getScreenResolution()
+  if !screenResolution: return ({})
   ({
     "browser": {
       "app_window_placement": {
         "[::]_/": {
           "maximized": false,
-          "bottom": 893,
-          "left": 0,
-          "right": 1308,
-          "top": 0,
+          "top": generateTop(screenResolution),
+          "bottom": generateBottom(screenResolution),
+          "left": generateLeft(screenResolution),
+          "right": generateRight(screenResolution),
         },
         "[::1]_/": {
           "maximized": false,
-          "bottom": 1244,
-          "left": 132,
-          "right": 1086,
-          "top": 332,
+          "top": generateTop(screenResolution),
+          "bottom": generateBottom(screenResolution),
+          "left": generateLeft(screenResolution),
+          "right": generateRight(screenResolution),
         },
         "0": {
           "0": {
             "0": {
               "0_/": {
                 "maximized": false,
-                "bottom": 1398,
-                "left": 18,
-                "right": 1283,
-                "top": 29,
+                "top": generateTop(screenResolution),
+                "bottom": generateBottom(screenResolution),
+                "left": generateLeft(screenResolution),
+                "right": generateRight(screenResolution),
               }
             }
           }
@@ -58,11 +59,11 @@ getChromePrefs():Object ->
           "0": {
             "0": {
               "1_/": {
+                "top": generateTop(screenResolution),
                 "maximized": false,
-                "bottom": 1079,
-                "left": 507,
-                "right": 1546,
-                "top": 192,
+                "bottom": generateBottom(screenResolution),
+                "left": generateLeft(screenResolution),
+                "right": generateRight(screenResolution),
               }
             }
           }
@@ -77,10 +78,13 @@ getChromePrefs():Object ->
 * dimensions change later as when they move the window and close it, chromium
 * updates that in the Preferences file.
 */
-generateBottom(screenResolution)
-generateLeft(screenResolution)
-generateRight(screenResolution)
-generateTop(screenResolution)
+generateTop(screenResolution):Number ->
+
+generateBottom(screenResolution):Number ->
+
+generateLeft(screenResolution):Number ->
+
+generateRight(screenResolution):Number ->
 
 export {
   getFirefoxUserChrome,

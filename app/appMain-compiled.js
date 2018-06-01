@@ -147,105 +147,9 @@ process.on('uncaughtException', err => {
   !*** ./app/components/bluelossConfig/browsersProfileFileData/browserProfileData.lsc ***!
   \**************************************************************************************/
 /*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getChromePrefs = exports.getFirefoxPrefsJs = exports.getFirefoxUserChrome = undefined;
-
-var _utils = __webpack_require__(/*! ../../utils.lsc */ "./app/components/utils.lsc");
-
-function getFirefoxUserChrome() {
-  return `
-@-moz-document url(chrome://browser/content/browser.xul) {
-#TabsToolbar {
-  visibility: collapse !important;
-}
-#nav-bar {
-  visibility: collapse !important;
-}
-`;
-}function getFirefoxPrefsJs() {
-  return `
-user_pref("browser.tabs.warnOnClose", false);
-user_pref("browser.sessionstore.restore_on_demand", false);
-user_pref("browser.tabs.warnOnCloseOtherTabs", false);
-`;
-} /*****
-  * Localhost addresses
-  * ::
-  * ::1
-  * 0.0.0.0
-  * 127.0.0.1
-  */
-function getChromePrefs() {
-  const screenResolution = (0, _utils.getScreenResolution)();
-  return {
-    "browser": {
-      "app_window_placement": {
-        "[::]_/": {
-          "maximized": false,
-          "bottom": 893,
-          "left": 0,
-          "right": 1308,
-          "top": 0
-        },
-        "[::1]_/": {
-          "maximized": false,
-          "bottom": 1244,
-          "left": 132,
-          "right": 1086,
-          "top": 332
-        },
-        "0": {
-          "0": {
-            "0": {
-              "0_/": {
-                "maximized": false,
-                "bottom": 1398,
-                "left": 18,
-                "right": 1283,
-                "top": 29
-              }
-            }
-          }
-        },
-        "127": {
-          "0": {
-            "0": {
-              "1_/": {
-                "maximized": false,
-                "bottom": 1079,
-                "left": 507,
-                "right": 1546,
-                "top": 192
-              }
-            }
-          }
-        }
-      }
-    }
-  };
-}
-
-/*****
-* We want the chromium browser to end up in the center of the screen
-* with a width of 786px and a height of 616px. It's ok if the users screen
-* dimensions change later as when they move the window and close it, chromium
-* updates that in the Preferences file.
-*/
-generateBottom(screenResolution);
-generateLeft(screenResolution);
-generateRight(screenResolution);
-generateTop(screenResolution);
-
-exports.getFirefoxUserChrome = getFirefoxUserChrome;
-exports.getFirefoxPrefsJs = getFirefoxPrefsJs;
-exports.getChromePrefs = getChromePrefs;
+throw new Error("Module build failed: SyntaxError: Expected an Indent or Statement (81:37)\n\n\u001b[0m \u001b[90m 79 | \u001b[39m\u001b[90m* updates that in the Preferences file.\u001b[39m\n \u001b[90m 80 | \u001b[39m\u001b[90m*/\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 81 | \u001b[39mgenerateTop(screenResolution)\u001b[33m:\u001b[39m\u001b[33mNumber\u001b[39m \u001b[33m-\u001b[39m\u001b[33m>\u001b[39m\n \u001b[90m    | \u001b[39m                                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 82 | \u001b[39m\n \u001b[90m 83 | \u001b[39mgenerateBottom(screenResolution)\u001b[33m:\u001b[39m\u001b[33mNumber\u001b[39m \u001b[33m-\u001b[39m\u001b[33m>\u001b[39m\n \u001b[90m 84 | \u001b[39m\u001b[0m\n");
 
 /***/ }),
 
@@ -1378,8 +1282,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function getScreenResolution() {
   try {
-    const { stdout } = _execa2.default.shellSync(`xrandr | grep '*'`);
-    const [width, height] = stdout.trim().split(' ')[0].split('x');
+    const [width, height] = _execa2.default.shellSync(`xrandr |grep \\* |awk '{print $1}'`).stdout.split('x');
     return { width: Number(width), height: Number(height) };
   } catch (e) {
     return _logging.logger.error(e);

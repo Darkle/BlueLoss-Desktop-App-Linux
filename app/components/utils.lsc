@@ -9,8 +9,10 @@ import { getSettings } from './settings/settings.lsc'
 
 getScreenResolution():Object ->
   try:
-    { stdout } = execa.shellSync(`xrandr | grep '*'`)
-    [ width, height ] = stdout.trim().split(' ')[0].split('x')
+    [ width, height ] = execa
+      .shellSync(`xrandr |grep \\* |awk '{print $1}'`)
+      .stdout
+      .split('x')
     return { width: Number(width), height: Number(height) }
   catch(e):
     logger.error(e)
