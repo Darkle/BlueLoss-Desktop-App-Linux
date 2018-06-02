@@ -1,6 +1,6 @@
 import { h } from 'hyperapp'
 
-import DeviceCard from '../components/deviceCard.lsc'
+import DeviceCard from '../deviceCard.lsc'
 
 export default ({ actions, state }) ->
   infoWindowDisplay = if state.activeTab === 'statusTab': 'flex' else: 'none'

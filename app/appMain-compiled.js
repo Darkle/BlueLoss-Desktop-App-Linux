@@ -388,6 +388,7 @@ function handleScanResults(spawnCommandResult) {
 
   const { devicesToSearchFor } = (0, _settings.getSettings)();
   const timeStampedDeviceList = addTimeStampToSeenDevices(deviceList);
+  // TODO: send to settings window via websockets
   // settingsWindow?.webContents?.send(
   //   'mainprocess:update-of-bluetooth-devices-can-see',
   //   { devicesCanSee: timeStampedDeviceList }
@@ -419,7 +420,7 @@ function processScanResultsText(spawnCommandResult) {
     const deviceId = splitIDandName[0].trim();
     const deviceName = splitIDandName[1].trim();
     return [...(resultsArr === void 0 ? [] : resultsArr), ...[{ deviceId, deviceName }]];
-  }, []);
+  });
 }function addTimeStampToSeenDevices(deviceList) {
   return (() => {
     const _arr = [];for (let _i2 = 0, _len2 = deviceList.length; _i2 < _len2; _i2++) {
@@ -830,7 +831,7 @@ function sendOSnotification(message) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.serverAddress = exports.startServer = undefined;
+exports.getServerAddress = exports.startServer = undefined;
 
 var _path = __webpack_require__(/*! path */ "path");
 
@@ -870,10 +871,12 @@ function startServer() {
   });
 }function storeServerAddress({ family, address, port }) {
   const ip = family.toLowerCase() === 'ipv6' ? `[${address}]` : address;
-  exports.serverAddress = serverAddress = `http://${ip}:${port}`;
+  serverAddress = `http://${ip}:${port}`;
   _logging.logger.debug('serverAddress: ', serverAddress);
+}function getServerAddress() {
+  return serverAddress;
 }exports.startServer = startServer;
-exports.serverAddress = serverAddress;
+exports.getServerAddress = getServerAddress;
 
 /***/ }),
 
@@ -1042,6 +1045,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 // import { DeviceType, SettingsTypes } from '../types/types.lsc'
+// import { updateSetting, addNewDeviceToSearchFor, removeNewDeviceToSearchFor } from './settings.lsc'
 function initSettingsIPClisteners() {
   ({});
 } // ipcMain.on('renderer:setting-updated-in-ui', (event, settingName: string, settingValue: SettingsTypes):void ->
@@ -1077,12 +1081,16 @@ Object.defineProperty(exports, "__esModule", {
 // import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
 // import { addRollbarLogging, removeRollbarLogging } from '../common/logging/logging.lsc'
 // import { changeTrayIcon, updateTrayMenuEnabledItem } from '../tray/tray.lsc'
+// import { enableRunOnStartup, disableRunOnStartup } from '../common/runOnStartup.lsc'
 function initSettingsObservers() {
   ({});
 } // initSettingsObservers(settings):void ->
 // gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->
 //   if enabled: addRollbarLogging()
 //   else: removeRollbarLogging()
+// )
+// gawk.watch(settings, ['blueLossEnabled'], (enabled: boolean):void ->
+//   settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
 // )
 // gawk.watch(settings, ['runOnStartup'], (enabled: boolean):void ->
 //   if enabled: enableRunOnStartup() .catch()
@@ -1134,13 +1142,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const firefoxCliSpawnParams = 'firefox -new-instance --width=786 --height=616';
 
 function openSettingsWindow() {
-  //send a message to all open windows via websockets to close themselves, then
-  // open a new settings window
+  // TODO:send a message to all open windows via websockets to close themselves, so there arent
+  // more that one settings window open at once
   // https://github.com/Financial-Times/promise-rat-race#promise-rat-race
-  return (0, _promiseRatRace2.default)([
-  // execa.shell('command -v google-chrome'),
-  // execa.shell('command -v chromium-browser'),
-  _execa2.default.shell('command -v firefox')]).then(function (result) {
+  return (0, _promiseRatRace2.default)([_execa2.default.shell('command -v google-chrome'), _execa2.default.shell('command -v chromium-browser'), _execa2.default.shell('command -v firefox')]).then(function (result) {
     const browserPath = result == null ? void 0 : result.stdout;
     if (!browserPath) throw new Error();
     const browser = browserPath.slice(browserPath.lastIndexOf('/') + 1);
@@ -1148,14 +1153,14 @@ function openSettingsWindow() {
   })
   //fall back to opening with OS's default browser
   .catch(function (err) {
-    return (0, _opn2.default)(_server.serverAddress);
+    return (0, _opn2.default)((0, _server.getServerAddress)());
   });
 } // eslint-disable-line handle-callback-err, no-unused-vars
 
 function openSettingsWindowInBrowser(browser) {
   if (browser === 'firefox') {
-    return _execa2.default.shell(`${firefoxCliSpawnParams} -profile ${getFirefoxProfilePath()} ${_server.serverAddress}`);
-  }return _execa2.default.shell(`${browser} --app=${_server.serverAddress} --user-data-dir=${getChromiumProfilePath()}`);
+    return _execa2.default.shell(`${firefoxCliSpawnParams} -profile ${getFirefoxProfilePath()} ${(0, _server.getServerAddress)()}`);
+  }return _execa2.default.shell(`${browser} --app=${(0, _server.getServerAddress)()} --user-data-dir=${getChromiumProfilePath()}`);
 }function getFirefoxProfilePath() {
   return _path2.default.join((0, _createBlueLossConfig.getBlueLossConfigFolderPath)(), 'BrowserProfiles', 'Firefox');
 }function getChromiumProfilePath() {
@@ -1478,7 +1483,7 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect-brk app/appMain-compiled.js","styleWatch":"cross-env NODE_ENV=development stylus -w app/components/settingsWindow/frontEnd/assets/styles/stylus/index.styl -o app/components/settingsWindow/frontEnd/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^5.0.1","execa":"^0.10.0","express":"^4.16.3","formbase":"^6.0.4","fs-extra":"^6.0.1","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","parallel-webpack":"^2.3.0","promise-rat-race":"^1.5.1","rollbar":"^2.3.9","systray":"^1.0.5","the-answer":"^1.0.0","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.1","nexe":"^2.0.0-rc.28","nodemon":"^1.17.5","pkg":"^4.3.1","rollup":"^0.59.4","rollup-plugin-babel":"^3.0.4","rollup-plugin-commonjs":"^9.1.3","rollup-plugin-json":"^3.0.0","rollup-plugin-node-resolve":"^3.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","stylus":"^0.54.5","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect-brk app/appMain-compiled.js","styleWatch":"cross-env NODE_ENV=development stylus -w app/components/settingsWindow/frontEnd/assets/styles/stylus/index.styl -o app/components/settingsWindow/frontEnd/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^5.0.1","execa":"^0.10.0","express":"^4.16.3","formbase":"^6.0.4","fs-extra":"^6.0.1","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","parallel-webpack":"^2.3.0","promise-rat-race":"^1.5.1","rollbar":"^2.4.1","systray":"^1.0.5","the-answer":"^1.0.0","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.2","nexe":"^2.0.0-rc.29","nodemon":"^1.17.5","pkg":"^4.3.1","rollup":"^0.59.4","rollup-plugin-babel":"^3.0.4","rollup-plugin-commonjs":"^9.1.3","rollup-plugin-json":"^3.0.0","rollup-plugin-node-resolve":"^3.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
 
 /***/ }),
 

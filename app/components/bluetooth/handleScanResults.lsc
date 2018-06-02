@@ -12,6 +12,7 @@ handleScanResults(spawnCommandResult:Object):void ->
 
   { devicesToSearchFor } = getSettings()
   timeStampedDeviceList = addTimeStampToSeenDevices(deviceList)
+  // TODO: send to settings window via websockets
   // settingsWindow?.webContents?.send(
   //   'mainprocess:update-of-bluetooth-devices-can-see',
   //   { devicesCanSee: timeStampedDeviceList }
@@ -41,7 +42,7 @@ processScanResultsText(spawnCommandResult:Object):Array<DeviceType> ->
     deviceId = splitIDandName[0].trim()
     deviceName = splitIDandName[1].trim()
     [...resultsArr, ...[ {deviceId, deviceName} ] ]
-  , [])
+  )
 
 addTimeStampToSeenDevices(deviceList: Array<DeviceType>):Array<DeviceType> ->
   [ ...for elem device in deviceList: [{...device, lastSeen: Date.now()}] ]

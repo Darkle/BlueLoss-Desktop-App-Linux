@@ -1,6 +1,4 @@
-import { ipcRenderer } from 'electron'
-
-import { DeviceType } from '../../../types/types.lsc'
+import { DeviceType } from '../../../../../types/types.lsc'
 
 /**
 * HyperApp - if you need to use the state & actions and return data, you need
@@ -9,7 +7,8 @@ import { DeviceType } from '../../../types/types.lsc'
 */
 export default addNewDevice(newDevice: DeviceType) -> state ->
   if state.devicesToSearchFor[newDevice.deviceId]: return {}
-  ipcRenderer.send('renderer:device-added-in-ui', newDevice)
+  //TODO: send new settings to server
+  // ipcRenderer.send('renderer:device-added-in-ui', newDevice)
   ({
     devicesToSearchFor: {
       ...state.devicesToSearchFor,

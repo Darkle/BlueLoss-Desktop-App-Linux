@@ -31,7 +31,9 @@ storeServerAddress({family, address, port}):void ->
   now serverAddress = `http://${ ip }:${ port }`
   logger.debug('serverAddress: ', serverAddress)
 
+getServerAddress():String -> serverAddress
+
 export{
   startServer,
-  serverAddress,
+  getServerAddress,
 }

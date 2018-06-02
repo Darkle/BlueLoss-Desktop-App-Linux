@@ -14,23 +14,7 @@ const debugging = isDev && process.env.nodeDebug === 'true'
 console.log('process.env.nodeDebug: ', process.env.nodeDebug)
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV)
 
-/*****
-* We dont want webpack to include polyfills or mocks for various node stuff, which we set with
-* the 'node' key https://webpack.js.org/configuration/node/
-* We also dont want webpack to transpile the stuff in node_modules folder, so we use the
-* webpack-node-externals plugin.
-*/
-
 const commonWebpackOptions = {
-  node: {
-    console: false,
-    global: false,
-    process: false,
-    Buffer: false,
-    __filename: false,
-    __dirname: false,
-    setImmediate: false
-  },
   mode: process.env.NODE_ENV,
   devtool: debugging ? 'eval-source-map' : 'none',
   context: projectDir,
@@ -51,7 +35,6 @@ const commonWebpackOptions = {
   resolve: {
     extensions: ['.lsc', '.js']
   },
-  externals: [nodeExternals()],
   optimization: {
     minimize: false
   },
@@ -65,6 +48,12 @@ const commonWebpackOptions = {
     })
   ]
 }
+/*****
+* We dont want webpack to include polyfills or mocks for various node stuff, which we set with
+* the 'node' key https://webpack.js.org/configuration/node/
+* We also dont want webpack to transpile the stuff in node_modules folder, so we use the
+* webpack-node-externals plugin.
+*/
 
 const electronMainWebpackOptions = {
   ...commonWebpackOptions,
@@ -74,6 +63,16 @@ const electronMainWebpackOptions = {
     output: {
       filename: 'appMain-compiled.js',
       path: appDir
+    },
+    externals: [nodeExternals()],
+    node: {
+      console: false,
+      global: false,
+      process: false,
+      Buffer: false,
+      __filename: false,
+      __dirname: false,
+      setImmediate: false
     }
   }
 }
@@ -84,7 +83,7 @@ const frontEndWebpackOptions = {
     target: 'web',
     entry: settingsWindowMainEntryPoint,
     output: {
-      filename: 'settingsWindowMain-compiled.js',
+      filename: 'settingsWindowWeb-compiled.js',
       path: frontEndJsPath
     }
   }

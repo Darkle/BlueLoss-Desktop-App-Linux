@@ -1,13 +1,8 @@
 import { h } from 'hyperapp'
 
-import { defaultSettings } from '../../../settings/settingsDefaults.lsc'
-
-minTimeToLock = defaultSettings.timeToLock
-
 export default ({ actions, state }) ->
   infoWindowDisplay = if state.activeTab === 'settingsTab': 'flex' else: 'none'
   iconColorIsWhite = state.trayIconColor === 'white'
-  isMac = process.platform === 'darwin'
 
   <div id="settingsTabInfoWindow" style={ { display: infoWindowDisplay } }>
     <x-box id="timeToLockSetting">

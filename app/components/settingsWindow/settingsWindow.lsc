@@ -5,18 +5,18 @@ import execa from 'execa'
 import pRatRace from 'promise-rat-race'
 
 // import { logger } from '../logging/logging.lsc'
-import { serverAddress } from '../server/server.lsc'
+import { getServerAddress } from '../server/server.lsc'
 import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 
 firefoxCliSpawnParams = 'firefox -new-instance --width=786 --height=616'
 
 openSettingsWindow():Promise ->
-  //send a message to all open windows via websockets to close themselves, then
-  // open a new settings window
+  // TODO:send a message to all open windows via websockets to close themselves, so there arent
+  // more that one settings window open at once
   // https://github.com/Financial-Times/promise-rat-race#promise-rat-race
   pRatRace([
-    // execa.shell('command -v google-chrome'),
-    // execa.shell('command -v chromium-browser'),
+    execa.shell('command -v google-chrome'),
+    execa.shell('command -v chromium-browser'),
     execa.shell('command -v firefox'),
   ])
   .then(result ->
@@ -26,12 +26,12 @@ openSettingsWindow():Promise ->
     openSettingsWindowInBrowser(browser)
   )
   //fall back to opening with OS's default browser
-  .catch(err -> opn(serverAddress))  // eslint-disable-line handle-callback-err, no-unused-vars
+  .catch(err -> opn(getServerAddress()))  // eslint-disable-line handle-callback-err, no-unused-vars
 
 openSettingsWindowInBrowser(browser):Promise ->
   if browser === 'firefox':
-    return execa.shell(`${ firefoxCliSpawnParams } -profile ${ getFirefoxProfilePath() } ${ serverAddress }`)
-  execa.shell(`${ browser } --app=${ serverAddress } --user-data-dir=${ getChromiumProfilePath() }`)
+    return execa.shell(`${ firefoxCliSpawnParams } -profile ${ getFirefoxProfilePath() } ${ getServerAddress() }`)
+  execa.shell(`${ browser } --app=${ getServerAddress() } --user-data-dir=${ getChromiumProfilePath() }`)
 
 getFirefoxProfilePath():String ->
   path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', 'Firefox')

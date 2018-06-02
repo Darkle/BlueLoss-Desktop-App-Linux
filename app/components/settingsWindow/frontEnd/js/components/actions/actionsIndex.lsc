@@ -1,0 +1,17 @@
+import toggleTab from './toggleTab.lsc'
+import openLink from './openLink.lsc'
+import animateDots from './animateDots.lsc'
+import updateSetting from './updateSetting.lsc'
+import updateStateOnServerMessage from './updateStateOnServerMessage.lsc'
+import removeDevice from './removeDevice.lsc'
+import addNewDevice from './addNewDevice.lsc'
+
+export default {
+  toggleTab,
+  openLink,
+  animateDots,
+  updateSetting,
+  updateStateOnServerMessage,
+  removeDevice,
+  addNewDevice,
+}

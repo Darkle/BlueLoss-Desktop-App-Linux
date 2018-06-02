@@ -1,0 +1,7 @@
+
+identity(param) -> param
+
+
+export {
+  identity
+}

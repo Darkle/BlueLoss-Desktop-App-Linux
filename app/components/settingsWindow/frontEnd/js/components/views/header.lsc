@@ -1,0 +1,13 @@
+import { h } from 'hyperapp'
+
+export default () ->
+  <div id="header">
+    <div id="logo">
+      <div id="headerIcon">
+        <img src="assets/icons/BlueLossIcon.svg" />
+      </div>
+      <div id="headerText">BlueLoss</div>
+    </div>
+  </div>
+
+

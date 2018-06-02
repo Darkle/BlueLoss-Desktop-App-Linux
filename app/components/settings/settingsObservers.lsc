@@ -5,12 +5,15 @@
 // import { addRollbarLogging, removeRollbarLogging } from '../common/logging/logging.lsc'
 // import { changeTrayIcon, updateTrayMenuEnabledItem } from '../tray/tray.lsc'
 // import { enableRunOnStartup, disableRunOnStartup } from '../common/runOnStartup.lsc'
-
+//TODO: todo
 initSettingsObservers():void -> {}
 // initSettingsObservers(settings):void ->
   // gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->
   //   if enabled: addRollbarLogging()
   //   else: removeRollbarLogging()
+  // )
+  // gawk.watch(settings, ['blueLossEnabled'], (enabled: boolean):void ->
+  //   settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
   // )
   // gawk.watch(settings, ['runOnStartup'], (enabled: boolean):void ->
   //   if enabled: enableRunOnStartup() .catch()

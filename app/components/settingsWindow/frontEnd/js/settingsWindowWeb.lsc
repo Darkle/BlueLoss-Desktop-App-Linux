@@ -1,3 +1,25 @@
+import { h, app } from 'hyperapp'  // eslint-disable-line no-unused-vars
+import { withLogger } from '@hyperapp/logger'
+
+import appActions from './components/actions/actionsIndex.lsc'
+import views from './components/views/viewsIndex.lsc'
+import { identity } from './frontEndUtils.lsc'
+
+initialState = {
+  activeTab: 'statusTab',
+  devicesCanSee: [],
+  blueLossEnabled: true,
+  runOnStartup: true,
+  timeToLock: 3,
+  reportErrors: true,
+  firstRun: true,
+  scanInterval: 30000
+}
+
+logInDev = if ISDEV: withLogger else: identity
+settingsWindowApp = logInDev(app)(initialState, appActions, views, document.body)
+
+// settingsWindowApp?.updateStateOnServerMessage?(setting)
 
 
-console.log('settingsss window main')
+console.log('settings window main')

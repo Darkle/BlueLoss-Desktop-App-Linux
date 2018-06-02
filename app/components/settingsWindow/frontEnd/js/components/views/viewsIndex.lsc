@@ -1,13 +1,11 @@
 import { h } from 'hyperapp'
 
-import Header from '../views/header.lsc'
-import AboutTab from '../views/aboutTab.lsc'
-import HelpTab from '../views/helpTab.lsc'
-import SettingsTab from '../views/settingsTab.lsc'
-import StatusTab from '../views/statusTab.lsc'
-import StatusInfoWindow from '../views/statusInfoWindow.lsc'
-import SettingsInfoWindow from '../views/settingsInfoWindow.lsc'
-import AboutInfoWindow from '../views/aboutInfoWindow.lsc'
+import Header from './header.lsc'
+import HelpTab from './helpTab.lsc'
+import SettingsTab from './settingsTab.lsc'
+import StatusTab from './statusTab.lsc'
+import StatusInfoWindow from './statusInfoWindow.lsc'
+import SettingsInfoWindow from './settingsInfoWindow.lsc'
 
 export default (state, actions) ->
   <div>

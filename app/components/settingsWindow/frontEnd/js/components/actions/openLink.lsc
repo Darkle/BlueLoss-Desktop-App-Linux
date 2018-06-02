@@ -1,0 +1,4 @@
+
+export default openLink(event):void ->
+  event.preventDefault()
+  window.open(event.currentTarget.dataset.externalLink)

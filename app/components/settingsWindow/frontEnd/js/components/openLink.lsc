@@ -1,5 +1,0 @@
-import { shell } from 'electron'
-
-export default openLink(event):void ->
-  event.preventDefault()
-  shell.openExternal(event.currentTarget.dataset.externalLink)

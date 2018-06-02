@@ -3,7 +3,7 @@ import low from 'lowdb'
 import FileSync from 'lowdb/adapters/FileSync'
 import is from 'typa'
 
-import { tenYearsFromNow, omitGawkFromSettings } from '../utils.lsc'
+import { tenYearsFromNow } from '../utils.lsc'
 import { DeviceType, SettingsTypes } from '../types/types.lsc'
 import { defaultSettings } from './settingsDefaults.lsc'
 import { initSettingsObservers } from './settingsObservers.lsc'
@@ -81,7 +81,7 @@ updateLastSeenForDevicesLookingForOnStartup():void ->
 logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
   debugMessage = `Updated Setting: updated '${ newSettingKey }' with:`
   if is.obj(newSettingValue):
-    logger.debug(debugMessage, { [newSettingKey]: omitGawkFromSettings(newSettingValue) })
+    logger.debug(debugMessage, { [newSettingKey]: newSettingValue })
   else:
     logger.debug(`${ debugMessage } ${ newSettingValue }`)
 
