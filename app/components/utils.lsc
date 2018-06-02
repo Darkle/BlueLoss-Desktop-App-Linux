@@ -2,10 +2,11 @@ import tp from 'timeproxy'
 import is from 'typa'
 import execa from 'execa'
 
-import packageJson from '../../package.json'
 import { openSettingsWindow } from '../components/settingsWindow/settingsWindow.lsc'
 import { logger } from '../components/logging/logging.lsc'
 import { getSettings } from './settings/settings.lsc'
+
+getAppVersion():String -> require('../../package.json').version
 
 getScreenResolution():Object ->
   try:
@@ -13,15 +14,13 @@ getScreenResolution():Object ->
       .shellSync(`xrandr |grep \\* |awk '{print $1}'`)
       .stdout
       .split('x')
-    return { width: Number(width), height: Number(height) }
+    return { screenWidth: Number(width), screenHeight: Number(height) }
   catch(e):
     logger.error(e)
 
-getAppVersion():String -> packageJson.version
-
 setUpDev():void -> if ISDEV && !getSettings().firstRun: openSettingsWindow().catch(logger.error)
 
-omitGawkFromSettings(settings) -> recursivelyOmitObjProperties(settings, ['__gawk__'])
+omitGawkFromSettings(settings):Object -> recursivelyOmitObjProperties(settings, ['__gawk__'])
 
 noop() -> return
 
@@ -37,7 +36,7 @@ identity(param) -> param
 
 range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + start) //includes end number
 
-tenYearsFromNow():number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
+tenYearsFromNow():Number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 
 recursivelyOmitObjProperties(obj: Object, propertyFiltersArr: Array<string> = []):Object ->
   Object.keys(obj).reduce((newObj, propName) ->
