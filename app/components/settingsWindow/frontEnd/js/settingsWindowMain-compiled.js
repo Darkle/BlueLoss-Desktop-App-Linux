@@ -96,7 +96,7 @@
 "use strict";
 
 
-console.log('settings window main');
+console.log('settingsss window main');
 
 /***/ })
 

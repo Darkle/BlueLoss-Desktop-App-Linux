@@ -25,32 +25,24 @@ user_pref("browser.tabs.warnOnCloseOtherTabs", false);
 getChromePrefs():Object ->
   screenResolution = getScreenResolution()
   if !screenResolution: return ({})
+  browserWindowPosition = generateBrowserWindowPosition(screenResolution)
   ({
     "browser": {
       "app_window_placement": {
         "[::]_/": {
           "maximized": false,
-          "top": generateTop(screenResolution),
-          "bottom": generateBottom(screenResolution),
-          "left": generateLeft(screenResolution),
-          "right": generateRight(screenResolution),
+          ...browserWindowPosition
         },
         "[::1]_/": {
           "maximized": false,
-          "top": generateTop(screenResolution),
-          "bottom": generateBottom(screenResolution),
-          "left": generateLeft(screenResolution),
-          "right": generateRight(screenResolution),
+          ...browserWindowPosition
         },
         "0": {
           "0": {
             "0": {
               "0_/": {
                 "maximized": false,
-                "top": generateTop(screenResolution),
-                "bottom": generateBottom(screenResolution),
-                "left": generateLeft(screenResolution),
-                "right": generateRight(screenResolution),
+                ...browserWindowPosition
               }
             }
           }
@@ -59,11 +51,8 @@ getChromePrefs():Object ->
           "0": {
             "0": {
               "1_/": {
-                "top": generateTop(screenResolution),
                 "maximized": false,
-                "bottom": generateBottom(screenResolution),
-                "left": generateLeft(screenResolution),
-                "right": generateRight(screenResolution),
+                ...browserWindowPosition
               }
             }
           }
@@ -78,13 +67,15 @@ getChromePrefs():Object ->
 * dimensions change later as when they move the window and close it, chromium
 * updates that in the Preferences file.
 */
-generateTop(screenResolution):Number ->
-
-generateBottom(screenResolution):Number ->
-
-generateLeft(screenResolution):Number ->
-
-generateRight(screenResolution):Number ->
+generateBrowserWindowPosition({ screenHeight, screenWidth }):Object ->
+  (
+    {
+      "top": Math.round((screenHeight/2) - (616/2)),
+      "bottom": Math.round((screenHeight/2) + (616/2)),
+      "left": Math.round((screenWidth/2) - (786/2)),
+      "right": Math.round((screenWidth/2) + (786/2))
+    }
+  )
 
 export {
   getFirefoxUserChrome,

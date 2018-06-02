@@ -34,11 +34,13 @@ createFirefoxProfileFiles():Promise ->
     .then(() -> fs.outputFile(blueLossConfigFirefoxUserChromeFilePath, getFirefoxUserChrome()))
     .then(() -> fs.outputFile(blueLossConfigFirefoxPrefsFilePath, getFirefoxPrefsJs()))
 
-
+getBlueLossLogsFolderPath():String -> blueLossLogsFolderPath
+getBlueLossConfigFolderPath():String -> blueLossConfigFolderPath
+getBlueLossSettingsFilePath():String -> blueLossSettingsFilePath
 
 export {
   createBlueLossConfig,
-  blueLossLogsFolderPath,
-  blueLossConfigFolderPath,
-  blueLossSettingsFilePath,
+  getBlueLossLogsFolderPath,
+  getBlueLossConfigFolderPath,
+  getBlueLossSettingsFilePath,
 }

@@ -8,8 +8,8 @@ sendOSnotification(message:String):void ->
     execa.shell('command -v zenity'),
     execa.shell('command -v notify-send'),
   ])
-  .then(({data: {out}}):Promise ->
-    if out[0].endsWith('zenity'):
+  .then(result ->
+    if result?.stdout?.endsWith('zenity'):
       return execa.shell(`zenity --notification --text="${ message }"`).catch(noop)
     execa.shell(`notify-send "${ message }"`).catch(noop)
   )

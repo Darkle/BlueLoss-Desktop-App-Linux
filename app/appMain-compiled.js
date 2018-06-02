@@ -147,9 +147,97 @@ process.on('uncaughtException', err => {
   !*** ./app/components/bluelossConfig/browsersProfileFileData/browserProfileData.lsc ***!
   \**************************************************************************************/
 /*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-throw new Error("Module build failed: SyntaxError: Expected an Indent or Statement (81:37)\n\n\u001b[0m \u001b[90m 79 | \u001b[39m\u001b[90m* updates that in the Preferences file.\u001b[39m\n \u001b[90m 80 | \u001b[39m\u001b[90m*/\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 81 | \u001b[39mgenerateTop(screenResolution)\u001b[33m:\u001b[39m\u001b[33mNumber\u001b[39m \u001b[33m-\u001b[39m\u001b[33m>\u001b[39m\n \u001b[90m    | \u001b[39m                                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 82 | \u001b[39m\n \u001b[90m 83 | \u001b[39mgenerateBottom(screenResolution)\u001b[33m:\u001b[39m\u001b[33mNumber\u001b[39m \u001b[33m-\u001b[39m\u001b[33m>\u001b[39m\n \u001b[90m 84 | \u001b[39m\u001b[0m\n");
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getChromePrefs = exports.getFirefoxPrefsJs = exports.getFirefoxUserChrome = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _utils = __webpack_require__(/*! ../../utils.lsc */ "./app/components/utils.lsc");
+
+function getFirefoxUserChrome() {
+  return `
+@-moz-document url(chrome://browser/content/browser.xul) {
+#TabsToolbar {
+  visibility: collapse !important;
+}
+#nav-bar {
+  visibility: collapse !important;
+}
+`;
+}function getFirefoxPrefsJs() {
+  return `
+user_pref("browser.tabs.warnOnClose", false);
+user_pref("browser.sessionstore.restore_on_demand", false);
+user_pref("browser.tabs.warnOnCloseOtherTabs", false);
+`;
+} /*****
+  * Localhost addresses
+  * ::
+  * ::1
+  * 0.0.0.0
+  * 127.0.0.1
+  */
+function getChromePrefs() {
+  const screenResolution = (0, _utils.getScreenResolution)();
+  if (!screenResolution) return {};
+  const browserWindowPosition = generateBrowserWindowPosition(screenResolution);
+  return {
+    "browser": {
+      "app_window_placement": {
+        "[::]_/": _extends({
+          "maximized": false
+        }, browserWindowPosition),
+        "[::1]_/": _extends({
+          "maximized": false
+        }, browserWindowPosition),
+        "0": {
+          "0": {
+            "0": {
+              "0_/": _extends({
+                "maximized": false
+              }, browserWindowPosition)
+            }
+          }
+        },
+        "127": {
+          "0": {
+            "0": {
+              "1_/": _extends({
+                "maximized": false
+              }, browserWindowPosition)
+            }
+          }
+        }
+      }
+    }
+  };
+}
+
+/*****
+* We want the chromium browser to end up in the center of the screen
+* with a width of 786px and a height of 616px. It's ok if the users screen
+* dimensions change later as when they move the window and close it, chromium
+* updates that in the Preferences file.
+*/
+function generateBrowserWindowPosition({ screenHeight, screenWidth }) {
+  return {
+    "top": Math.round(screenHeight / 2 - 616 / 2),
+    "bottom": Math.round(screenHeight / 2 + 616 / 2),
+    "left": Math.round(screenWidth / 2 - 786 / 2),
+    "right": Math.round(screenWidth / 2 + 786 / 2)
+  };
+}
+
+exports.getFirefoxUserChrome = getFirefoxUserChrome;
+exports.getFirefoxPrefsJs = getFirefoxPrefsJs;
+exports.getChromePrefs = getChromePrefs;
 
 /***/ }),
 
@@ -166,7 +254,7 @@ throw new Error("Module build failed: SyntaxError: Expected an Indent or Stateme
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.blueLossSettingsFilePath = exports.blueLossConfigFolderPath = exports.blueLossLogsFolderPath = exports.createBlueLossConfig = undefined;
+exports.getBlueLossSettingsFilePath = exports.getBlueLossConfigFolderPath = exports.getBlueLossLogsFolderPath = exports.createBlueLossConfig = undefined;
 
 var _os = __webpack_require__(/*! os */ "os");
 
@@ -210,10 +298,16 @@ async function createBlueLossConfig() {
   }).then(function () {
     return _fsExtra2.default.outputFile(blueLossConfigFirefoxPrefsFilePath, (0, _browserProfileData.getFirefoxPrefsJs)());
   });
+}function getBlueLossLogsFolderPath() {
+  return blueLossLogsFolderPath;
+}function getBlueLossConfigFolderPath() {
+  return blueLossConfigFolderPath;
+}function getBlueLossSettingsFilePath() {
+  return blueLossSettingsFilePath;
 }exports.createBlueLossConfig = createBlueLossConfig;
-exports.blueLossLogsFolderPath = blueLossLogsFolderPath;
-exports.blueLossConfigFolderPath = blueLossConfigFolderPath;
-exports.blueLossSettingsFilePath = blueLossSettingsFilePath;
+exports.getBlueLossLogsFolderPath = getBlueLossLogsFolderPath;
+exports.getBlueLossConfigFolderPath = getBlueLossConfigFolderPath;
+exports.getBlueLossSettingsFilePath = getBlueLossSettingsFilePath;
 
 /***/ }),
 
@@ -315,9 +409,9 @@ function handleScanResults(spawnCommandResult) {
   * {"code":0,"data":{"out":["Scanning ...\tE0:88:61:CF:F3:52\tMotoG3\n\t12:30:D3:CD:32:51\tn/a\n"],"err":[]}}
   */
 function processScanResultsText(spawnCommandResult) {
-  var _spawnCommandResult$d, _spawnCommandResult$d2, _spawnCommandResult$d3, _spawnCommandResult$d4;
+  var _spawnCommandResult$s, _spawnCommandResult$s2;
 
-  const results = spawnCommandResult == null ? void 0 : (_spawnCommandResult$d = spawnCommandResult.data) == null ? void 0 : (_spawnCommandResult$d2 = _spawnCommandResult$d.out) == null ? void 0 : (_spawnCommandResult$d3 = _spawnCommandResult$d2[0]) == null ? void 0 : (_spawnCommandResult$d4 = _spawnCommandResult$d3.trim()) == null ? void 0 : _spawnCommandResult$d4.replace('Scanning ...', '');
+  const results = spawnCommandResult == null ? void 0 : (_spawnCommandResult$s = spawnCommandResult.stdout) == null ? void 0 : (_spawnCommandResult$s2 = _spawnCommandResult$s.trim()) == null ? void 0 : _spawnCommandResult$s2.replace('Scanning ...', '');
   if (!(results == null ? void 0 : results.length)) return [];
 
   return results.split('\n').reduce(function (resultsArr, nextResult) {
@@ -451,11 +545,9 @@ var _rollbar = __webpack_require__(/*! rollbar */ "rollbar");
 
 var _rollbar2 = _interopRequireDefault(_rollbar);
 
-var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const rollbarConfig = {
+const rollbarLogger = new _rollbar2.default({
   accessToken: process.env.rollbarAccessToken,
   enabled: false,
   captureUncaught: true,
@@ -463,15 +555,13 @@ const rollbarConfig = {
   environment: "development",
   reportLevel: 'error',
   payload: {
-    BlueLossVersion: (0, _utils.getAppVersion)()
+    BlueLossVersion: __webpack_require__(/*! ../../../package.json */ "./package.json").version
   },
   // Ignore the server stuff cause that includes info about the host pc name.
   transform(payload) {
     return payload.server = {};
   }
-};
-
-const rollbarLogger = new _rollbar2.default(rollbarConfig);
+});
 
 const CustomRollbarTransport = _winston2.default.transports.CustomLogger = function (options) {
   Object.assign(this, options);
@@ -518,7 +608,6 @@ var _createBlueLossConfig = __webpack_require__(/*! ../bluelossConfig/createBlue
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const bluelossLogFilePath = _path2.default.join(_createBlueLossConfig.blueLossLogsFolderPath, 'BlueLoss.log.txt');
 const rollbarTransportOptions = {
   name: 'rollbarTransport',
   level: 'error',
@@ -552,7 +641,7 @@ function addRollbarLogging() {
   logger.remove('rollbarTransport');
 }function addWinstonFileLogging() {
   return _winston2.default.add(_winston2.default.transports.File, {
-    filename: bluelossLogFilePath,
+    filename: _path2.default.join((0, _createBlueLossConfig.getBlueLossLogsFolderPath)(), 'BlueLoss.log.txt'),
     maxsize: 500000, // 500KB
     maxFiles: 6,
     prettyPrint: true,
@@ -624,7 +713,7 @@ process.once('SIGINT', function () {
 });
 
 function getLockFilePath() {
-  return _path2.default.join(_createBlueLossConfig.blueLossConfigFolderPath, 'BlueLoss.lock');
+  return _path2.default.join((0, _createBlueLossConfig.getBlueLossConfigFolderPath)(), 'BlueLoss.lock');
 }exports.makeSingleInstance = makeSingleInstance;
 
 /***/ }),
@@ -717,8 +806,10 @@ var _utils = __webpack_require__(/*! ./utils.lsc */ "./app/components/utils.lsc"
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function sendOSnotification(message) {
-  (0, _promiseRatRace2.default)([_execa2.default.shell('command -v zenity'), _execa2.default.shell('command -v notify-send')]).then(function ({ data: { out } }) {
-    if (out[0].endsWith('zenity')) {
+  (0, _promiseRatRace2.default)([_execa2.default.shell('command -v zenity'), _execa2.default.shell('command -v notify-send')]).then(function (result) {
+    var _result$stdout;
+
+    if (result == null ? void 0 : (_result$stdout = result.stdout) == null ? void 0 : _result$stdout.endsWith('zenity')) {
       return _execa2.default.shell(`zenity --notification --text="${message}"`).catch(_utils.noop);
     }return _execa2.default.shell(`notify-send "${message}"`).catch(_utils.noop);
   }).catch(_utils.noop);
@@ -748,10 +839,6 @@ var _path2 = _interopRequireDefault(_path);
 var _express = __webpack_require__(/*! express */ "express");
 
 var _express2 = _interopRequireDefault(_express);
-
-var _internalIp = __webpack_require__(/*! internal-ip */ "./node_modules/internal-ip/index.js");
-
-var _internalIp2 = _interopRequireDefault(_internalIp);
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
@@ -843,7 +930,7 @@ let db = null;
 let settings = null;
 
 function initSettings() {
-  db = (0, _lowdb2.default)(new _FileSync2.default(_createBlueLossConfig.blueLossSettingsFilePath));
+  db = (0, _lowdb2.default)(new _FileSync2.default((0, _createBlueLossConfig.getBlueLossSettingsFilePath)()));
   db.defaults(_settingsDefaults.defaultSettings).write();
   settings = (0, _gawk2.default)(db.getState());
 
@@ -1044,21 +1131,17 @@ var _createBlueLossConfig = __webpack_require__(/*! ../bluelossConfig/createBlue
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // import { logger } from '../logging/logging.lsc'
-const firefoxProfilePath = _path2.default.join(_createBlueLossConfig.blueLossConfigFolderPath, 'BrowserProfiles', 'Firefox');
-const chromiumProfilePath = _path2.default.join(_createBlueLossConfig.blueLossConfigFolderPath, 'BrowserProfiles', 'Chromium');
 const firefoxCliSpawnParams = 'firefox -new-instance --width=786 --height=616';
 
 function openSettingsWindow() {
   //send a message to all open windows via websockets to close themselves, then
   // open a new settings window
   // https://github.com/Financial-Times/promise-rat-race#promise-rat-race
-  return (0, _promiseRatRace2.default)([_execa2.default.shell('command -v google-chrome')]
+  return (0, _promiseRatRace2.default)([
+  // execa.shell('command -v google-chrome'),
   // execa.shell('command -v chromium-browser'),
-  // execa.shell('command -v firefox'),
-  ).then(function (result) {
-    var _result$data;
-
-    const browserPath = result == null ? void 0 : (_result$data = result.data) == null ? void 0 : _result$data.out;
+  _execa2.default.shell('command -v firefox')]).then(function (result) {
+    const browserPath = result == null ? void 0 : result.stdout;
     if (!browserPath) throw new Error();
     const browser = browserPath.slice(browserPath.lastIndexOf('/') + 1);
     return openSettingsWindowInBrowser(browser);
@@ -1071,8 +1154,12 @@ function openSettingsWindow() {
 
 function openSettingsWindowInBrowser(browser) {
   if (browser === 'firefox') {
-    return _execa2.default.shell(`${firefoxCliSpawnParams} -profile ${firefoxProfilePath} ${_server.serverAddress}`);
-  }return _execa2.default.shell(`${browser} --app=${_server.serverAddress} --user-data-dir=${chromiumProfilePath}`);
+    return _execa2.default.shell(`${firefoxCliSpawnParams} -profile ${getFirefoxProfilePath()} ${_server.serverAddress}`);
+  }return _execa2.default.shell(`${browser} --app=${_server.serverAddress} --user-data-dir=${getChromiumProfilePath()}`);
+}function getFirefoxProfilePath() {
+  return _path2.default.join((0, _createBlueLossConfig.getBlueLossConfigFolderPath)(), 'BrowserProfiles', 'Firefox');
+}function getChromiumProfilePath() {
+  return _path2.default.join((0, _createBlueLossConfig.getBlueLossConfigFolderPath)(), 'BrowserProfiles', 'Chromium');
 }exports.openSettingsWindow = openSettingsWindow;
 
 /***/ }),
@@ -1167,7 +1254,7 @@ function initTrayMenu() {
     updateSystrayIcon(action);
   }if (action.seq_id === 3) {
     //Open logs folder
-    (0, _opn2.default)(_createBlueLossConfig.blueLossLogsFolderPath);
+    (0, _opn2.default)((0, _createBlueLossConfig.getBlueLossLogsFolderPath)());
   }if (action.seq_id === 4) {
     //Exit BlueLoss
     systray.kill();
@@ -1268,10 +1355,6 @@ var _execa = __webpack_require__(/*! execa */ "execa");
 
 var _execa2 = _interopRequireDefault(_execa);
 
-var _package = __webpack_require__(/*! ../../package.json */ "./package.json");
-
-var _package2 = _interopRequireDefault(_package);
-
 var _settingsWindow = __webpack_require__(/*! ../components/settingsWindow/settingsWindow.lsc */ "./app/components/settingsWindow/settingsWindow.lsc");
 
 var _logging = __webpack_require__(/*! ../components/logging/logging.lsc */ "./app/components/logging/logging.lsc");
@@ -1280,15 +1363,15 @@ var _settings = __webpack_require__(/*! ./settings/settings.lsc */ "./app/compon
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getScreenResolution() {
+function getAppVersion() {
+  return __webpack_require__(/*! ../../package.json */ "./package.json").version;
+}function getScreenResolution() {
   try {
     const [width, height] = _execa2.default.shellSync(`xrandr |grep \\* |awk '{print $1}'`).stdout.split('x');
-    return { width: Number(width), height: Number(height) };
+    return { screenWidth: Number(width), screenHeight: Number(height) };
   } catch (e) {
     return _logging.logger.error(e);
   }
-}function getAppVersion() {
-  return _package2.default.version;
 }function setUpDev() {
   true && !(0, _settings.getSettings)().firstRun ? (0, _settingsWindow.openSettingsWindow)().catch(_logging.logger.error) : void 0;
 }function omitGawkFromSettings(settings) {
@@ -1388,671 +1471,6 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 
 /***/ }),
 
-/***/ "./node_modules/default-gateway sync recursive ^\\.\\/.*$":
-/*!****************************************************!*\
-  !*** ./node_modules/default-gateway sync ^\.\/.*$ ***!
-  \****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var map = {
-	"./": "./node_modules/default-gateway/index.js",
-	"./LICENSE": "./node_modules/default-gateway/LICENSE",
-	"./README.md": "./node_modules/default-gateway/README.md",
-	"./android": "./node_modules/default-gateway/android.js",
-	"./android.js": "./node_modules/default-gateway/android.js",
-	"./darwin": "./node_modules/default-gateway/darwin.js",
-	"./darwin.js": "./node_modules/default-gateway/darwin.js",
-	"./freebsd": "./node_modules/default-gateway/freebsd.js",
-	"./freebsd.js": "./node_modules/default-gateway/freebsd.js",
-	"./index": "./node_modules/default-gateway/index.js",
-	"./index.js": "./node_modules/default-gateway/index.js",
-	"./linux": "./node_modules/default-gateway/linux.js",
-	"./linux.js": "./node_modules/default-gateway/linux.js",
-	"./openbsd": "./node_modules/default-gateway/openbsd.js",
-	"./openbsd.js": "./node_modules/default-gateway/openbsd.js",
-	"./package.json": "./node_modules/default-gateway/package.json",
-	"./sunos": "./node_modules/default-gateway/sunos.js",
-	"./sunos.js": "./node_modules/default-gateway/sunos.js",
-	"./win32": "./node_modules/default-gateway/win32.js",
-	"./win32.js": "./node_modules/default-gateway/win32.js"
-};
-
-
-function webpackContext(req) {
-	var id = webpackContextResolve(req);
-	return __webpack_require__(id);
-}
-function webpackContextResolve(req) {
-	var id = map[req];
-	if(!(id + 1)) { // check for number or string
-		var e = new Error("Cannot find module '" + req + "'");
-		e.code = 'MODULE_NOT_FOUND';
-		throw e;
-	}
-	return id;
-}
-webpackContext.keys = function webpackContextKeys() {
-	return Object.keys(map);
-};
-webpackContext.resolve = webpackContextResolve;
-module.exports = webpackContext;
-webpackContext.id = "./node_modules/default-gateway sync recursive ^\\.\\/.*$";
-
-/***/ }),
-
-/***/ "./node_modules/default-gateway/LICENSE":
-/*!**********************************************!*\
-  !*** ./node_modules/default-gateway/LICENSE ***!
-  \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-throw new Error("Module parse failed: Unexpected token (1:14)\nYou may need an appropriate loader to handle this file type.\n| Copyright (c) silverwind\n| All rights reserved.\n| ");
-
-/***/ }),
-
-/***/ "./node_modules/default-gateway/README.md":
-/*!************************************************!*\
-  !*** ./node_modules/default-gateway/README.md ***!
-  \************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-throw new Error("Module parse failed: Unexpected character '#' (1:0)\nYou may need an appropriate loader to handle this file type.\n| # default-gateway\n| [![](https://img.shields.io/npm/v/default-gateway.svg?style=flat)](https://www.npmjs.org/package/default-gateway) [![](https://img.shields.io/npm/dm/default-gateway.svg)](https://www.npmjs.org/package/default-gateway) [![](https://api.travis-ci.org/silverwind/default-gateway.svg?style=flat)](https://travis-ci.org/silverwind/default-gateway)\n| ");
-
-/***/ }),
-
-/***/ "./node_modules/default-gateway/android.js":
-/*!*************************************************!*\
-  !*** ./node_modules/default-gateway/android.js ***!
-  \*************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-const net = __webpack_require__(/*! net */ "net");
-const execa = __webpack_require__(/*! execa */ "execa");
-
-const args = {
-  v4: ["-4", "r"],
-  v6: ["-6", "r"],
-};
-
-const parse = stdout => {
-  let result;
-
-  (stdout || "").trim().split("\n").some(line => {
-    const results = /default via (.+?) dev (.+?)( |$)/.exec(line) || [];
-    const gateway = results[1];
-    const iface = results[2];
-    if (gateway && net.isIP(gateway)) {
-      result = {gateway: gateway, interface: (iface ? iface : null)};
-      return true;
-    }
-  });
-
-  if (!result) {
-    throw new Error("Unable to determine default gateway");
-  }
-
-  return result;
-};
-
-const promise = family => {
-  return execa.stdout("ip", args[family]).then(stdout => {
-    return parse(stdout);
-  });
-};
-
-const sync = family => {
-  const result = execa.sync("ip", args[family]);
-  return parse(result.stdout);
-};
-
-module.exports.v4 = () => promise("v4");
-module.exports.v6 = () => promise("v6");
-
-module.exports.v4.sync = () => sync("v4");
-module.exports.v6.sync = () => sync("v6");
-
-
-/***/ }),
-
-/***/ "./node_modules/default-gateway/darwin.js":
-/*!************************************************!*\
-  !*** ./node_modules/default-gateway/darwin.js ***!
-  \************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-const net = __webpack_require__(/*! net */ "net");
-const execa = __webpack_require__(/*! execa */ "execa");
-const dests = ["default", "0.0.0.0", "0.0.0.0/0", "::", "::/0"];
-
-const args = {
-  v4: ["-rn", "-f", "inet"],
-  v6: ["-rn", "-f", "inet6"],
-};
-
-const parse = (stdout, family) => {
-  let result;
-
-  (stdout || "").trim().split("\n").some(line => {
-    const results = line.split(/ +/) || [];
-    const target = results[0];
-    const gateway = results[1];
-    const iface = results[family === "v4" ? 5 : 3];
-    if (dests.indexOf(target) !== -1 && gateway && net.isIP(gateway)) {
-      result = {gateway: gateway, interface: (iface ? iface : null)};
-      return true;
-    }
-  });
-
-  if (!result) {
-    throw new Error("Unable to determine default gateway");
-  }
-
-  return result;
-};
-
-const promise = family => {
-  return execa.stdout("netstat", args[family]).then(stdout => {
-    return parse(stdout, family);
-  });
-};
-
-const sync = family => {
-  const result = execa.sync("netstat", args[family]);
-  return parse(result.stdout, family);
-};
-
-module.exports.v4 = () => promise("v4");
-module.exports.v6 = () => promise("v6");
-
-module.exports.v4.sync = () => sync("v4");
-module.exports.v6.sync = () => sync("v6");
-
-
-/***/ }),
-
-/***/ "./node_modules/default-gateway/freebsd.js":
-/*!*************************************************!*\
-  !*** ./node_modules/default-gateway/freebsd.js ***!
-  \*************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-const net = __webpack_require__(/*! net */ "net");
-const execa = __webpack_require__(/*! execa */ "execa");
-const dests = ["default", "0.0.0.0", "0.0.0.0/0", "::", "::/0"];
-
-const args = {
-  v4: ["-rn", "-f", "inet"],
-  v6: ["-rn", "-f", "inet6"],
-};
-
-const parse = stdout => {
-  let result;
-
-  (stdout || "").trim().split("\n").some(line => {
-    const results = line.split(/ +/) || [];
-    const target = results[0];
-    const gateway = results[1];
-    const iface = results[3];
-    if (dests.indexOf(target) !== -1 && gateway && net.isIP(gateway)) {
-      result = {gateway: gateway, interface: (iface ? iface : null)};
-      return true;
-    }
-  });
-
-  if (!result) {
-    throw new Error("Unable to determine default gateway");
-  }
-
-  return result;
-};
-
-const promise = family => {
-  return execa.stdout("netstat", args[family]).then(stdout => {
-    return parse(stdout);
-  });
-};
-
-const sync = family => {
-  const result = execa.sync("netstat", args[family]);
-  return parse(result.stdout);
-};
-
-module.exports.v4 = () => promise("v4");
-module.exports.v6 = () => promise("v6");
-
-module.exports.v4.sync = () => sync("v4");
-module.exports.v6.sync = () => sync("v6");
-
-
-/***/ }),
-
-/***/ "./node_modules/default-gateway/index.js":
-/*!***********************************************!*\
-  !*** ./node_modules/default-gateway/index.js ***!
-  \***********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-const platform = __webpack_require__(/*! os */ "os").platform();
-
-if ([
-  "android",
-  "darwin",
-  "freebsd",
-  "linux",
-  "openbsd",
-  "sunos",
-  "win32"
-].indexOf(platform) !== -1) {
-  const families = __webpack_require__("./node_modules/default-gateway sync recursive ^\\.\\/.*$")(`./${platform}`);
-  module.exports.v4 = () => families.v4();
-  module.exports.v6 = () => families.v6();
-  module.exports.v4.sync = () => families.v4.sync();
-  module.exports.v6.sync = () => families.v6.sync();
-} else {
-  const noop = () => { throw new Error(`Unsupported Platform: ${platform}`); };
-  module.exports.v4 = noop;
-  module.exports.v6 = noop;
-  module.exports.v4.sync = noop;
-  module.exports.v6.sync = noop;
-}
-
-
-/***/ }),
-
-/***/ "./node_modules/default-gateway/linux.js":
-/*!***********************************************!*\
-  !*** ./node_modules/default-gateway/linux.js ***!
-  \***********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-const net = __webpack_require__(/*! net */ "net");
-const os = __webpack_require__(/*! os */ "os");
-const execa = __webpack_require__(/*! execa */ "execa");
-
-const args = {
-  v4: ["-4", "r"],
-  v6: ["-6", "r"],
-};
-
-const parse = (stdout, family) => {
-  let result;
-
-  (stdout || "").trim().split("\n").some(line => {
-    const results = /default( via .+?)?( dev .+?)( |$)/.exec(line) || [];
-    const gateway = (results[1] || "").substring(5);
-    const iface = (results[2] || "").substring(5);
-    if (gateway && net.isIP(gateway)) { // default via 1.2.3.4 dev en0
-      result = {gateway: gateway, interface: (iface ? iface : null)};
-      return true;
-    } else if (iface && !gateway) { // default via dev en0
-      const interfaces = os.networkInterfaces();
-      const addresses = interfaces[iface];
-      if (!addresses || !addresses.length) return;
-
-      addresses.some(addr => {
-        if (addr.family.substring(2) === family && net.isIP(addr.address)) {
-          result = {gateway: addr.address, interface: (iface ? iface : null)};
-          return true;
-        }
-      });
-    }
-  });
-
-  if (!result) {
-    throw new Error("Unable to determine default gateway");
-  }
-
-  return result;
-};
-
-const promise = family => {
-  return execa.stdout("ip", args[family]).then(stdout => {
-    return parse(stdout, family);
-  });
-};
-
-const sync = family => {
-  const result = execa.sync("ip", args[family]);
-  return parse(result.stdout, family);
-};
-
-module.exports.v4 = () => promise("v4");
-module.exports.v6 = () => promise("v6");
-
-module.exports.v4.sync = () => sync("v4");
-module.exports.v6.sync = () => sync("v6");
-
-
-/***/ }),
-
-/***/ "./node_modules/default-gateway/openbsd.js":
-/*!*************************************************!*\
-  !*** ./node_modules/default-gateway/openbsd.js ***!
-  \*************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-const net = __webpack_require__(/*! net */ "net");
-const execa = __webpack_require__(/*! execa */ "execa");
-const dests = ["default", "0.0.0.0", "0.0.0.0/0", "::", "::/0"];
-
-const args = {
-  v4: ["-rn", "-f", "inet"],
-  v6: ["-rn", "-f", "inet6"],
-};
-
-const parse = stdout => {
-  let result;
-
-  (stdout || "").trim().split("\n").some(line => {
-    const results = line.split(/ +/) || [];
-    const target = results[0];
-    const gateway = results[1];
-    const iface = results[7];
-    if (dests.indexOf(target) !== -1 && gateway && net.isIP(gateway)) {
-      result = {gateway: gateway, interface: (iface ? iface : null)};
-      return true;
-    }
-  });
-
-  if (!result) {
-    throw new Error("Unable to determine default gateway");
-  }
-
-  return result;
-};
-
-const promise = family => {
-  return execa.stdout("netstat", args[family]).then(stdout => {
-    return parse(stdout);
-  });
-};
-
-const sync = family => {
-  const result = execa.sync("netstat", args[family]);
-  return parse(result.stdout);
-};
-
-module.exports.v4 = () => promise("v4");
-module.exports.v6 = () => promise("v6");
-
-module.exports.v4.sync = () => sync("v4");
-module.exports.v6.sync = () => sync("v6");
-
-
-/***/ }),
-
-/***/ "./node_modules/default-gateway/package.json":
-/*!***************************************************!*\
-  !*** ./node_modules/default-gateway/package.json ***!
-  \***************************************************/
-/*! exports provided: _from, _id, _inBundle, _integrity, _location, _phantomChildren, _requested, _requiredBy, _resolved, _shasum, _spec, _where, author, bugs, bundleDependencies, dependencies, deprecated, description, devDependencies, engines, files, homepage, keywords, license, name, os, repository, scripts, version, default */
-/***/ (function(module) {
-
-module.exports = {"_from":"default-gateway@^2.6.0","_id":"default-gateway@2.7.2","_inBundle":false,"_integrity":"sha512-lAc4i9QJR0YHSDFdzeBQKfZ1SRDG3hsJNEkrpcZa8QhBfidLAilT60BDEIVUUGqosFp425KOgB3uYqcnQrWafQ==","_location":"/default-gateway","_phantomChildren":{"get-stream":"3.0.0","is-stream":"1.1.0","nice-try":"1.0.4","npm-run-path":"2.0.2","p-finally":"1.0.0","path-key":"2.0.1","semver":"5.5.0","shebang-command":"1.2.0","signal-exit":"3.0.2","strip-eof":"1.0.0","which":"1.3.1"},"_requested":{"type":"range","registry":true,"raw":"default-gateway@^2.6.0","name":"default-gateway","escapedName":"default-gateway","rawSpec":"^2.6.0","saveSpec":null,"fetchSpec":"^2.6.0"},"_requiredBy":["/internal-ip"],"_resolved":"https://registry.npmjs.org/default-gateway/-/default-gateway-2.7.2.tgz","_shasum":"b7ef339e5e024b045467af403d50348db4642d0f","_spec":"default-gateway@^2.6.0","_where":"/home/coop/Coding/BlueLoss/node_modules/internal-ip","author":{"name":"silverwind","email":"me@silverwind.io"},"bugs":{"url":"https://github.com/silverwind/default-gateway/issues"},"bundleDependencies":false,"dependencies":{"execa":"^0.10.0","ip-regex":"^2.1.0"},"deprecated":false,"description":"Get the default network gateway, cross-platform.","devDependencies":{"eslint":"^4.19.1","eslint-config-silverwind":"^1.0.42","updates":"^3.0.0"},"engines":{"node":">=4"},"files":["index.js","android.js","darwin.js","freebsd.js","linux.js","openbsd.js","sunos.js","win32.js"],"homepage":"https://github.com/silverwind/default-gateway#readme","keywords":["default gateway","network","default","gateway","routing","route"],"license":"BSD-2-Clause","name":"default-gateway","os":["android","darwin","freebsd","linux","openbsd","sunos","win32"],"repository":{"type":"git","url":"git+https://github.com/silverwind/default-gateway.git"},"scripts":{"test":"make test"},"version":"2.7.2"};
-
-/***/ }),
-
-/***/ "./node_modules/default-gateway/sunos.js":
-/*!***********************************************!*\
-  !*** ./node_modules/default-gateway/sunos.js ***!
-  \***********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-const net = __webpack_require__(/*! net */ "net");
-const execa = __webpack_require__(/*! execa */ "execa");
-const dests = ["default", "0.0.0.0", "0.0.0.0/0", "::", "::/0"];
-
-const args = {
-  v4: ["-rn", "-f", "inet"],
-  v6: ["-rn", "-f", "inet6"],
-};
-
-const parse = stdout => {
-  let result;
-
-  (stdout || "").trim().split("\n").some(line => {
-    const results = line.split(/ +/) || [];
-    const target = results[0];
-    const gateway = results[1];
-    const iface = results[5];
-    if (dests.indexOf(target) !== -1 && gateway && net.isIP(gateway)) {
-      result = {gateway: gateway, interface: (iface ? iface : null)};
-      return true;
-    }
-  });
-
-  if (!result) {
-    throw new Error("Unable to determine default gateway");
-  }
-
-  return result;
-};
-
-const promise = family => {
-  return execa.stdout("netstat", args[family]).then(stdout => {
-    return parse(stdout);
-  });
-};
-
-const sync = family => {
-  const result = execa.sync("netstat", args[family]);
-  return parse(result.stdout);
-};
-
-module.exports.v4 = () => promise("v4");
-module.exports.v6 = () => promise("v6");
-
-module.exports.v4.sync = () => sync("v4");
-module.exports.v6.sync = () => sync("v6");
-
-
-/***/ }),
-
-/***/ "./node_modules/default-gateway/win32.js":
-/*!***********************************************!*\
-  !*** ./node_modules/default-gateway/win32.js ***!
-  \***********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-const execa = __webpack_require__(/*! execa */ "execa");
-const ipRegex = __webpack_require__(/*! ip-regex */ "./node_modules/ip-regex/index.js");
-
-const gwArgs = "path Win32_NetworkAdapterConfiguration where IPEnabled=true get DefaultIPGateway,Index /format:table".split(" ");
-const ifArgs = "path Win32_NetworkAdapter get Index,NetConnectionID /format:table".split(" ");
-
-const parse = (gwTable, ifTable, family) => {
-  let gateway, gwid, result;
-
-  (gwTable || "").trim().split("\n").splice(1).some(line => {
-    const results = line.trim().split(/} +/) || [];
-    const gw = results[0];
-    const id = results[1];
-    gateway = (ipRegex[family]().exec((gw || "").trim()) || [])[0];
-    if (gateway) {
-      gwid = id;
-      return true;
-    }
-  });
-
-  (ifTable || "").trim().split("\n").splice(1).some(line => {
-    const i = line.indexOf(" ");
-    const id = line.substr(0, i).trim();
-    const name = line.substr(i + 1).trim();
-    if (id === gwid) {
-      result = {gateway: gateway, interface: name ? name : null};
-      return true;
-    }
-  });
-
-  if (!result) {
-    throw new Error("Unable to determine default gateway");
-  }
-
-  return result;
-};
-
-const spawnOpts = {
-  windowsHide: true,
-};
-
-const promise = family => {
-  return Promise.all([
-    execa.stdout("wmic", gwArgs, spawnOpts),
-    execa.stdout("wmic", ifArgs, spawnOpts),
-  ]).then(results => {
-    const gwTable = results[0];
-    const ifTable = results[1];
-
-    return parse(gwTable, ifTable, family);
-  });
-};
-
-const sync = family => {
-  const gwTable = execa.sync("wmic", gwArgs, spawnOpts).stdout;
-  const ifTable = execa.sync("wmic", ifArgs, spawnOpts).stdout;
-
-  return parse(gwTable, ifTable, family);
-};
-
-module.exports.v4 = () => promise("v4");
-module.exports.v6 = () => promise("v6");
-
-module.exports.v4.sync = () => sync("v4");
-module.exports.v6.sync = () => sync("v6");
-
-
-/***/ }),
-
-/***/ "./node_modules/internal-ip/index.js":
-/*!*******************************************!*\
-  !*** ./node_modules/internal-ip/index.js ***!
-  \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-const os = __webpack_require__(/*! os */ "os");
-const defaultGateway = __webpack_require__(/*! default-gateway */ "./node_modules/default-gateway/index.js");
-const ipaddr = __webpack_require__(/*! ipaddr.js */ "ipaddr.js");
-
-function findIp(gateway) {
-	const interfaces = os.networkInterfaces();
-	const gatewayIp = ipaddr.parse(gateway);
-	let ip;
-
-	// Look for the matching interface in all local interfaces
-	Object.keys(interfaces).some(name => {
-		return interfaces[name].some(addr => {
-			const prefix = ipaddr.parse(addr.netmask).prefixLengthFromSubnetMask();
-			const net = ipaddr.parseCIDR(`${addr.address}/${prefix}`);
-
-			if (net[0] && net[0].kind() === gatewayIp.kind() && gatewayIp.match(net)) {
-				ip = net[0].toString();
-			}
-
-			return Boolean(ip);
-		});
-	});
-
-	return ip;
-}
-
-function promise(family) {
-	return defaultGateway[family]().then(result => {
-		return findIp(result.gateway) || null;
-	}).catch(() => null);
-}
-
-function sync(family) {
-	try {
-		const result = defaultGateway[family].sync();
-		return findIp(result.gateway) || null;
-	} catch (err) {
-		return null;
-	}
-}
-
-module.exports.v6 = () => promise('v6');
-module.exports.v4 = () => promise('v4');
-
-module.exports.v6.sync = () => sync('v6');
-module.exports.v4.sync = () => sync('v4');
-
-
-/***/ }),
-
-/***/ "./node_modules/ip-regex/index.js":
-/*!****************************************!*\
-  !*** ./node_modules/ip-regex/index.js ***!
-  \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-const v4 = '(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])){3}';
-
-const v6seg = '[0-9a-fA-F]{1,4}';
-const v6 = `
-(
-(?:${v6seg}:){7}(?:${v6seg}|:)|                                // 1:2:3:4:5:6:7::  1:2:3:4:5:6:7:8
-(?:${v6seg}:){6}(?:${v4}|:${v6seg}|:)|                         // 1:2:3:4:5:6::    1:2:3:4:5:6::8   1:2:3:4:5:6::8  1:2:3:4:5:6::1.2.3.4
-(?:${v6seg}:){5}(?::${v4}|(:${v6seg}){1,2}|:)|                 // 1:2:3:4:5::      1:2:3:4:5::7:8   1:2:3:4:5::8    1:2:3:4:5::7:1.2.3.4
-(?:${v6seg}:){4}(?:(:${v6seg}){0,1}:${v4}|(:${v6seg}){1,3}|:)| // 1:2:3:4::        1:2:3:4::6:7:8   1:2:3:4::8      1:2:3:4::6:7:1.2.3.4
-(?:${v6seg}:){3}(?:(:${v6seg}){0,2}:${v4}|(:${v6seg}){1,4}|:)| // 1:2:3::          1:2:3::5:6:7:8   1:2:3::8        1:2:3::5:6:7:1.2.3.4
-(?:${v6seg}:){2}(?:(:${v6seg}){0,3}:${v4}|(:${v6seg}){1,5}|:)| // 1:2::            1:2::4:5:6:7:8   1:2::8          1:2::4:5:6:7:1.2.3.4
-(?:${v6seg}:){1}(?:(:${v6seg}){0,4}:${v4}|(:${v6seg}){1,6}|:)| // 1::              1::3:4:5:6:7:8   1::8            1::3:4:5:6:7:1.2.3.4
-(?::((?::${v6seg}){0,5}:${v4}|(?::${v6seg}){1,7}|:))           // ::2:3:4:5:6:7:8  ::2:3:4:5:6:7:8  ::8             ::1.2.3.4
-)(%[0-9a-zA-Z]{1,})?                                           // %eth0            %1
-`.replace(/\s*\/\/.*$/gm, '').replace(/\n/g, '').trim();
-
-const ip = module.exports = opts => opts && opts.exact ?
-	new RegExp(`(?:^${v4}$)|(?:^${v6}$)`) :
-	new RegExp(`(?:${v4})|(?:${v6})`, 'g');
-
-ip.v4 = opts => opts && opts.exact ? new RegExp(`^${v4}$`) : new RegExp(v4, 'g');
-ip.v6 = opts => opts && opts.exact ? new RegExp(`^${v6}$`) : new RegExp(v6, 'g');
-
-
-/***/ }),
-
 /***/ "./package.json":
 /*!**********************!*\
   !*** ./package.json ***!
@@ -2060,7 +1478,7 @@ ip.v6 = opts => opts && opts.exact ? new RegExp(`^${v6}$`) : new RegExp(v6, 'g')
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect-brk app/appMain-compiled.js","styleWatch":"cross-env NODE_ENV=development stylus -w app/components/settingsWindow/frontEnd/assets/styles/stylus/index.styl -o app/components/settingsWindow/frontEnd/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^5.0.1","execa":"^0.10.0","express":"^4.16.3","formbase":"^6.0.4","fs-extra":"^6.0.1","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","internal-ip":"^3.0.1","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","parallel-webpack":"^2.3.0","promise-rat-race":"^1.5.1","rollbar":"^2.3.9","serve-static":"^1.13.2","systray":"^1.0.5","the-answer":"^1.0.0","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.1","nexe":"^2.0.0-rc.28","nodemon":"^1.17.5","pkg":"^4.3.1","rollup":"^0.59.4","rollup-plugin-babel":"^3.0.4","rollup-plugin-commonjs":"^9.1.3","rollup-plugin-json":"^3.0.0","rollup-plugin-node-resolve":"^3.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","stylus":"^0.54.5","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect-brk app/appMain-compiled.js","styleWatch":"cross-env NODE_ENV=development stylus -w app/components/settingsWindow/frontEnd/assets/styles/stylus/index.styl -o app/components/settingsWindow/frontEnd/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^5.0.1","execa":"^0.10.0","express":"^4.16.3","formbase":"^6.0.4","fs-extra":"^6.0.1","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","parallel-webpack":"^2.3.0","promise-rat-race":"^1.5.1","rollbar":"^2.3.9","systray":"^1.0.5","the-answer":"^1.0.0","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.1","nexe":"^2.0.0-rc.28","nodemon":"^1.17.5","pkg":"^4.3.1","rollup":"^0.59.4","rollup-plugin-babel":"^3.0.4","rollup-plugin-commonjs":"^9.1.3","rollup-plugin-json":"^3.0.0","rollup-plugin-node-resolve":"^3.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","stylus":"^0.54.5","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
 
 /***/ }),
 
@@ -2119,17 +1537,6 @@ module.exports = require("gawk");
 
 /***/ }),
 
-/***/ "ipaddr.js":
-/*!****************************!*\
-  !*** external "ipaddr.js" ***!
-  \****************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("ipaddr.js");
-
-/***/ }),
-
 /***/ "is-empty":
 /*!***************************!*\
   !*** external "is-empty" ***!
@@ -2171,17 +1578,6 @@ module.exports = require("lowdb");
 /***/ (function(module, exports) {
 
 module.exports = require("lowdb/adapters/FileSync");
-
-/***/ }),
-
-/***/ "net":
-/*!**********************!*\
-  !*** external "net" ***!
-  \**********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("net");
 
 /***/ }),
 

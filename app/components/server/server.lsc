@@ -1,7 +1,6 @@
 import path from 'path'
 
 import express from 'express'
-import internalIP from 'internal-ip'
 
 import { logger } from '../logging/logging.lsc'
 

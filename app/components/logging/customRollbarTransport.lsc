@@ -3,9 +3,7 @@ import util from 'util'
 import winston from 'winston'
 import Rollbar from 'rollbar'
 
-import { getAppVersion } from '../utils.lsc'
-
-rollbarConfig = {
+rollbarLogger = new Rollbar({
   accessToken: process.env.rollbarAccessToken,
   enabled: false,
   captureUncaught: true,
@@ -13,15 +11,13 @@ rollbarConfig = {
   environment: process.env.NODE_ENV,
   reportLevel: 'error',
   payload: {
-      BlueLossVersion: getAppVersion()
-    },
-    // Ignore the server stuff cause that includes info about the host pc name.
-    transform(payload){
-      payload.server = {}
-    },
-}
-
-rollbarLogger = new Rollbar(rollbarConfig)
+    BlueLossVersion: require('../../../package.json').version
+  },
+  // Ignore the server stuff cause that includes info about the host pc name.
+  transform(payload){
+    payload.server = {}
+  },
+})
 
 CustomRollbarTransport = winston.transports.CustomLogger = (options):void ->
   Object.assign(this, options)

@@ -4,9 +4,8 @@ import winston from 'winston'
 
 import { CustomRollbarTransport, rollbarLogger } from './customRollbarTransport.lsc'
 import { getSettings } from '../settings/settings.lsc'
-import { blueLossLogsFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
+import { getBlueLossLogsFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 
-bluelossLogFilePath = path.join(blueLossLogsFolderPath, 'BlueLoss.log.txt')
 rollbarTransportOptions = {
   name: 'rollbarTransport',
   level: 'error',
@@ -45,7 +44,7 @@ addWinstonFileLogging():Promise ->
   winston.add(
     winston.transports.File,
     {
-      filename: bluelossLogFilePath ,
+      filename: path.join(getBlueLossLogsFolderPath(), 'BlueLoss.log.txt'),
       maxsize: 500000,  // 500KB
       maxFiles: 6,
       prettyPrint: true,

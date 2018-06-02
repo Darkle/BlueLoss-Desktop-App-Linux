@@ -2,7 +2,7 @@ import path from 'path'
 
 import fs from 'fs-extra'
 
-import { blueLossConfigFolderPath } from './bluelossConfig/createBlueLossConfig.lsc'
+import { getBlueLossConfigFolderPath } from './bluelossConfig/createBlueLossConfig.lsc'
 
 let weCreatedFileLock = false
 anotherInstanceErrorMessage = 'BlueLoss is already running (BlueLoss.lock file already exists), exiting...'
@@ -30,7 +30,7 @@ process
   .once('SIGINT', () -> process.exit(1))
   .once('SIGTERM', () -> process.exit(1))
 
-getLockFilePath():String -> path.join(blueLossConfigFolderPath, 'BlueLoss.lock')
+getLockFilePath():String -> path.join(getBlueLossConfigFolderPath(), 'BlueLoss.lock')
 
 export {
   makeSingleInstance

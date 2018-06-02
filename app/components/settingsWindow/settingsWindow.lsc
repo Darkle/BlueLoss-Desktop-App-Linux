@@ -6,10 +6,8 @@ import pRatRace from 'promise-rat-race'
 
 // import { logger } from '../logging/logging.lsc'
 import { serverAddress } from '../server/server.lsc'
-import { blueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
+import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 
-firefoxProfilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Firefox')
-chromiumProfilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Chromium')
 firefoxCliSpawnParams = 'firefox -new-instance --width=786 --height=616'
 
 openSettingsWindow():Promise ->
@@ -17,12 +15,12 @@ openSettingsWindow():Promise ->
   // open a new settings window
   // https://github.com/Financial-Times/promise-rat-race#promise-rat-race
   pRatRace([
-    execa.shell('command -v google-chrome'),
+    // execa.shell('command -v google-chrome'),
     // execa.shell('command -v chromium-browser'),
-    // execa.shell('command -v firefox'),
+    execa.shell('command -v firefox'),
   ])
   .then(result ->
-    browserPath = result?.data?.out
+    browserPath = result?.stdout
     if !browserPath: throw new Error()
     browser = browserPath.slice(browserPath.lastIndexOf('/') +1)
     openSettingsWindowInBrowser(browser)
@@ -32,9 +30,14 @@ openSettingsWindow():Promise ->
 
 openSettingsWindowInBrowser(browser):Promise ->
   if browser === 'firefox':
-    return execa.shell(`${ firefoxCliSpawnParams } -profile ${ firefoxProfilePath } ${ serverAddress }`)
-  execa.shell(`${ browser } --app=${ serverAddress } --user-data-dir=${ chromiumProfilePath }`)
+    return execa.shell(`${ firefoxCliSpawnParams } -profile ${ getFirefoxProfilePath() } ${ serverAddress }`)
+  execa.shell(`${ browser } --app=${ serverAddress } --user-data-dir=${ getChromiumProfilePath() }`)
 
+getFirefoxProfilePath():String ->
+  path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', 'Firefox')
+
+getChromiumProfilePath():String ->
+  path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', 'Chromium')
 
 export {
   openSettingsWindow
