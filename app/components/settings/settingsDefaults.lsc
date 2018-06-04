@@ -9,18 +9,20 @@ defaultSettings: {
   firstRun: Boolean,
   dateLastCheckedForAppUpdate: Number,
   skipUpdateVersion: String,
-  scanInterval: Number
+  scanInterval: Number,
+  verboseLogging: Boolean
 } = {
   blueLossEnabled: true,
   runOnStartup: true,
   trayIconColor: 'blue',
   devicesToSearchFor: {},
-  timeToLock: 3,
+  timeToLock: 2,
   reportErrors: true,
   firstRun: true,
   dateLastCheckedForAppUpdate: Date.now(),
   skipUpdateVersion: '0',
-  scanInterval: 30000
+  scanInterval: 30,
+  verboseLogging: false
 }
 
 export {

@@ -1,5 +1,4 @@
 
-
 /*
 Color scheme:
 
@@ -11,41 +10,18 @@ Color scheme:
   http: //paletton.com/#uid=23D0u0ksMtghHAbmEuBunn2-bi5 - complimentary colors
 */
 
-::-webkit-scrollbar {
-    width: 4px;
-}
-::-webkit-scrollbar-thumb {
-    background: #1b5299;
-}
 
-body {
+html, body {
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
   background-color: #F9F9F9;
   font-family: 'Open Sans';
-  --primary-color: #1B5299;
-  --secondary-color: #1B5299;
 }
 
 * {
-  cursor: default;
   -webkit-user-select: none;
-}
-
-* input,
-* [role="input"] {
-  cursor: text;
-  -webkit-user-select: auto;
+  -moz-user-select: none;
 }
 
 #mainContainer {
   display: flex;
-}
-
-x-button {
-  color: #757575;
-}
-x-button[toggled] {
-  background: #757575;
 }

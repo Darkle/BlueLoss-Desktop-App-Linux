@@ -29,7 +29,7 @@ getSettings() -> settings
 updateSetting(newSettingKey: string, newSettingValue: SettingsTypes):void ->
   settings[newSettingKey] = newSettingValue
   db.set(newSettingKey, newSettingValue).write()
-  logSettingsUpdate(newSettingKey, newSettingValue)
+  logSettingsUpdateForVerboseLogging(newSettingKey, newSettingValue)
 
 addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
   { deviceId } = deviceToAdd
@@ -78,7 +78,8 @@ updateLastSeenForDevicesLookingForOnStartup():void ->
   for val { deviceId } in settings.devicesToSearchFor:
     updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', tenYearsFromNow())
 
-logSettingsUpdate(newSettingKey: string, newSettingValue: SettingsTypes):void ->
+logSettingsUpdateForVerboseLogging(newSettingKey: string, newSettingValue: SettingsTypes):void ->
+  if verbose logging off return
   debugMessage = `Updated Setting: updated '${ newSettingKey }' with:`
   if is.obj(newSettingValue):
     logger.debug(debugMessage, { [newSettingKey]: newSettingValue })

@@ -2,8 +2,6 @@
   display: flex;
   flex-direction: column;
   width: 150px;
-  height: 558px;
-  justify-content: space-between;
   border-right: 1px solid #757575;
 }
 
@@ -14,11 +12,32 @@
 }
 
 #sidebar .tab {
-  font-size: 16px;
+  font-size: 18px;
   color: #757575;
   display: flex;
   justify-content: space-between;
-  height: 56px;
+  flex: 0 0 56px;
+}
+
+#sidebar .tab:nth-child(1) {
+  border-bottom: 1px solid #757575;
+}
+
+#sidebar .tab:nth-child(2) {
+  border-bottom: 1px solid #757575;
+}
+
+#sidebar .tab:last-child {
+  border-top: 1px solid #757575;
+}
+
+#sidebar .tab:nth-child(1) .tabIcon {
+  width: 24px;
+  margin-top: 8px;
+}
+
+#sidebarSpacer {
+  flex-grow:1;
 }
 
 #sidebar .tab:hover .tabIcon,

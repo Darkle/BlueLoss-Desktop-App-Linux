@@ -1,30 +1,20 @@
 import { h } from 'hyperapp'
 
 export default deviceCard({lookingForDevice, device, actions}) ->
-  { deviceName, deviceId } = device
-  <x-card class="deviceCard">
-    <x-box>
-      <x-box class="cardDeviceIcon">
-        <img src={ `assets/icons/devicesIconForCards-${ if lookingForDevice: 'blue' else: 'grey' }.svg` } />
-      </x-box>
-      <x-box vertical class="deviceDetails">
-        <strong class="vendorName">{ deviceName }</strong>
-        <p class="deviceMacAddress">{ deviceId }</p>
-      </x-box>
-      <x-box class="addRemoveButton">
-        {
-          // if expressions: http://bit.ly/2kNbt9R
-          if lookingForDevice:
-            <x-button onclick={():void -> actions.removeDevice(device)}>
-              <x-box><x-label>Remove</x-label></x-box>
-            </x-button>
-          else:
-            <x-button onclick={():void -> actions.addNewDevice(device) }>
-              <x-box><x-label>Add</x-label></x-box>
-            </x-button>
-        }
-      </x-box>
-    </x-box>
-  </x-card>
-
-
+  <div class="card deviceCard">
+    <div class="cardDeviceIcon">
+      <img src={ `assets/icons/devicesIconForCards-${ if lookingForDevice: 'blue' else: 'grey' }.svg` } />
+    </div>
+    <div class="deviceDetails">
+      <div class="deviceName">{ device.deviceName }</div>
+      <div class="deviceMacAddress">{ device.deviceId }</div>
+    </div>
+    <div class="deviceCardButtons">
+      {
+        if lookingForDevice:
+          <a class="btn-flat" onclick={() -> actions.removeDevice(device) }>Remove</a>
+        else:
+          <a class="btn-flat" onclick={() -> actions.addNewDevice(device) }>Add</a>
+      }
+    </div>
+  </div>

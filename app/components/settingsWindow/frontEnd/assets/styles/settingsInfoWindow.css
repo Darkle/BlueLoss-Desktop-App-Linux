@@ -1,167 +1,37 @@
 #settingsTabInfoWindow {
-  width: 639px;
-  height: 100%;
+  width: calc(100vw - 150px);
+  height: calc(100vh - 64px);
   display: none;
   flex-direction: column;
   align-items: center;
   overflow: auto;
+  padding-top: 60px;
 }
 
-#settingsTabInfoWindow > x-box:nth-child(1) {
-  margin-top: 20px;
-}
-#settingsTabInfoWindow > x-box:nth-child(2) {
-  margin-top: 30px;
-  min-height: 13%;
-}
-#settingsTabInfoWindow > x-box:nth-child(3) {
-  min-height: 13%;
-}
-#settingsTabInfoWindow > x-box:nth-child(4) {
-  min-height: 14%;
-}
-
-
-#settingsTabInfoWindow > x-box {
-  width: 514px;
-  min-height: 18%;
-}
-
-#timeToLockSetting {
+.settingContainer {
   display: flex;
-  justify-content: space-around;
+  align-items: center;
+  width: 600px;
+  min-height: 15%;
 }
 
-#timeToLock {
-  margin-top: -9px;
-  margin-right: 10px;
-  width: 95px;
+.settingContainer:nth-child(1) .settingInputContainer {
+  width: 146px;
 }
 
-#timeToLockLabel {
-  width: 400px;
+.settingInputContainer {
+  padding: 0 30px;
+  width: 128px;
 }
 
-#timeToLockLabel > x-box > x-label:last-child {
-  margin-top: 5px;
+.settingHeading {
+  font-size: 20px;
 }
 
-#hostScanTimeoutSetting {
-  display: flex;
-  justify-content: space-around;
-}
-
-#hostScanTimeout {
-  margin-top: -9px;
-  margin-right: 10px;
-  width: 95px;
-}
-
-#hostScanTimeoutLabel {
-  width: 400px;
-}
-
-#hostScanTimeoutLabel > x-box > x-label:last-child {
-  margin-top: 5px;
-}
-
-#hostsScanRangeSetting {
-  display: flex;
-  justify-content: space-around;
-}
-
-#hostsScanRangeStart {
-  margin-top: -14px;
-  margin-right: 10px;
-  width: 95px;
-}
-
-#hostsScanRangeEnd {
-  margin-top: 10px;
-  margin-right: 10px;
-  width: 95px;
-}
-
-#hostsScanRangeLabel {
-  width: 400px;
-  margin-top: -30px;
-}
-
-#hostsScanRangeLabel .extraInfo > abbr {
-  text-decoration: none;
-}
-
-#hostsScanRangeLabel .extraInfo abbr img {
-  height 19px;
-  margin-bottom: -6px;
-  margin-left: 4px;
-}
-
-#hostsScanRangeLabel > x-box > x-label:last-child {
-  margin-top: 5px;
-}
-
-
-#iconColorDropdownContainer {
-  align-items: flex-start;
-  margin-top: 0;
-}
-
-#iconColorDropdown {
-  margin-right: 13px;
-  margin-left: 10px;
-  width: 88px;
-  color: #646464;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-}
-
-#iconColorDropdown * {
-  color: #646464 !important;
-}
-
-#iconColorDropdownLabel {
-}
-
-#erroReportingCheckbox {
-  margin-left: 76px;
-  margin-top: -25px;
-  margin-right: 13px;
-  width: 35px;
-}
-
-#erroReportingCheckboxLabel > x-box > x-label:last-child {
-  margin-top: 5px;
-}
-
-#runOnStartupCheckbox {
-  margin-left: 76px;
-  margin-top: 11px;
-  margin-right: 13px;
-  width: 25px;
-}
-
-#ouiUpdateCheckbox {
-  margin-left: 76px;
-  margin-right: 13px;
-  margin-top: -38px;
-}
-
-#ouiUpdateCheckboxLabel {
-  width: 398px;
-  margin-top: 5px;
-}
-
-#ouiUpdateCheckboxLabel > x-box > x-label:last-child {
-  margin-top: 5px;
-}
-
-#userDebugSwitch {
-  margin-bottom: 28px;
-  margin-right: 11px;
-  margin-left: 73px;
-  width: 50px;
-}
-
-#userDebugSwitchLabel > x-box > span {
-  margin-top: 5px;
+/*
+Make arrows for number input always show for chromium
+*/
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  opacity: 1;
 }
