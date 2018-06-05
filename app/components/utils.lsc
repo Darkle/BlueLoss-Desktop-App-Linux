@@ -36,10 +36,6 @@ range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + sta
 
 tenYearsFromNow():Number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 
-generateLogTimeStamp():String ->
-  today = new Date()
-  `[${ today.getHours() }:${ today.getMinutes() }:${ today.getSeconds() }]`
-
 export {
   getScreenResolution,
   getAppVersion,
@@ -52,5 +48,4 @@ export {
   compose,
   identity,
   tenYearsFromNow,
-  generateLogTimeStamp,
 }

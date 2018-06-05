@@ -1361,7 +1361,7 @@ function initTrayMenu() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.generateLogTimeStamp = exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = exports.getAppVersion = exports.getScreenResolution = undefined;
+exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = exports.getAppVersion = exports.getScreenResolution = undefined;
 
 var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
@@ -1427,9 +1427,6 @@ function getAppVersion() {
 
 function tenYearsFromNow() {
   return Date.now() + _timeproxy2.default.FIVE_HUNDRED_WEEKS;
-}function generateLogTimeStamp() {
-  const today = new Date();
-  return `[${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}]`;
 }exports.getScreenResolution = getScreenResolution;
 exports.getAppVersion = getAppVersion;
 exports.setUpDev = setUpDev;
@@ -1441,7 +1438,6 @@ exports.range = range;
 exports.compose = compose;
 exports.identity = identity;
 exports.tenYearsFromNow = tenYearsFromNow;
-exports.generateLogTimeStamp = generateLogTimeStamp;
 
 /***/ }),
 
