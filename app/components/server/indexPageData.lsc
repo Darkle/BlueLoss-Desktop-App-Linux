@@ -1,0 +1,42 @@
+export default indexPageString(settingsData) ->
+  console.log('settingsData')
+  console.log(settingsData)
+  `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <title>BlueLoss</title>
+    <link rel="shortcut icon" type="image/png" href="assets/icons/BlueLossIcon.png">
+    <link rel="stylesheet" href="assets/vendor/modern-normalize/modern-normalize.css">
+    <link rel="stylesheet" href="assets/vendor/materialize/materialize.css">
+    <style>
+      @font-face {
+        font-family: 'Roboto';
+        src: url() format('woff2');
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Open Sans';
+        src: url() format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Lato';
+        src: url() format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
+    <link rel="stylesheet" href="assets/styles/index.css">
+  </head>
+  <body>
+    <script>
+      const initialSettingsFromMain = ${ JSON.stringify(settingsData) }
+    </script>
+    <script src="js/settingsWindowWeb-compiled.js"></script>
+  </body>
+  </html>
+  `

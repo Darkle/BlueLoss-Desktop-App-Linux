@@ -1,7 +1,7 @@
 
 
 type DeviceType = { deviceName: string, deviceId: string, lastSeen: ?number }
-type SettingsTypes = number | boolean | string | Array<DeviceType>
+type SettingsTypes = number | boolean | string | Object
 
 export type {
   DeviceType,

@@ -1,19 +1,27 @@
 import path from 'path'
 
 import express from 'express'
+import omit from 'lodash.omit'
 
 import { logger } from '../logging/logging.lsc'
+import { getSettings } from '../settings/settings.lsc'
+import indexPageData from './indexPageData.lsc'
 
 let serverAddress = null
 frontEndDirPath = path.resolve(__dirname, '..', 'app', 'components', 'settingsWindow', 'frontEnd')
-settingsPagePath = path.join(frontEndDirPath, 'html', 'settingsWindow.html')
 assetsPath = path.join(frontEndDirPath, 'assets')
 jsPath = path.join(frontEndDirPath, 'js')
+settingsPagePath = path.join(frontEndDirPath, 'html', 'settingsWindow.html')
+settingsData
 expressApp = express()
 
 expressApp.use('/assets', express.static(assetsPath))
 expressApp.use('/js', express.static(jsPath))
-expressApp.get('/', (req, res) -> res.sendFile(settingsPagePath))
+// expressApp.get('/', (req, res) -> res.send(indexPageData(getSettings())))
+expressApp.get('/', (req, res) ->
+  res.cookie('data', JSON.stringify())
+  res.sendFile(settingsPagePath)
+)
 
 /*****
 * If port is 0, the operating system will assign an arbitrary unused port.

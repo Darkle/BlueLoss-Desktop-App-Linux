@@ -1,24 +1,26 @@
 
-// import gawk from 'gawk'
+import gawk from 'gawk'
 
-// import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-// import { addRollbarLogging, removeRollbarLogging } from '../common/logging/logging.lsc'
-// import { changeTrayIcon, updateTrayMenuEnabledItem } from '../tray/tray.lsc'
-// import { enableRunOnStartup, disableRunOnStartup } from '../common/runOnStartup.lsc'
-//TODO: todo
-initSettingsObservers():void -> {}
-// initSettingsObservers(settings):void ->
-  // gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->
-  //   if enabled: addRollbarLogging()
-  //   else: removeRollbarLogging()
-  // )
-  // gawk.watch(settings, ['blueLossEnabled'], (enabled: boolean):void ->
-  //   settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
-  // )
-  // gawk.watch(settings, ['runOnStartup'], (enabled: boolean):void ->
-  //   if enabled: enableRunOnStartup() .catch()
-  //   else: disableRunOnStartup().catch()
-  // )
+import { addRollbarLogging, removeRollbarLogging } from '../logging/logging.lsc'
+import { enableRunOnStartup, disableRunOnStartup } from '../runOnStartup.lsc'
+
+initSettingsObservers(settings:Object):void ->
+  gawk.watch(settings, ['reportErrors'], (enabled: Boolean):void ->
+    if enabled: addRollbarLogging()
+    else: removeRollbarLogging()
+  )
+  gawk.watch(settings, ['blueLossEnabled'], (enabled: Boolean):void ->
+    console.log('send new settings to frontend')
+    //settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
+  )
+  gawk.watch(settings, ['runOnStartup'], (enabled: Boolean):void ->
+    if enabled: enableRunOnStartup().catch()
+    else: disableRunOnStartup().catch()
+  )
+  gawk.watch(settings, ['verboseLogging'], (enabled: Boolean):void ->
+    console.log('switch to verbose logging')
+    //TODO: switch to verbose logging
+  )
 
 export {
   initSettingsObservers

@@ -1,13 +1,12 @@
-import gawk from 'gawk'
 import low from 'lowdb'
 import FileSync from 'lowdb/adapters/FileSync'
 import is from 'typa'
+import gawk from 'gawk'
 
 import { tenYearsFromNow } from '../utils.lsc'
 import { DeviceType, SettingsTypes } from '../types/types.lsc'
 import { defaultSettings } from './settingsDefaults.lsc'
 import { initSettingsObservers } from './settingsObservers.lsc'
-import { initSettingsIPClisteners } from './settingsIPClisteners.lsc'
 import { logger } from '../logging/logging.lsc'
 import { getBlueLossSettingsFilePath } from '../bluelossConfig/createBlueLossConfig.lsc'
 
@@ -18,11 +17,8 @@ initSettings():Promise ->
   now db = low(new FileSync(getBlueLossSettingsFilePath()))
   db.defaults(defaultSettings).write()
   now settings = gawk(db.getState())
-
   initSettingsObservers(settings)
-  initSettingsIPClisteners()
   updateLastSeenForDevicesLookingForOnStartup()
-  settings
 
 getSettings() -> settings
 
@@ -35,7 +31,7 @@ addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
   { deviceId } = deviceToAdd
   if deviceIsInDevicesToSearchFor(deviceId): return
   updateSetting('devicesToSearchFor',
-    {...settings.devicesToSearchFor, ...{ [ deviceId ]: deviceToAdd }}
+    {...getSettings().devicesToSearchFor, ...{ [ deviceId ]: deviceToAdd }}
   )
 
 removeNewDeviceToSearchFor(deviceToRemove: DeviceType):void ->
@@ -45,20 +41,20 @@ removeNewDeviceToSearchFor(deviceToRemove: DeviceType):void ->
 
 filterDevicesToSearchFor(deviceIdToRemove: string):Object ->
   {
-    ...for key deviceId, val device in settings.devicesToSearchFor:
+    ...for key deviceId, val device in getSettings().devicesToSearchFor:
       if deviceId != deviceIdToRemove: { [ deviceId ]: device }
   }
 
 deviceIsInDevicesToSearchFor(deviceId: string):boolean ->
-  settings.devicesToSearchFor[deviceId]
+  getSettings().devicesToSearchFor[deviceId]
 
 updateDeviceInDevicesToSearchFor(deviceId: string, propName: string, propValue: any):Object ->
   updateSetting('devicesToSearchFor',
     {
-      ...settings.devicesToSearchFor,
+      ...getSettings().devicesToSearchFor,
       ...{
         [ deviceId ]: {
-          ...settings.devicesToSearchFor[deviceId],
+          ...getSettings().devicesToSearchFor[deviceId],
           ...{ [ propName ]: propValue }
         }
       }
@@ -75,11 +71,11 @@ updateDeviceInDevicesToSearchFor(deviceId: string, propName: string, propValue: 
  * (when a device is seen again during a scan, lastSeen is updated.)
  */
 updateLastSeenForDevicesLookingForOnStartup():void ->
-  for val { deviceId } in settings.devicesToSearchFor:
+  for val { deviceId } in getSettings().devicesToSearchFor:
     updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', tenYearsFromNow())
 
 logSettingsUpdateForVerboseLogging(newSettingKey: string, newSettingValue: SettingsTypes):void ->
-  if !settings.verboseLogging: return
+  if !getSettings().verboseLogging: return
   debugMessage = `Updated Setting: updated '${ newSettingKey }' with:`
   if is.obj(newSettingValue):
     logger.debug(debugMessage, { [newSettingKey]: newSettingValue })

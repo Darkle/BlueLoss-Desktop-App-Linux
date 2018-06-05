@@ -1047,14 +1047,10 @@ var _settingsDefaults = __webpack_require__(/*! ../../../settings/settingsDefaul
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-console.log(_settingsDefaults.defaultSettings);
 const initialState = _extends({
   activeTab: 'statusTab',
-  devicesCanSee: [{ deviceId: 'F8:37:17:13:FC:13', deviceName: 'MotoG3' }, { deviceId: 'F2:37:17:13:FC:93', deviceName: 'MotoG3' }, { deviceId: 'F3:37:17:13:FC:93', deviceName: 'MotoG3' }, { deviceId: 'F4:37:17:13:FC:93', deviceName: 'MotoG3' }]
-}, (0, _lodash2.default)(_settingsDefaults.defaultSettings, ['trayIconColor', 'dateLastCheckedForAppUpdate', 'skipUpdateVersion']), { devicesToSearchFor: {
-    'F8:37:17:13:FC:93': { deviceId: 'F8:37:17:13:FC:93', deviceName: 'MotoG3' },
-    'F8:37:17:13:FC:43': { deviceId: 'F8:37:17:13:FC:93', deviceName: 'MotoG3' }
-  } });
+  devicesCanSee: []
+}, (0, _lodash2.default)(_settingsDefaults.defaultSettings, ['trayIconColor', 'dateLastCheckedForAppUpdate', 'skipUpdateVersion']));
 
 const logInDev =  true ? _logger.withLogger : undefined;
 const settingsWindowApp = logInDev(_hyperapp.app)(initialState, _actionsIndex2.default, _viewsIndex2.default, document.body);

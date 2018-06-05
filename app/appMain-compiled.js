@@ -822,6 +822,66 @@ function sendOSnotification(message) {
 
 /***/ }),
 
+/***/ "./app/components/server/indexPageData.lsc":
+/*!*************************************************!*\
+  !*** ./app/components/server/indexPageData.lsc ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function indexPageString(settingsData) {
+  console.log('settingsData');
+  console.log(settingsData);
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <title>BlueLoss</title>
+    <link rel="shortcut icon" type="image/png" href="assets/icons/BlueLossIcon.png">
+    <link rel="stylesheet" href="assets/vendor/modern-normalize/modern-normalize.css">
+    <link rel="stylesheet" href="assets/vendor/materialize/materialize.css">
+    <style>
+      @font-face {
+        font-family: 'Roboto';
+        src: url() format('woff2');
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Open Sans';
+        src: url() format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'Lato';
+        src: url() format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
+    <link rel="stylesheet" href="assets/styles/index.css">
+  </head>
+  <body>
+    <script>
+      const initialSettingsFromMain = ${JSON.stringify(settingsData)}
+    </script>
+    <script src="js/settingsWindowWeb-compiled.js"></script>
+  </body>
+  </html>
+  `;
+};
+
+/***/ }),
+
 /***/ "./app/components/server/server.lsc":
 /*!******************************************!*\
   !*** ./app/components/server/server.lsc ***!
@@ -845,20 +905,33 @@ var _express = __webpack_require__(/*! express */ "express");
 
 var _express2 = _interopRequireDefault(_express);
 
+var _lodash = __webpack_require__(/*! lodash.omit */ "lodash.omit");
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
+
+var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+var _indexPageData = __webpack_require__(/*! ./indexPageData.lsc */ "./app/components/server/indexPageData.lsc");
+
+var _indexPageData2 = _interopRequireDefault(_indexPageData);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 let serverAddress = null;
 const frontEndDirPath = _path2.default.resolve(__dirname, '..', 'app', 'components', 'settingsWindow', 'frontEnd');
-const settingsPagePath = _path2.default.join(frontEndDirPath, 'html', 'settingsWindow.html');
 const assetsPath = _path2.default.join(frontEndDirPath, 'assets');
 const jsPath = _path2.default.join(frontEndDirPath, 'js');
+const settingsPagePath = _path2.default.join(frontEndDirPath, 'html', 'settingsWindow.html');
+settingsData;
 const expressApp = (0, _express2.default)();
 
 expressApp.use('/assets', _express2.default.static(assetsPath));
 expressApp.use('/js', _express2.default.static(jsPath));
+// expressApp.get('/', (req, res) -> res.send(indexPageData(getSettings())))
 expressApp.get('/', function (req, res) {
+  res.cookie('data', JSON.stringify());
   return res.sendFile(settingsPagePath);
 });
 
@@ -901,10 +974,6 @@ exports.updateDeviceInDevicesToSearchFor = exports.removeNewDeviceToSearchFor = 
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _gawk = __webpack_require__(/*! gawk */ "gawk");
-
-var _gawk2 = _interopRequireDefault(_gawk);
-
 var _lowdb = __webpack_require__(/*! lowdb */ "lowdb");
 
 var _lowdb2 = _interopRequireDefault(_lowdb);
@@ -917,6 +986,10 @@ var _typa = __webpack_require__(/*! typa */ "typa");
 
 var _typa2 = _interopRequireDefault(_typa);
 
+var _gawk = __webpack_require__(/*! gawk */ "gawk");
+
+var _gawk2 = _interopRequireDefault(_gawk);
+
 var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
 
 var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
@@ -924,8 +997,6 @@ var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/typ
 var _settingsDefaults = __webpack_require__(/*! ./settingsDefaults.lsc */ "./app/components/settings/settingsDefaults.lsc");
 
 var _settingsObservers = __webpack_require__(/*! ./settingsObservers.lsc */ "./app/components/settings/settingsObservers.lsc");
-
-var _settingsIPClisteners = __webpack_require__(/*! ./settingsIPClisteners.lsc */ "./app/components/settings/settingsIPClisteners.lsc");
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
@@ -940,11 +1011,8 @@ function initSettings() {
   db = (0, _lowdb2.default)(new _FileSync2.default((0, _createBlueLossConfig.getBlueLossSettingsFilePath)()));
   db.defaults(_settingsDefaults.defaultSettings).write();
   settings = (0, _gawk2.default)(db.getState());
-
   (0, _settingsObservers.initSettingsObservers)(settings);
-  (0, _settingsIPClisteners.initSettingsIPClisteners)();
-  updateLastSeenForDevicesLookingForOnStartup();
-  return settings;
+  return updateLastSeenForDevicesLookingForOnStartup();
 }function getSettings() {
   return settings;
 }function updateSetting(newSettingKey, newSettingValue) {
@@ -954,14 +1022,14 @@ function initSettings() {
 }function addNewDeviceToSearchFor(deviceToAdd) {
   const { deviceId } = deviceToAdd;
   if (deviceIsInDevicesToSearchFor(deviceId)) return;
-  updateSetting('devicesToSearchFor', _extends({}, settings.devicesToSearchFor, { [deviceId]: deviceToAdd }));
+  updateSetting('devicesToSearchFor', _extends({}, getSettings().devicesToSearchFor, { [deviceId]: deviceToAdd }));
 }function removeNewDeviceToSearchFor(deviceToRemove) {
   const { deviceId } = deviceToRemove;
   if (!deviceIsInDevicesToSearchFor(deviceId)) return;
   updateSetting('devicesToSearchFor', filterDevicesToSearchFor(deviceId));
 }function filterDevicesToSearchFor(deviceIdToRemove) {
   return (() => {
-    const _obj = {};for (let _obj2 = settings.devicesToSearchFor, _i = 0, _keys = Object.keys(_obj2), _len = _keys.length; _i < _len; _i++) {
+    const _obj = {};for (let _obj2 = getSettings().devicesToSearchFor, _i = 0, _keys = Object.keys(_obj2), _len = _keys.length; _i < _len; _i++) {
       const deviceId = _keys[_i];const device = _obj2[deviceId];
       if (deviceId !== deviceIdToRemove) _obj[deviceId] = device;
     }return _obj;
@@ -969,10 +1037,10 @@ function initSettings() {
 }
 
 function deviceIsInDevicesToSearchFor(deviceId) {
-  return settings.devicesToSearchFor[deviceId];
+  return getSettings().devicesToSearchFor[deviceId];
 }function updateDeviceInDevicesToSearchFor(deviceId, propName, propValue) {
-  return updateSetting('devicesToSearchFor', _extends({}, settings.devicesToSearchFor, {
-    [deviceId]: _extends({}, settings.devicesToSearchFor[deviceId], { [propName]: propValue })
+  return updateSetting('devicesToSearchFor', _extends({}, getSettings().devicesToSearchFor, {
+    [deviceId]: _extends({}, getSettings().devicesToSearchFor[deviceId], { [propName]: propValue })
   }));
 } /**
    * When a user starts up BlueLoss after previously exiting, the
@@ -984,12 +1052,12 @@ function deviceIsInDevicesToSearchFor(deviceId) {
    * (when a device is seen again during a scan, lastSeen is updated.)
    */
 function updateLastSeenForDevicesLookingForOnStartup() {
-  for (let _obj3 = settings.devicesToSearchFor, _i2 = 0, _keys2 = Object.keys(_obj3), _len2 = _keys2.length; _i2 < _len2; _i2++) {
+  for (let _obj3 = getSettings().devicesToSearchFor, _i2 = 0, _keys2 = Object.keys(_obj3), _len2 = _keys2.length; _i2 < _len2; _i2++) {
     const _k = _keys2[_i2];const { deviceId } = _obj3[_k];
     updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', (0, _utils.tenYearsFromNow)());
   }
 }function logSettingsUpdateForVerboseLogging(newSettingKey, newSettingValue) {
-  if (!settings.verboseLogging) return;
+  if (!getSettings().verboseLogging) return;
   const debugMessage = `Updated Setting: updated '${newSettingKey}' with:`;
   if (_typa2.default.obj(newSettingValue)) {
     _logging.logger.debug(debugMessage, { [newSettingKey]: newSettingValue });
@@ -1037,37 +1105,6 @@ exports.defaultSettings = defaultSettings;
 
 /***/ }),
 
-/***/ "./app/components/settings/settingsIPClisteners.lsc":
-/*!**********************************************************!*\
-  !*** ./app/components/settings/settingsIPClisteners.lsc ***!
-  \**********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-// import { DeviceType, SettingsTypes } from '../types/types.lsc'
-// import { updateSetting, addNewDeviceToSearchFor, removeNewDeviceToSearchFor } from './settings.lsc'
-function initSettingsIPClisteners() {
-  ({});
-} // ipcMain.on('renderer:setting-updated-in-ui', (event, settingName: string, settingValue: SettingsTypes):void ->
-//   updateSetting(settingName, settingValue)
-// )
-// ipcMain.on('renderer:device-added-in-ui', (event, deviceToAdd: DeviceType):void ->
-//   addNewDeviceToSearchFor(deviceToAdd)
-// )
-// ipcMain.on('renderer:device-removed-in-ui', (event, deviceToRemove: DeviceType):void ->
-//   removeNewDeviceToSearchFor(deviceToRemove)
-// )
-
-exports.initSettingsIPClisteners = initSettingsIPClisteners;
-
-/***/ }),
-
 /***/ "./app/components/settings/settingsObservers.lsc":
 /*!*******************************************************!*\
   !*** ./app/components/settings/settingsObservers.lsc ***!
@@ -1081,29 +1118,34 @@ exports.initSettingsIPClisteners = initSettingsIPClisteners;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.initSettingsObservers = undefined;
 
-// import gawk from 'gawk'
+var _gawk = __webpack_require__(/*! gawk */ "gawk");
 
-// import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-// import { addRollbarLogging, removeRollbarLogging } from '../common/logging/logging.lsc'
-// import { changeTrayIcon, updateTrayMenuEnabledItem } from '../tray/tray.lsc'
-// import { enableRunOnStartup, disableRunOnStartup } from '../common/runOnStartup.lsc'
-function initSettingsObservers() {
-  ({});
-} // initSettingsObservers(settings):void ->
-// gawk.watch(settings, ['reportErrors'], (enabled: boolean):void ->
-//   if enabled: addRollbarLogging()
-//   else: removeRollbarLogging()
-// )
-// gawk.watch(settings, ['blueLossEnabled'], (enabled: boolean):void ->
-//   settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
-// )
-// gawk.watch(settings, ['runOnStartup'], (enabled: boolean):void ->
-//   if enabled: enableRunOnStartup() .catch()
-//   else: disableRunOnStartup().catch()
-// )
+var _gawk2 = _interopRequireDefault(_gawk);
 
-exports.initSettingsObservers = initSettingsObservers;
+var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
+
+var _runOnStartup = __webpack_require__(/*! ../runOnStartup.lsc */ "./app/components/runOnStartup.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function initSettingsObservers(settings) {
+  _gawk2.default.watch(settings, ['reportErrors'], function (enabled) {
+    if (enabled) (0, _logging.addRollbarLogging)();else (0, _logging.removeRollbarLogging)();
+  });
+  _gawk2.default.watch(settings, ['blueLossEnabled'], function (enabled) {
+    console.log('send new settings to frontend');
+  } //settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
+  );
+  _gawk2.default.watch(settings, ['runOnStartup'], function (enabled) {
+    if (enabled) (0, _runOnStartup.enableRunOnStartup)().catch();else (0, _runOnStartup.disableRunOnStartup)().catch();
+  });
+  _gawk2.default.watch(settings, ['verboseLogging'], function (enabled) {
+    console.log('switch to verbose logging');
+  } //TODO: switch to verbose logging
+  );
+}exports.initSettingsObservers = initSettingsObservers;
 
 /***/ }),
 
@@ -1232,6 +1274,8 @@ var _createBlueLossConfig = __webpack_require__(/*! ../bluelossConfig/createBlue
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
+var _settingsWindow = __webpack_require__(/*! ../settingsWindow/settingsWindow.lsc */ "./app/components/settingsWindow/settingsWindow.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 let systray = null;
@@ -1254,7 +1298,7 @@ function initTrayMenu() {
 }function systrayClickHandler(action) {
   if (action.seq_id === 0) {
     //Open settings window
-    console.log('open settings window here');
+    (0, _settingsWindow.openSettingsWindow)();
   }if (action.seq_id === 1) {
     //Enable/Disable BlueLoss
     (0, _settings.updateSetting)('blueLossEnabled', !(0, _settings.getSettings)().blueLossEnabled);
@@ -1545,6 +1589,17 @@ module.exports = require("is-empty");
 /***/ (function(module, exports) {
 
 module.exports = require("lock-system");
+
+/***/ }),
+
+/***/ "lodash.omit":
+/*!******************************!*\
+  !*** external "lodash.omit" ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("lodash.omit");
 
 /***/ }),
 

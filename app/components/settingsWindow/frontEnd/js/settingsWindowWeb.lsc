@@ -6,20 +6,20 @@ import appActions from './components/actions/actionsIndex.lsc'
 import views from './components/views/viewsIndex.lsc'
 import { identity } from './frontEndUtils.lsc'
 import { defaultSettings } from '../../../settings/settingsDefaults.lsc'
-console.log(defaultSettings)
+
 initialState = {
   ...{
     activeTab: 'statusTab',
-    devicesCanSee: [{deviceId: 'F8:37:17:13:FC:13', deviceName: 'MotoG3'}, {deviceId: 'F2:37:17:13:FC:93', deviceName: 'MotoG3'}, {deviceId: 'F3:37:17:13:FC:93', deviceName: 'MotoG3'}, {deviceId: 'F4:37:17:13:FC:93', deviceName: 'MotoG3'}]
+    devicesCanSee: []
   },
   ...omit(
     defaultSettings,
-    ['trayIconColor', 'dateLastCheckedForAppUpdate', 'skipUpdateVersion']
-  ),
-  ...{devicesToSearchFor: {
-    'F8:37:17:13:FC:93': {deviceId: 'F8:37:17:13:FC:93', deviceName: 'MotoG3'},
-    'F8:37:17:13:FC:43': {deviceId: 'F8:37:17:13:FC:93', deviceName: 'MotoG3'}
-  }}
+    [
+      'trayIconColor',
+      'dateLastCheckedForAppUpdate',
+      'skipUpdateVersion'
+    ]
+  )
 }
 
 logInDev = if ISDEV: withLogger else: identity
