@@ -348,7 +348,7 @@ function scanForBlueToothDevices() {
   _execa2.default.shell('hcitool scan').then(_handleScanResults.handleScanResults).catch(_logging.logger.error);
   scheduleScan();
 }function scheduleScan() {
-  setTimeout(scanForBlueToothDevices, _timeproxy2.default`${(0, _settings.getSettings)().scanInterval} minutes`);
+  setTimeout(scanForBlueToothDevices, _timeproxy2.default`${(0, _settings.getSettings)().scanInterval} seconds`);
 }exports.scanForBlueToothDevices = scanForBlueToothDevices;
 
 /***/ }),
@@ -369,8 +369,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.handleScanResults = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-// import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
-
 
 var _isEmpty = __webpack_require__(/*! is-empty */ "is-empty");
 
@@ -382,6 +380,8 @@ var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/typ
 
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
 
+var _server = __webpack_require__(/*! ../server/server.lsc */ "./app/components/server/server.lsc");
+
 var _lockCheck = __webpack_require__(/*! ./lockCheck.lsc */ "./app/components/bluetooth/lockCheck.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -392,11 +392,8 @@ function handleScanResults(spawnCommandResult) {
 
   const { devicesToSearchFor } = (0, _settings.getSettings)();
   const timeStampedDeviceList = addTimeStampToSeenDevices(deviceList);
-  // TODO: send to settings window via websockets
-  // settingsWindow?.webContents?.send(
-  //   'mainprocess:update-of-bluetooth-devices-can-see',
-  //   { devicesCanSee: timeStampedDeviceList }
-  // )
+
+  (0, _server.pushUpdatesToFrontEnd)('devicesCanSee', timeStampedDeviceList);
 
   if ((0, _isEmpty2.default)(devicesToSearchFor)) return;
   /**
@@ -822,66 +819,6 @@ function sendOSnotification(message) {
 
 /***/ }),
 
-/***/ "./app/components/server/indexPageData.lsc":
-/*!*************************************************!*\
-  !*** ./app/components/server/indexPageData.lsc ***!
-  \*************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function indexPageString(settingsData) {
-  console.log('settingsData');
-  console.log(settingsData);
-  return `
-  <!DOCTYPE html>
-  <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>BlueLoss</title>
-    <link rel="shortcut icon" type="image/png" href="assets/icons/BlueLossIcon.png">
-    <link rel="stylesheet" href="assets/vendor/modern-normalize/modern-normalize.css">
-    <link rel="stylesheet" href="assets/vendor/materialize/materialize.css">
-    <style>
-      @font-face {
-        font-family: 'Roboto';
-        src: url() format('woff2');
-        font-weight: normal;
-        font-style: normal;
-      }
-      @font-face {
-        font-family: 'Open Sans';
-        src: url() format('truetype');
-        font-weight: normal;
-        font-style: normal;
-      }
-      @font-face {
-        font-family: 'Lato';
-        src: url() format('truetype');
-        font-weight: normal;
-        font-style: normal;
-      }
-    </style>
-    <link rel="stylesheet" href="assets/styles/index.css">
-  </head>
-  <body>
-    <script>
-      const initialSettingsFromMain = ${JSON.stringify(settingsData)}
-    </script>
-    <script src="js/settingsWindowWeb-compiled.js"></script>
-  </body>
-  </html>
-  `;
-};
-
-/***/ }),
-
 /***/ "./app/components/server/server.lsc":
 /*!******************************************!*\
   !*** ./app/components/server/server.lsc ***!
@@ -895,7 +832,7 @@ exports.default = function indexPageString(settingsData) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getServerAddress = exports.startServer = undefined;
+exports.tellAllSettingsWindowsToClose = exports.pushUpdatesToFrontEnd = exports.getServerAddress = exports.startServer = undefined;
 
 var _path = __webpack_require__(/*! path */ "path");
 
@@ -909,13 +846,17 @@ var _lodash = __webpack_require__(/*! lodash.omit */ "lodash.omit");
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _bodyParser = __webpack_require__(/*! body-parser */ "body-parser");
+
+var _bodyParser2 = _interopRequireDefault(_bodyParser);
+
+var _ssePusher = __webpack_require__(/*! sse-pusher */ "sse-pusher");
+
+var _ssePusher2 = _interopRequireDefault(_ssePusher);
+
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
-
-var _indexPageData = __webpack_require__(/*! ./indexPageData.lsc */ "./app/components/server/indexPageData.lsc");
-
-var _indexPageData2 = _interopRequireDefault(_indexPageData);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -924,16 +865,19 @@ const frontEndDirPath = _path2.default.resolve(__dirname, '..', 'app', 'componen
 const assetsPath = _path2.default.join(frontEndDirPath, 'assets');
 const jsPath = _path2.default.join(frontEndDirPath, 'js');
 const settingsPagePath = _path2.default.join(frontEndDirPath, 'html', 'settingsWindow.html');
-settingsData;
 const expressApp = (0, _express2.default)();
+const push = (0, _ssePusher2.default)();
 
 expressApp.use('/assets', _express2.default.static(assetsPath));
 expressApp.use('/js', _express2.default.static(jsPath));
-// expressApp.get('/', (req, res) -> res.send(indexPageData(getSettings())))
+expressApp.use(_bodyParser2.default.json());
+
 expressApp.get('/', function (req, res) {
-  res.cookie('data', JSON.stringify());
+  res.cookie('bluelossSettings', generateCookieSettingsData());
   return res.sendFile(settingsPagePath);
 });
+expressApp.post('/updatesettings', updateSettingsPostHandler);
+expressApp.use('/sse-update', push.handler());
 
 /*****
 * If port is 0, the operating system will assign an arbitrary unused port.
@@ -946,14 +890,31 @@ function startServer() {
     });
     return listener;
   });
-}function storeServerAddress({ family, address, port }) {
+}function generateCookieSettingsData() {
+  return JSON.stringify((0, _lodash2.default)((0, _settings.getSettings)(), ['trayIconColor', 'dateLastCheckedForAppUpdate', 'skipUpdateVersion']));
+}function updateSettingsPostHandler(req, res) {
+  console.log(typeof req.body);
+  if (req == null ? void 0 : req.body) return res.status(400).end();
+} //do validation and log if error
+// if error res.status(400).end()
+// Object.entries returns an array of arrays of key/value pairs for an object
+// [[settingName, newSettingValue]] = Object.entries(req.body)
+// if ok, updateSetting() and then res.end()
+
+function storeServerAddress({ family, address, port }) {
   const ip = family.toLowerCase() === 'ipv6' ? `[${address}]` : address;
   serverAddress = `http://${ip}:${port}`;
   _logging.logger.debug('serverAddress: ', serverAddress);
 }function getServerAddress() {
   return serverAddress;
+}function pushUpdatesToFrontEnd(settingName, settingValue) {
+  push('settingsUpdate', { [settingName]: settingValue });
+}function tellAllSettingsWindowsToClose() {
+  push('closeSelf', true);
 }exports.startServer = startServer;
 exports.getServerAddress = getServerAddress;
+exports.pushUpdatesToFrontEnd = pushUpdatesToFrontEnd;
+exports.tellAllSettingsWindowsToClose = tellAllSettingsWindowsToClose;
 
 /***/ }),
 
@@ -1128,6 +1089,8 @@ var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/componen
 
 var _runOnStartup = __webpack_require__(/*! ../runOnStartup.lsc */ "./app/components/runOnStartup.lsc");
 
+var _server = __webpack_require__(/*! ../server/server.lsc */ "./app/components/server/server.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function initSettingsObservers(settings) {
@@ -1135,9 +1098,8 @@ function initSettingsObservers(settings) {
     if (enabled) (0, _logging.addRollbarLogging)();else (0, _logging.removeRollbarLogging)();
   });
   _gawk2.default.watch(settings, ['blueLossEnabled'], function (enabled) {
-    console.log('send new settings to frontend');
-  } //settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
-  );
+    (0, _server.pushUpdatesToFrontEnd)('blueLossEnabled', enabled);
+  });
   _gawk2.default.watch(settings, ['runOnStartup'], function (enabled) {
     if (enabled) (0, _runOnStartup.enableRunOnStartup)().catch();else (0, _runOnStartup.disableRunOnStartup)().catch();
   });
@@ -1190,8 +1152,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const firefoxCliSpawnParams = 'firefox -new-instance --width=910 --height=760';
 
 function openSettingsWindow() {
-  // TODO:send a message to all open windows via websockets to close themselves, so there arent
-  // more that one settings window open at once
+  /*****
+  * We send a message to all open windows (via Server Side Events) to close themselves, so there
+  * isn't more that one settings window open at once.
+  */
+  (0, _server.tellAllSettingsWindowsToClose)();
+
   return (0, _promiseRatRace2.default)([_execa2.default.shell('command -v google-chrome'), _execa2.default.shell('command -v chromium-browser'), _execa2.default.shell('command -v firefox')]).then(function (result) {
     const browserPath = result == null ? void 0 : result.stdout;
     if (!browserPath) throw new Error();
@@ -1511,7 +1477,18 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect-brk app/appMain-compiled.js","styleWatch":"cross-env NODE_ENV=development stylus -w app/components/settingsWindow/frontEnd/assets/styles/stylus/index.styl -o app/components/settingsWindow/frontEnd/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","dotenv":"^5.0.1","execa":"^0.10.0","express":"^4.16.3","formbase":"^6.0.4","fs-extra":"^6.0.1","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","modern-normalize":"^0.4.0","ono":"^4.0.5","parallel-webpack":"^2.3.0","promise-rat-race":"^1.5.1","rollbar":"^2.4.1","systray":"^1.0.5","the-answer":"^1.0.0","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.2","nexe":"^2.0.0-rc.29","nodemon":"^1.17.5","pkg":"^4.3.1","rollup":"^0.59.4","rollup-plugin-babel":"^3.0.4","rollup-plugin-commonjs":"^9.1.3","rollup-plugin-json":"^3.0.0","rollup-plugin-node-resolve":"^3.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect-brk app/appMain-compiled.js","styleWatch":"cross-env NODE_ENV=development stylus -w app/components/settingsWindow/frontEnd/assets/styles/stylus/index.styl -o app/components/settingsWindow/frontEnd/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","body-parser":"^1.18.3","dotenv":"^5.0.1","execa":"^0.10.0","express":"^4.16.3","formbase":"^6.0.4","fs-extra":"^6.0.1","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","js-cookie":"^2.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","modern-normalize":"^0.4.0","ono":"^4.0.5","parallel-webpack":"^2.3.0","promise-rat-race":"^1.5.1","rollbar":"^2.4.1","sse-pusher":"^1.1.1","systray":"^1.0.5","the-answer":"^1.0.0","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.2","nexe":"^2.0.0-rc.29","nodemon":"^1.17.5","pkg":"^4.3.1","rollup":"^0.59.4","rollup-plugin-babel":"^3.0.4","rollup-plugin-commonjs":"^9.1.3","rollup-plugin-json":"^3.0.0","rollup-plugin-node-resolve":"^3.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
+
+/***/ }),
+
+/***/ "body-parser":
+/*!******************************!*\
+  !*** external "body-parser" ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("body-parser");
 
 /***/ }),
 
@@ -1677,6 +1654,17 @@ module.exports = require("promise-rat-race");
 /***/ (function(module, exports) {
 
 module.exports = require("rollbar");
+
+/***/ }),
+
+/***/ "sse-pusher":
+/*!*****************************!*\
+  !*** external "sse-pusher" ***!
+  \*****************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("sse-pusher");
 
 /***/ }),
 

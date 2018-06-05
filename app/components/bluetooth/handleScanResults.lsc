@@ -3,7 +3,7 @@ import isEmpty from 'is-empty'
 import { logger } from '../logging/logging.lsc'
 import { DeviceType } from '../types/types.lsc'
 import { getSettings, updateDeviceInDevicesToSearchFor } from '../settings/settings.lsc'
-// import { settingsWindow } from '../settingsWindow/settingsWindow.lsc'
+import { pushUpdatesToFrontEnd } from '../server/server.lsc'
 import { lockSystemIfDeviceLost } from './lockCheck.lsc'
 
 handleScanResults(spawnCommandResult:Object):void ->
@@ -12,11 +12,8 @@ handleScanResults(spawnCommandResult:Object):void ->
 
   { devicesToSearchFor } = getSettings()
   timeStampedDeviceList = addTimeStampToSeenDevices(deviceList)
-  // TODO: send to settings window via websockets
-  // settingsWindow?.webContents?.send(
-  //   'mainprocess:update-of-bluetooth-devices-can-see',
-  //   { devicesCanSee: timeStampedDeviceList }
-  // )
+
+  pushUpdatesToFrontEnd('devicesCanSee', timeStampedDeviceList)
 
   if isEmpty(devicesToSearchFor): return
   /**

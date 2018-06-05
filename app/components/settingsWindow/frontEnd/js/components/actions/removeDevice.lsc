@@ -1,4 +1,5 @@
 import { DeviceType } from '../../../../../types/types.lsc'
+import { sendNewSettingToServer } from '../../frontEndUtils.lsc'
 
 /**
 * HyperApp - if you need to use the state & actions and return data, you need
@@ -7,11 +8,9 @@ import { DeviceType } from '../../../../../types/types.lsc'
 */
 export default removeDevice(deviceToRemove: DeviceType) -> state ->
   if !state.devicesToSearchFor[deviceToRemove.deviceId]: return {}
-  //TODO: send new settings to server
-  // ipcRenderer.send('renderer:device-removed-in-ui', deviceToRemove)
-  ({
-    devicesToSearchFor: {
+  devicesToSearchFor = {
     ...for key deviceId, val device in state.devicesToSearchFor:
       if deviceId != deviceToRemove.deviceId: { [ deviceId ]: device }
   }
-  })
+  sendNewSettingToServer('devicesToSearchFor', devicesToSearchFor)
+  ({ devicesToSearchFor })

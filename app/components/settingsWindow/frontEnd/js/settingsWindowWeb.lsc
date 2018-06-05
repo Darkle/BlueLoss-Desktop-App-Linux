@@ -1,31 +1,36 @@
 import { h, app } from 'hyperapp'  // eslint-disable-line no-unused-vars
 import { withLogger } from '@hyperapp/logger'
-import omit from 'lodash.omit'
+import Cookies from 'js-cookie'
 
 import appActions from './components/actions/actionsIndex.lsc'
 import views from './components/views/viewsIndex.lsc'
 import { identity } from './frontEndUtils.lsc'
-import { defaultSettings } from '../../../settings/settingsDefaults.lsc'
 
 initialState = {
   ...{
     activeTab: 'statusTab',
     devicesCanSee: []
   },
-  ...omit(
-    defaultSettings,
-    [
-      'trayIconColor',
-      'dateLastCheckedForAppUpdate',
-      'skipUpdateVersion'
-    ]
-  )
+  ...JSON.parse(Cookies.get('bluelossSettings'))
 }
 
+Cookies.remove('bluelossSettings')
+
 logInDev = if ISDEV: withLogger else: identity
+
 settingsWindowApp = logInDev(app)(initialState, appActions, views, document.body)
 
-// settingsWindowApp?.updateStateOnServerMessage?(setting)
+serverSideEventSource = new EventSource('/sse-update')
 
+serverSideEventSource.onmessage = (e):void ->
+  console.log(e.data)
 
-console.log('settings window main')
+serverSideEventSource.addEventListener('settingsUpdate', (e):void ->
+  console.log(e.data)
+  settingsWindowApp.updateStateOnServerMessage(JSON.parse(e.data))
+)
+
+serverSideEventSource.addEventListener('closeSelf', (e):void ->
+  console.log(e.data)
+  window.close()
+)

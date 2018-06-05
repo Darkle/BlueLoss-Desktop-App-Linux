@@ -1,5 +1,5 @@
+import { sendNewSettingToServer } from '../../frontEndUtils.lsc'
 
 export default updateSetting({ settingName, settingValue }) ->
-  //TODO: send new settings to server
-  //ipcRenderer.send('renderer:setting-updated-in-ui', settingName, settingValue)
+  sendNewSettingToServer(settingName, settingValue)
   { [settingName]: settingValue }

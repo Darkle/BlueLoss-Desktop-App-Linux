@@ -1,8 +1,8 @@
-
 import gawk from 'gawk'
 
 import { addRollbarLogging, removeRollbarLogging } from '../logging/logging.lsc'
 import { enableRunOnStartup, disableRunOnStartup } from '../runOnStartup.lsc'
+import { pushUpdatesToFrontEnd } from '../server/server.lsc'
 
 initSettingsObservers(settings:Object):void ->
   gawk.watch(settings, ['reportErrors'], (enabled: Boolean):void ->
@@ -10,8 +10,7 @@ initSettingsObservers(settings:Object):void ->
     else: removeRollbarLogging()
   )
   gawk.watch(settings, ['blueLossEnabled'], (enabled: Boolean):void ->
-    console.log('send new settings to frontend')
-    //settingsWindow?.webContents?.send('mainprocess:setting-updated-in-main', {blueLossEnabled: enabled})
+    pushUpdatesToFrontEnd('blueLossEnabled', enabled)
   )
   gawk.watch(settings, ['runOnStartup'], (enabled: Boolean):void ->
     if enabled: enableRunOnStartup().catch()

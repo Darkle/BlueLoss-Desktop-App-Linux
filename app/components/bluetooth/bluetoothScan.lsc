@@ -14,7 +14,7 @@ scanForBlueToothDevices():void ->
 scheduleScan():void ->
   setTimeout(
     scanForBlueToothDevices,
-    tp`${ getSettings().scanInterval } minutes`
+    tp`${ getSettings().scanInterval } seconds`
   )
 
 
