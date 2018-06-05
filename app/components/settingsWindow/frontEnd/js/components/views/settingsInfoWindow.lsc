@@ -1,9 +1,9 @@
 import { h } from 'hyperapp'
 
-import defaultSettings from '../../../../../settings/settingsDefaults.lsc'
+import { defaultSettings } from '../../../../../settings/settingsDefaults.lsc'
 
 export default ({ actions, state }) ->
-  infoWindowDisplay = if state.activeTab === 'settingsTab': 'block' else: 'none'
+  infoWindowDisplay = if state.activeTab === 'settingsTab': 'flex' else: 'none'
   minTimeToLock = defaultSettings.timeToLock
   minScanInterval = defaultSettings.scanInterval
 
@@ -13,9 +13,9 @@ export default ({ actions, state }) ->
         <label>
           <input
             value={ state.timeToLock }
-            min="2"
+            min={ minTimeToLock }
             onchange={({ currentTarget: { value } }) ->
-              newTimeToLock = if !newTimeToLock || value < minTimeToLock: minTimeToLock else: value
+              newTimeToLock = if !value || value < minTimeToLock: minTimeToLock else: value
               actions.updateSetting({ settingName: 'timeToLock', settingValue: ( newTimeToLock )})
             }
             type="number"
@@ -37,9 +37,9 @@ export default ({ actions, state }) ->
         <label>
           <input
             value={ state.scanInterval }
-            min="30"
+            min={ minScanInterval }
             onchange={({ currentTarget: { value } }) ->
-              newScanInterval = if !newScanInterval || value < minScanInterval: minScanInterval else: value
+              newScanInterval = if !value || value < minScanInterval: minScanInterval else: value
               actions.updateSetting({ settingName: 'scanInterval', settingValue: ( newScanInterval )})
             }
             type="number"
@@ -64,7 +64,7 @@ export default ({ actions, state }) ->
             checked={ state.runOnStartup }
             onchange={event ->
               actions.updateSetting(
-                { settingName: 'runOnStartup', settingValue: event.currentTarget.toggled}
+                { settingName: 'runOnStartup', settingValue: event.currentTarget.checked}
               )
             }
           />
@@ -87,7 +87,7 @@ export default ({ actions, state }) ->
             checked={ state.reportErrors }
             onchange={event ->
               actions.updateSetting(
-                { settingName: 'reportErrors', settingValue: event.currentTarget.toggled}
+                { settingName: 'reportErrors', settingValue: event.currentTarget.checked}
               )
             }
           />
@@ -111,7 +111,7 @@ export default ({ actions, state }) ->
             checked={ state.verboseLogging }
             onchange={event ->
               actions.updateSetting(
-                { settingName: 'verboseLogging', settingValue: event.currentTarget.toggled}
+                { settingName: 'verboseLogging', settingValue: event.currentTarget.checked}
               )
             }
           />

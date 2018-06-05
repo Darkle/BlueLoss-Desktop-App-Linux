@@ -16,12 +16,10 @@ export default (state, actions) ->
         <SettingsTab actions={actions} state={state} />
         <div id="sidebarSpacer"></div>
         <HelpTab actions={actions} />
-        // <AboutTab actions={actions} state={state} />
       </div>
       <div id="rightInfoContainer">
         <StatusInfoWindow actions={actions} state={state} />
         <SettingsInfoWindow actions={actions} state={state} />
-        // <AboutInfoWindow actions={actions} state={state} />
       </div>
     </div>
   </div>

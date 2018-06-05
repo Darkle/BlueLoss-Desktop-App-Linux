@@ -13,6 +13,11 @@
   align-items: center;
   width: 600px;
   min-height: 15%;
+  border-bottom: 1px solid #80808033;
+}
+
+.settingContainer:nth-child(1) {
+  border-top: 1px solid #80808033;
 }
 
 .settingContainer:nth-child(1) .settingInputContainer {
@@ -22,6 +27,10 @@
 .settingInputContainer {
   padding: 0 30px;
   width: 128px;
+}
+
+.settingInputContainer input[type="number"] {
+  text-align: center;
 }
 
 .settingHeading {

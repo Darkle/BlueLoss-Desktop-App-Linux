@@ -63,17 +63,17 @@ getChromePrefs():Object ->
 
 /*****
 * We want the chromium browser to end up in the center of the screen
-* with a width of 786px and a height of 616px. It's ok if the users screen
+* with a width of 910px and a height of 760px. It's ok if the users screen
 * dimensions change later as when they move the window and close it, chromium
 * updates that in the Preferences file.
 */
 generateBrowserWindowPosition({ screenHeight, screenWidth }):Object ->
   (
     {
-      "top": Math.round((screenHeight/2) - (616/2)),
-      "bottom": Math.round((screenHeight/2) + (616/2)),
-      "left": Math.round((screenWidth/2) - (786/2)),
-      "right": Math.round((screenWidth/2) + (786/2))
+      "top": Math.round((screenHeight/2) - (760/2)),
+      "bottom": Math.round((screenHeight/2) + (760/2)),
+      "left": Math.round((screenWidth/2) - (910/2)),
+      "right": Math.round((screenWidth/2) + (910/2))
     }
   )
 

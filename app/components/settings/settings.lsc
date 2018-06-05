@@ -79,7 +79,7 @@ updateLastSeenForDevicesLookingForOnStartup():void ->
     updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', tenYearsFromNow())
 
 logSettingsUpdateForVerboseLogging(newSettingKey: string, newSettingValue: SettingsTypes):void ->
-  if verbose logging off return
+  if !settings.verboseLogging: return
   debugMessage = `Updated Setting: updated '${ newSettingKey }' with:`
   if is.obj(newSettingValue):
     logger.debug(debugMessage, { [newSettingKey]: newSettingValue })

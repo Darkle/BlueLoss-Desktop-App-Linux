@@ -5,6 +5,7 @@ import { updateSetting, getSettings } from '../settings/settings.lsc'
 import { base64IconData } from './iconsData.lsc'
 import { sendOSnotification } from '../sendOSnotification.lsc'
 import { getBlueLossLogsFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
+import { logger } from '../logging/logging.lsc'
 
 let systray = null
 
@@ -35,7 +36,7 @@ systrayClickHandler(action:Object):void ->
     toggleTrayIconColorSetting()
     updateSystrayIcon(action)
   if action.seq_id === 3: //Open logs folder
-    opn(getBlueLossLogsFolderPath())
+    opn(getBlueLossLogsFolderPath()).catch(logger.error)
   if action.seq_id === 4: //Exit BlueLoss
     systray.kill()
 

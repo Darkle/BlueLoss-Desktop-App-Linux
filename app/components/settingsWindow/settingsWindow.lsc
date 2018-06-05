@@ -8,12 +8,11 @@ import pRatRace from 'promise-rat-race'
 import { getServerAddress } from '../server/server.lsc'
 import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 
-firefoxCliSpawnParams = 'firefox -new-instance --width=786 --height=616'
+firefoxCliSpawnParams = 'firefox -new-instance --width=910 --height=760'
 
 openSettingsWindow():Promise ->
   // TODO:send a message to all open windows via websockets to close themselves, so there arent
   // more that one settings window open at once
-  // https://github.com/Financial-Times/promise-rat-race#promise-rat-race
   pRatRace([
     execa.shell('command -v google-chrome'),
     execa.shell('command -v chromium-browser'),

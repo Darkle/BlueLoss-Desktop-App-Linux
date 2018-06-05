@@ -26,7 +26,7 @@ export default ({ actions, state }) ->
             checked={ state.blueLossEnabled }
             onchange={
               event -> actions.updateSetting(
-                { settingName: 'blueLossEnabled', settingValue: event.currentTarget.toggled}
+                { settingName: 'blueLossEnabled', settingValue: event.currentTarget.checked}
               )
             }
           />

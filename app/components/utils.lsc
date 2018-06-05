@@ -1,5 +1,4 @@
 import tp from 'timeproxy'
-import is from 'typa'
 import execa from 'execa'
 
 import { openSettingsWindow } from '../components/settingsWindow/settingsWindow.lsc'
