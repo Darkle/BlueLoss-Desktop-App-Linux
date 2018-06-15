@@ -1265,9 +1265,9 @@ var _server = __webpack_require__(/*! ../server/server.lsc */ "./app/components/
 
 var _createBlueLossConfig = __webpack_require__(/*! ../bluelossConfig/createBlueLossConfig.lsc */ "./app/components/bluelossConfig/createBlueLossConfig.lsc");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
 
-const firefoxCliSpawnParams = 'firefox -new-instance --width=910 --height=760';
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function openSettingsWindow() {
   /*****
@@ -1276,24 +1276,24 @@ function openSettingsWindow() {
   */
   (0, _server.tellAllSettingsWindowsToClose)();
 
-  return (0, _promiseRatRace2.default)([_execa2.default.shell('command -v google-chrome'), _execa2.default.shell('command -v chromium-browser'), _execa2.default.shell('command -v firefox')]).then(function (result) {
-    const browserPath = result == null ? void 0 : result.stdout;
-    if (!browserPath) throw new Error();
-    const browser = browserPath.slice(browserPath.lastIndexOf('/') + 1);
-    return openSettingsWindowInBrowser(browser);
-  })
-  //fall back to opening with OS's default browser
-  .catch(function () {
+  return (0, _promiseRatRace2.default)([_execa2.default.shell('command -v google-chrome'), _execa2.default.shell('command -v chromium-browser'), _execa2.default.shell('command -v firefox')]).then(openSettingsWindowInPreferredBrowser).catch(function () {
     return (0, _opn2.default)((0, _server.getServerAddress)());
   });
-}function openSettingsWindowInBrowser(browser) {
+} //fall back to opening with OS's default browser
+
+function openSettingsWindowInPreferredBrowser({ stdout: browserPath }) {
+  const browser = getBrowserExecNameFromPath(browserPath);
   if (browser === 'firefox') {
-    return _execa2.default.shell(`${firefoxCliSpawnParams} -profile ${getFirefoxProfilePath()} ${(0, _server.getServerAddress)()}`);
-  }return _execa2.default.shell(`${browser} --app=${(0, _server.getServerAddress)()} --user-data-dir=${getChromiumProfilePath()}`);
-}function getFirefoxProfilePath() {
-  return _path2.default.join((0, _createBlueLossConfig.getBlueLossConfigFolderPath)(), 'BrowserProfiles', 'Firefox');
-}function getChromiumProfilePath() {
-  return _path2.default.join((0, _createBlueLossConfig.getBlueLossConfigFolderPath)(), 'BrowserProfiles', 'Chromium');
+    return _execa2.default.shell(generateFirefoxCliParams());
+  }return _execa2.default.shell(generateChromeCliParams(browser));
+}function generateFirefoxCliParams() {
+  return `firefox -new-instance --width=910 --height=760 -profile ${getBrowserProfilePath('Firefox')} ${(0, _server.getServerAddress)()}`;
+}function generateChromeCliParams(browser) {
+  return `${browser} --app=${(0, _server.getServerAddress)()} --user-data-dir=${getBrowserProfilePath('Chromium')}`;
+}function getBrowserProfilePath(browser) {
+  return _path2.default.join((0, _createBlueLossConfig.getBlueLossConfigFolderPath)(), 'BrowserProfiles', (0, _utils.capetilizeFirstLetter)(browser));
+}function getBrowserExecNameFromPath(browserPath) {
+  return browserPath.slice(browserPath.lastIndexOf('/') + 1);
 }exports.openSettingsWindow = openSettingsWindow;
 
 /***/ }),
@@ -1480,7 +1480,7 @@ function systrayClickHandler(action) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = undefined;
+exports.capetilizeFirstLetter = exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = undefined;
 
 var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
@@ -1530,6 +1530,8 @@ function setUpDev() {
 
 function tenYearsFromNow() {
   return Date.now() + _timeproxy2.default.FIVE_HUNDRED_WEEKS;
+}function capetilizeFirstLetter(string) {
+  return `${string[0].toUpperCase()}${string.slice(1)}`;
 }exports.setUpDev = setUpDev;
 exports.noop = noop;
 exports.pipe = pipe;
@@ -1539,6 +1541,7 @@ exports.range = range;
 exports.compose = compose;
 exports.identity = identity;
 exports.tenYearsFromNow = tenYearsFromNow;
+exports.capetilizeFirstLetter = capetilizeFirstLetter;
 
 /***/ }),
 

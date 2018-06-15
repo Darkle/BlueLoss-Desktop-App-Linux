@@ -6,8 +6,7 @@ import pRatRace from 'promise-rat-race'
 
 import { getServerAddress, tellAllSettingsWindowsToClose } from '../server/server.lsc'
 import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
-
-firefoxCliSpawnParams = 'firefox -new-instance --width=910 --height=760'
+import { capetilizeFirstLetter } from '../utils.lsc'
 
 openSettingsWindow():Promise ->
   /*****
@@ -21,25 +20,26 @@ openSettingsWindow():Promise ->
     execa.shell('command -v chromium-browser'),
     execa.shell('command -v firefox'),
   ])
-  .then(result ->
-    browserPath = result?.stdout
-    if !browserPath: throw new Error()
-    browser = browserPath.slice(browserPath.lastIndexOf('/') +1)
-    openSettingsWindowInBrowser(browser)
-  )
-  //fall back to opening with OS's default browser
-  .catch(() -> opn(getServerAddress()))
+  .then(openSettingsWindowInPreferredBrowser)
+  .catch(() -> opn(getServerAddress()))  //fall back to opening with OS's default browser
 
-openSettingsWindowInBrowser(browser):Promise ->
+openSettingsWindowInPreferredBrowser({stdout: browserPath}):Promise ->
+  browser = getBrowserExecNameFromPath(browserPath)
   if browser === 'firefox':
-    return execa.shell(`${ firefoxCliSpawnParams } -profile ${ getFirefoxProfilePath() } ${ getServerAddress() }`)
-  execa.shell(`${ browser } --app=${ getServerAddress() } --user-data-dir=${ getChromiumProfilePath() }`)
+    return execa.shell(generateFirefoxCliParams())
+  execa.shell(generateChromeCliParams(browser))
 
-getFirefoxProfilePath():String ->
-  path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', 'Firefox')
+generateFirefoxCliParams():String ->
+  `firefox -new-instance --width=910 --height=760 -profile ${ getBrowserProfilePath('Firefox') } ${ getServerAddress() }`
 
-getChromiumProfilePath():String ->
-  path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', 'Chromium')
+generateChromeCliParams(browser:String):String ->
+  `${ browser } --app=${ getServerAddress() } --user-data-dir=${ getBrowserProfilePath('Chromium') }`
+
+getBrowserProfilePath(browser:String):String ->
+  path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', capetilizeFirstLetter(browser))
+
+getBrowserExecNameFromPath(browserPath:String):String ->
+  browserPath.slice(browserPath.lastIndexOf('/') +1)
 
 export {
   openSettingsWindow
