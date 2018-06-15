@@ -55,7 +55,7 @@ const commonWebpackOptions = {
 * webpack-node-externals plugin.
 */
 
-const electronMainWebpackOptions = {
+const mainWebpackOptions = {
   ...commonWebpackOptions,
   ...{
     target: 'node',
@@ -90,6 +90,6 @@ const frontEndWebpackOptions = {
 }
 
 module.exports = [
-  electronMainWebpackOptions,
+  mainWebpackOptions,
   frontEndWebpackOptions,
 ]
