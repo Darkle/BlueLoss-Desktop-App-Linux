@@ -4,18 +4,28 @@ import express from 'express'
 import omit from 'lodash.omit'
 import bodyParser from 'body-parser'
 import ssePusher from 'sse-pusher'
+import Joi from 'joi'
 
 import { logger } from '../logging/logging.lsc'
 import { getSettings, updateSetting } from '../settings/settings.lsc'
+import { defaultSettings } from '../settings/settingsDefaults.lsc'
 
 let serverAddress = null
 frontEndDirPath = path.resolve(__dirname, '..', 'app', 'components', 'settingsWindow', 'frontEnd')
 assetsPath = path.join(frontEndDirPath, 'assets')
 jsPath = path.join(frontEndDirPath, 'js')
 settingsPagePath = path.join(frontEndDirPath, 'html', 'settingsWindow.html')
-expressApp = express()
+postBodyValidationSchema = Joi.object().keys({
+  blueLossEnabled: Joi.boolean(),
+  runOnStartup: Joi.boolean(),
+  devicesToSearchFor: Joi.object(),
+  timeToLock: Joi.number().integer().min(defaultSettings.timeToLock),
+  scanInterval: Joi.number().integer().min(defaultSettings.scanInterval),
+  reportErrors: Joi.boolean(),
+  verboseLogging: Joi.boolean(),
+})
 push = ssePusher()
-
+expressApp = express()
 expressApp.use('/assets', express.static(assetsPath))
 expressApp.use('/js', express.static(jsPath))
 expressApp.use(bodyParser.json())
@@ -24,7 +34,7 @@ expressApp.get('/', (req, res) ->
   res.cookie('bluelossSettings', generateCookieSettingsData())
   res.sendFile(settingsPagePath)
 )
-expressApp.post('/updatesettings', updateSettingsPostHandler)
+expressApp.post('/updatesettings', validateUpdatePost, updateSettingsPostHandler)
 expressApp.use('/sse-update', push.handler())
 
 /*****
@@ -38,24 +48,21 @@ startServer():Promise ->
     })
   })
 
-generateCookieSettingsData():String ->
-  JSON.stringify(omit(
-    getSettings(),
-    [
-      'trayIconColor',
-      'dateLastCheckedForAppUpdate',
-      'skipUpdateVersion'
-    ]
-  ))
+updateSettingsPostHandler(req, res):Function ->
+  /*****
+  * The frontend only updates (sends back) one setting at a time.
+  * Object.entries returns an array of arrays of key/value pairs for an object.
+  */
+  [[settingName, newSettingValue]] = Object.entries(req.body)
+  updateSetting(settingName, newSettingValue)
+  return res.end()
 
-updateSettingsPostHandler(req, res) ->
-  console.log(typeof req.body)
-  if req?.body: return res.status(400).end()
-  //do validation and log if error
-  // if error res.status(400).end()
-  // Object.entries returns an array of arrays of key/value pairs for an object
-  // [[settingName, newSettingValue]] = Object.entries(req.body)
-  // if ok, updateSetting() and then res.end()
+validateUpdatePost(req, res, next):Function ->
+  validationError = Joi.validate(req?.body, postBodyValidationSchema)?.error
+  if validationError:
+    logger.error(validationError)
+    return res.status(400).end()
+  next()
 
 storeServerAddress({family, address, port}):void ->
   ip = if family.toLowerCase() === 'ipv6': `[${ address }]` else: address
@@ -66,6 +73,17 @@ getServerAddress():String -> serverAddress
 
 pushUpdatesToFrontEnd(settingName, settingValue):void ->
   push('settingsUpdate', {[settingName]: settingValue})
+
+generateCookieSettingsData():String ->
+  JSON.stringify(omit(
+    getSettings(),
+    [
+      'trayIconColor',
+      'dateLastCheckedForAppUpdate',
+      'skipUpdateVersion',
+      'firstRun',
+    ]
+  ))
 
 tellAllSettingsWindowsToClose():void ->
   push('closeSelf', true)

@@ -379,7 +379,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _hyperapp = __webpack_require__(/*! hyperapp */ "./node_modules/hyperapp/src/index.js");
 
-exports.default = function deviceCard({ lookingForDevice, device, actions }) {
+exports.default = function deviceCard({ lookingForDevice, device, remove, add }) {
   return (0, _hyperapp.h)(
     "div",
     { "class": "card deviceCard" },
@@ -408,13 +408,13 @@ exports.default = function deviceCard({ lookingForDevice, device, actions }) {
       lookingForDevice ? (0, _hyperapp.h)(
         "a",
         { "class": "btn-flat", onclick: function () {
-            return actions.removeDevice(device);
+            return remove(device);
           } },
         "Remove"
       ) : (0, _hyperapp.h)(
         "a",
         { "class": "btn-flat", onclick: function () {
-            return actions.addNewDevice(device);
+            return add(device);
           } },
         "Add"
       )
@@ -549,7 +549,7 @@ exports.default = function ({ actions, state }) {
             min: minTimeToLock,
             onchange: function ({ currentTarget: { value } }) {
               const newTimeToLock = !value || value < minTimeToLock ? minTimeToLock : value;
-              return actions.updateSetting({ settingName: 'timeToLock', settingValue: newTimeToLock });
+              return actions.updateSetting({ settingName: 'timeToLock', settingValue: Number(newTimeToLock) });
             },
             type: 'number',
             required: true
@@ -585,7 +585,7 @@ exports.default = function ({ actions, state }) {
             min: minScanInterval,
             onchange: function ({ currentTarget: { value } }) {
               const newScanInterval = !value || value < minScanInterval ? minScanInterval : value;
-              return actions.updateSetting({ settingName: 'scanInterval', settingValue: newScanInterval });
+              return actions.updateSetting({ settingName: 'scanInterval', settingValue: Number(newScanInterval) });
             },
             type: 'number',
             required: true
@@ -838,7 +838,8 @@ exports.default = function ({ actions, state }) {
       Object.values(state.devicesToSearchFor).map(function (device) {
         return (0, _hyperapp.h)(_deviceCard2.default, {
           key: device.deviceId,
-          actions: actions,
+          add: actions.addNewDevice,
+          remove: actions.removeDevice,
           lookingForDevice: true,
           device: device
         });
@@ -853,7 +854,8 @@ exports.default = function ({ actions, state }) {
       }).map(function (device) {
         return (0, _hyperapp.h)(_deviceCard2.default, {
           key: device.deviceId,
-          actions: actions,
+          add: actions.addNewDevice,
+          remove: actions.removeDevice,
           lookingForDevice: false,
           device: device
         });
@@ -1071,16 +1073,12 @@ const settingsWindowApp = logInDev(_hyperapp.app)(initialState, _actionsIndex2.d
 
 const serverSideEventSource = new EventSource('/sse-update');
 
-serverSideEventSource.onmessage = function (e) {
-  console.log(e.data);
-};serverSideEventSource.addEventListener('settingsUpdate', function (e) {
-  console.log(e.data);
-  settingsWindowApp.updateStateOnServerMessage(JSON.parse(e.data));
+serverSideEventSource.addEventListener('settingsUpdate', e => {
+  return settingsWindowApp.updateStateOnServerMessage(JSON.parse(e.data));
 });
 
-serverSideEventSource.addEventListener('closeSelf', function (e) {
-  console.log(e.data);
-  window.close();
+serverSideEventSource.addEventListener('closeSelf', () => {
+  return window.close();
 });
 
 /***/ }),

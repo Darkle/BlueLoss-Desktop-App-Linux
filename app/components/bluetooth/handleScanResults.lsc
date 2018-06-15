@@ -2,7 +2,7 @@ import isEmpty from 'is-empty'
 
 import { logger } from '../logging/logging.lsc'
 import { DeviceType } from '../types/types.lsc'
-import { getSettings, updateDeviceInDevicesToSearchFor } from '../settings/settings.lsc'
+import { getSettings, updateLastSeenForDeviceSearchingFor } from '../settings/settings.lsc'
 import { pushUpdatesToFrontEnd } from '../server/server.lsc'
 import { lockSystemIfDeviceLost } from './lockCheck.lsc'
 
@@ -22,7 +22,7 @@ handleScanResults(spawnCommandResult:Object):void ->
    */
   for elem { deviceId } in deviceList:
     if devicesToSearchFor[deviceId]:
-      updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', Date.now())
+      updateLastSeenForDeviceSearchingFor(deviceId, Date.now())
 
   lockSystemIfDeviceLost()
 

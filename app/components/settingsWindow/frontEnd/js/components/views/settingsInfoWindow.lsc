@@ -16,7 +16,7 @@ export default ({ actions, state }) ->
             min={ minTimeToLock }
             onchange={({ currentTarget: { value } }) ->
               newTimeToLock = if !value || value < minTimeToLock: minTimeToLock else: value
-              actions.updateSetting({ settingName: 'timeToLock', settingValue: ( newTimeToLock )})
+              actions.updateSetting({ settingName: 'timeToLock', settingValue: ( Number(newTimeToLock) )})
             }
             type="number"
             required
@@ -40,7 +40,7 @@ export default ({ actions, state }) ->
             min={ minScanInterval }
             onchange={({ currentTarget: { value } }) ->
               newScanInterval = if !value || value < minScanInterval: minScanInterval else: value
-              actions.updateSetting({ settingName: 'scanInterval', settingValue: ( newScanInterval )})
+              actions.updateSetting({ settingName: 'scanInterval', settingValue: ( Number(newScanInterval) )})
             }
             type="number"
             required

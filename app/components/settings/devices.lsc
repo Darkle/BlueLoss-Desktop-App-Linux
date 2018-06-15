@@ -10,29 +10,26 @@ addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
     {...getSettings().devicesToSearchFor, ...{ [ deviceId ]: deviceToAdd }}
   )
 
-removeNewDeviceToSearchFor(deviceToRemove: DeviceType):void ->
-  { deviceId } = deviceToRemove
+removeNewDeviceToSearchFor({ deviceId }):void ->
   if !deviceIsInDevicesToSearchFor(deviceId): return
   updateSetting('devicesToSearchFor', filterDevicesToSearchFor(deviceId))
 
-filterDevicesToSearchFor(deviceIdToRemove: string):Object ->
+filterDevicesToSearchFor(deviceIdToRemove: String):Object ->
   {
     ...for key deviceId, val device in getSettings().devicesToSearchFor:
       if deviceId != deviceIdToRemove: { [ deviceId ]: device }
   }
 
-deviceIsInDevicesToSearchFor(deviceId: string):boolean ->
+deviceIsInDevicesToSearchFor(deviceId: String):Boolean ->
   getSettings().devicesToSearchFor[deviceId]
 
-updateDeviceInDevicesToSearchFor(deviceId: string, propName: string, propValue: any):Object ->
+updateLastSeenForDeviceSearchingFor(deviceId: String, time: Number):Object ->
+  { devicesToSearchFor } = getSettings()
+  deviceToUpdate = devicesToSearchFor[deviceId]
   updateSetting('devicesToSearchFor',
     {
-      ...getSettings().devicesToSearchFor,
-      ...{
-        [ deviceId ]: {
-          ...getSettings().devicesToSearchFor[deviceId],
-          ...{ [ propName ]: propValue }
-        }
+      ...devicesToSearchFor,
+      ...{ [ deviceId ]: {...deviceToUpdate, ...{ lastSeen: time } }
       }
     }
   )
@@ -48,12 +45,12 @@ updateDeviceInDevicesToSearchFor(deviceId: string, propName: string, propValue: 
  */
 updateLastSeenForDevicesLookingForOnStartup():void ->
   for val { deviceId } in getSettings().devicesToSearchFor:
-    updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', tenYearsFromNow())
+    updateLastSeenForDeviceSearchingFor(deviceId, tenYearsFromNow())
 
 
 export {
   addNewDeviceToSearchFor,
   removeNewDeviceToSearchFor,
-  updateDeviceInDevicesToSearchFor,
+  updateLastSeenForDeviceSearchingFor,
   updateLastSeenForDevicesLookingForOnStartup,
 }

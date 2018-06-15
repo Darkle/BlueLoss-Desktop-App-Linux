@@ -43,7 +43,8 @@ export default ({ actions, state }) ->
         Object.values(state.devicesToSearchFor).map(device ->
           <DeviceCard
             key={device.deviceId}
-            actions={actions}
+            add={actions.addNewDevice}
+            remove={actions.removeDevice}
             lookingForDevice={true}
             device={device}
           />
@@ -58,7 +59,8 @@ export default ({ actions, state }) ->
           .map(device ->
             <DeviceCard
               key={device.deviceId}
-              actions={actions}
+              add={actions.addNewDevice}
+              remove={actions.removeDevice}
               lookingForDevice={false}
               device={device}
             />

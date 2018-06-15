@@ -334,6 +334,10 @@ var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
 var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
+var _delay = __webpack_require__(/*! delay */ "delay");
+
+var _delay2 = _interopRequireDefault(_delay);
+
 var _handleScanResults = __webpack_require__(/*! ./handleScanResults.lsc */ "./app/components/bluetooth/handleScanResults.lsc");
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
@@ -343,12 +347,11 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/compo
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function scanForBlueToothDevices() {
-  if (!(0, _settings.getSettings)().blueLossEnabled) return scheduleScan();
+  if (!(0, _settings.getSettings)().blueLossEnabled) scheduleScan();
   _logging.logger.debug('=======New Scan Started=======');
-  _execa2.default.shell('hcitool scan').then(_handleScanResults.handleScanResults).catch(_logging.logger.error);
-  scheduleScan();
+  return _execa2.default.shell('hcitool scan').then(_handleScanResults.handleScanResults).catch(_logging.logger.error).then(scheduleScan);
 }function scheduleScan() {
-  setTimeout(scanForBlueToothDevices, _timeproxy2.default`${(0, _settings.getSettings)().scanInterval} seconds`);
+  return (0, _delay2.default)(_timeproxy2.default`${(0, _settings.getSettings)().scanInterval} seconds`).then(scanForBlueToothDevices);
 }exports.scanForBlueToothDevices = scanForBlueToothDevices;
 
 /***/ }),
@@ -403,7 +406,7 @@ function handleScanResults(spawnCommandResult) {
   for (let _i = 0, _len = deviceList.length; _i < _len; _i++) {
     const { deviceId } = deviceList[_i];
     if (devicesToSearchFor[deviceId]) {
-      (0, _settings.updateDeviceInDevicesToSearchFor)(deviceId, 'lastSeen', Date.now());
+      (0, _settings.updateLastSeenForDeviceSearchingFor)(deviceId, Date.now());
     }
   }(0, _lockCheck.lockSystemIfDeviceLost)();
 } /*****
@@ -474,7 +477,7 @@ function lockSystemIfDeviceLost() {
     const _k = _keys[_i];const { lastSeen, deviceId } = devicesToSearchFor[_k];
     if (deviceHasBeenLost(lastSeen, timeToLock)) {
       (0, _lockSystem.lockTheSystem)();
-      (0, _settings.updateDeviceInDevicesToSearchFor)(deviceId, 'lastSeen', (0, _utils.tenYearsFromNow)());
+      (0, _settings.updateLastSeenForDeviceSearchingFor)(deviceId, (0, _utils.tenYearsFromNow)());
     }
   }
 }function deviceHasBeenLost(lastTimeSawDevice, timeToLock) {
@@ -576,6 +579,45 @@ CustomRollbarTransport.prototype.log = function (level, msg = '', error, callbac
   callback(null, true);
 };exports.CustomRollbarTransport = CustomRollbarTransport;
 exports.rollbarLogger = rollbarLogger;
+
+/***/ }),
+
+/***/ "./app/components/logging/logSettingsUpdates.lsc":
+/*!*******************************************************!*\
+  !*** ./app/components/logging/logSettingsUpdates.lsc ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.logSettingsUpdateForVerboseLogging = undefined;
+
+var _typa = __webpack_require__(/*! typa */ "typa");
+
+var _typa2 = _interopRequireDefault(_typa);
+
+var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+var _logging = __webpack_require__(/*! ./logging.lsc */ "./app/components/logging/logging.lsc");
+
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function logSettingsUpdateForVerboseLogging(newSettingKey, newSettingValue) {
+  if (!(0, _settings.getSettings)().verboseLogging) return;
+  const debugMessage = `Updated Setting: updated '${newSettingKey}' with:`;
+  if (_typa2.default.obj(newSettingValue)) {
+    _logging.logger.debug(debugMessage, { [newSettingKey]: newSettingValue });
+  } else {
+    _logging.logger.debug(`${debugMessage} ${newSettingValue}`);
+  }
+}exports.logSettingsUpdateForVerboseLogging = logSettingsUpdateForVerboseLogging;
 
 /***/ }),
 
@@ -854,9 +896,15 @@ var _ssePusher = __webpack_require__(/*! sse-pusher */ "sse-pusher");
 
 var _ssePusher2 = _interopRequireDefault(_ssePusher);
 
+var _joi = __webpack_require__(/*! joi */ "joi");
+
+var _joi2 = _interopRequireDefault(_joi);
+
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+var _settingsDefaults = __webpack_require__(/*! ../settings/settingsDefaults.lsc */ "./app/components/settings/settingsDefaults.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -865,9 +913,17 @@ const frontEndDirPath = _path2.default.resolve(__dirname, '..', 'app', 'componen
 const assetsPath = _path2.default.join(frontEndDirPath, 'assets');
 const jsPath = _path2.default.join(frontEndDirPath, 'js');
 const settingsPagePath = _path2.default.join(frontEndDirPath, 'html', 'settingsWindow.html');
-const expressApp = (0, _express2.default)();
+const postBodyValidationSchema = _joi2.default.object().keys({
+  blueLossEnabled: _joi2.default.boolean(),
+  runOnStartup: _joi2.default.boolean(),
+  devicesToSearchFor: _joi2.default.object(),
+  timeToLock: _joi2.default.number().integer().min(_settingsDefaults.defaultSettings.timeToLock),
+  scanInterval: _joi2.default.number().integer().min(_settingsDefaults.defaultSettings.scanInterval),
+  reportErrors: _joi2.default.boolean(),
+  verboseLogging: _joi2.default.boolean()
+});
 const push = (0, _ssePusher2.default)();
-
+const expressApp = (0, _express2.default)();
 expressApp.use('/assets', _express2.default.static(assetsPath));
 expressApp.use('/js', _express2.default.static(jsPath));
 expressApp.use(_bodyParser2.default.json());
@@ -876,7 +932,7 @@ expressApp.get('/', function (req, res) {
   res.cookie('bluelossSettings', generateCookieSettingsData());
   return res.sendFile(settingsPagePath);
 });
-expressApp.post('/updatesettings', updateSettingsPostHandler);
+expressApp.post('/updatesettings', validateUpdatePost, updateSettingsPostHandler);
 expressApp.use('/sse-update', push.handler());
 
 /*****
@@ -890,18 +946,23 @@ function startServer() {
     });
     return listener;
   });
-}function generateCookieSettingsData() {
-  return JSON.stringify((0, _lodash2.default)((0, _settings.getSettings)(), ['trayIconColor', 'dateLastCheckedForAppUpdate', 'skipUpdateVersion']));
 }function updateSettingsPostHandler(req, res) {
-  console.log(typeof req.body);
-  if (req == null ? void 0 : req.body) return res.status(400).end();
-} //do validation and log if error
-// if error res.status(400).end()
-// Object.entries returns an array of arrays of key/value pairs for an object
-// [[settingName, newSettingValue]] = Object.entries(req.body)
-// if ok, updateSetting() and then res.end()
+  /*****
+  * The frontend only updates (sends back) one setting at a time.
+  * Object.entries returns an array of arrays of key/value pairs for an object.
+  */
+  const [[settingName, newSettingValue]] = Object.entries(req.body);
+  (0, _settings.updateSetting)(settingName, newSettingValue);
+  return res.end();
+}function validateUpdatePost(req, res, next) {
+  var _Joi$validate;
 
-function storeServerAddress({ family, address, port }) {
+  const validationError = (_Joi$validate = _joi2.default.validate(req == null ? void 0 : req.body, postBodyValidationSchema)) == null ? void 0 : _Joi$validate.error;
+  if (validationError) {
+    _logging.logger.error(validationError);
+    return res.status(400).end();
+  }return next();
+}function storeServerAddress({ family, address, port }) {
   const ip = family.toLowerCase() === 'ipv6' ? `[${address}]` : address;
   serverAddress = `http://${ip}:${port}`;
   _logging.logger.debug('serverAddress: ', serverAddress);
@@ -909,12 +970,81 @@ function storeServerAddress({ family, address, port }) {
   return serverAddress;
 }function pushUpdatesToFrontEnd(settingName, settingValue) {
   push('settingsUpdate', { [settingName]: settingValue });
+}function generateCookieSettingsData() {
+  return JSON.stringify((0, _lodash2.default)((0, _settings.getSettings)(), ['trayIconColor', 'dateLastCheckedForAppUpdate', 'skipUpdateVersion', 'firstRun']));
 }function tellAllSettingsWindowsToClose() {
   push('closeSelf', true);
 }exports.startServer = startServer;
 exports.getServerAddress = getServerAddress;
 exports.pushUpdatesToFrontEnd = pushUpdatesToFrontEnd;
 exports.tellAllSettingsWindowsToClose = tellAllSettingsWindowsToClose;
+
+/***/ }),
+
+/***/ "./app/components/settings/devices.lsc":
+/*!*********************************************!*\
+  !*** ./app/components/settings/devices.lsc ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.updateLastSeenForDevicesLookingForOnStartup = exports.updateLastSeenForDeviceSearchingFor = exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _settings = __webpack_require__(/*! ./settings.lsc */ "./app/components/settings/settings.lsc");
+
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
+
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
+
+function addNewDeviceToSearchFor(deviceToAdd) {
+  const { deviceId } = deviceToAdd;
+  if (deviceIsInDevicesToSearchFor(deviceId)) return;
+  (0, _settings.updateSetting)('devicesToSearchFor', _extends({}, (0, _settings.getSettings)().devicesToSearchFor, { [deviceId]: deviceToAdd }));
+}function removeNewDeviceToSearchFor({ deviceId }) {
+  if (!deviceIsInDevicesToSearchFor(deviceId)) return;
+  (0, _settings.updateSetting)('devicesToSearchFor', filterDevicesToSearchFor(deviceId));
+}function filterDevicesToSearchFor(deviceIdToRemove) {
+  return (() => {
+    const _obj = {};for (let _obj2 = (0, _settings.getSettings)().devicesToSearchFor, _i = 0, _keys = Object.keys(_obj2), _len = _keys.length; _i < _len; _i++) {
+      const deviceId = _keys[_i];const device = _obj2[deviceId];
+      if (deviceId !== deviceIdToRemove) _obj[deviceId] = device;
+    }return _obj;
+  })();
+}
+
+function deviceIsInDevicesToSearchFor(deviceId) {
+  return (0, _settings.getSettings)().devicesToSearchFor[deviceId];
+}function updateLastSeenForDeviceSearchingFor(deviceId, time) {
+  const { devicesToSearchFor } = (0, _settings.getSettings)();
+  const deviceToUpdate = devicesToSearchFor[deviceId];
+  return (0, _settings.updateSetting)('devicesToSearchFor', _extends({}, devicesToSearchFor, { [deviceId]: _extends({}, deviceToUpdate, { lastSeen: time })
+  }));
+} /**
+   * When a user starts up BlueLoss after previously exiting, the
+   * lastSeen value will be out of date for the devices in
+   * devicesToSearchFor. This would cause BlueLoss to lock the
+   * system straight away because the lastSeen value + timeToLock
+   *  will be less than Date.now(). So to prevent this, we give all
+   * devices in devicesToSearchFor a lastSeen of 10 years from now.
+   * (when a device is seen again during a scan, lastSeen is updated.)
+   */
+function updateLastSeenForDevicesLookingForOnStartup() {
+  for (let _obj3 = (0, _settings.getSettings)().devicesToSearchFor, _i2 = 0, _keys2 = Object.keys(_obj3), _len2 = _keys2.length; _i2 < _len2; _i2++) {
+    const _k = _keys2[_i2];const { deviceId } = _obj3[_k];
+    updateLastSeenForDeviceSearchingFor(deviceId, (0, _utils.tenYearsFromNow)());
+  }
+}exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;
+exports.removeNewDeviceToSearchFor = removeNewDeviceToSearchFor;
+exports.updateLastSeenForDeviceSearchingFor = updateLastSeenForDeviceSearchingFor;
+exports.updateLastSeenForDevicesLookingForOnStartup = updateLastSeenForDevicesLookingForOnStartup;
 
 /***/ }),
 
@@ -931,9 +1061,7 @@ exports.tellAllSettingsWindowsToClose = tellAllSettingsWindowsToClose;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateDeviceInDevicesToSearchFor = exports.removeNewDeviceToSearchFor = exports.addNewDeviceToSearchFor = exports.getSettings = exports.updateSetting = exports.initSettings = undefined;
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+exports.getSettings = exports.updateSetting = exports.initSettings = undefined;
 
 var _lowdb = __webpack_require__(/*! lowdb */ "lowdb");
 
@@ -943,25 +1071,21 @@ var _FileSync = __webpack_require__(/*! lowdb/adapters/FileSync */ "lowdb/adapte
 
 var _FileSync2 = _interopRequireDefault(_FileSync);
 
-var _typa = __webpack_require__(/*! typa */ "typa");
-
-var _typa2 = _interopRequireDefault(_typa);
-
 var _gawk = __webpack_require__(/*! gawk */ "gawk");
 
 var _gawk2 = _interopRequireDefault(_gawk);
-
-var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
-
-var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
 
 var _settingsDefaults = __webpack_require__(/*! ./settingsDefaults.lsc */ "./app/components/settings/settingsDefaults.lsc");
 
 var _settingsObservers = __webpack_require__(/*! ./settingsObservers.lsc */ "./app/components/settings/settingsObservers.lsc");
 
-var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
-
 var _createBlueLossConfig = __webpack_require__(/*! ../bluelossConfig/createBlueLossConfig.lsc */ "./app/components/bluelossConfig/createBlueLossConfig.lsc");
+
+var _logSettingsUpdates = __webpack_require__(/*! ../logging/logSettingsUpdates.lsc */ "./app/components/logging/logSettingsUpdates.lsc");
+
+var _devices = __webpack_require__(/*! ./devices.lsc */ "./app/components/settings/devices.lsc");
+
+var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -973,64 +1097,16 @@ function initSettings() {
   db.defaults(_settingsDefaults.defaultSettings).write();
   settings = (0, _gawk2.default)(db.getState());
   (0, _settingsObservers.initSettingsObservers)(settings);
-  return updateLastSeenForDevicesLookingForOnStartup();
+  return (0, _devices.updateLastSeenForDevicesLookingForOnStartup)();
 }function getSettings() {
   return settings;
 }function updateSetting(newSettingKey, newSettingValue) {
   settings[newSettingKey] = newSettingValue;
   db.set(newSettingKey, newSettingValue).write();
-  logSettingsUpdateForVerboseLogging(newSettingKey, newSettingValue);
-}function addNewDeviceToSearchFor(deviceToAdd) {
-  const { deviceId } = deviceToAdd;
-  if (deviceIsInDevicesToSearchFor(deviceId)) return;
-  updateSetting('devicesToSearchFor', _extends({}, getSettings().devicesToSearchFor, { [deviceId]: deviceToAdd }));
-}function removeNewDeviceToSearchFor(deviceToRemove) {
-  const { deviceId } = deviceToRemove;
-  if (!deviceIsInDevicesToSearchFor(deviceId)) return;
-  updateSetting('devicesToSearchFor', filterDevicesToSearchFor(deviceId));
-}function filterDevicesToSearchFor(deviceIdToRemove) {
-  return (() => {
-    const _obj = {};for (let _obj2 = getSettings().devicesToSearchFor, _i = 0, _keys = Object.keys(_obj2), _len = _keys.length; _i < _len; _i++) {
-      const deviceId = _keys[_i];const device = _obj2[deviceId];
-      if (deviceId !== deviceIdToRemove) _obj[deviceId] = device;
-    }return _obj;
-  })();
-}
-
-function deviceIsInDevicesToSearchFor(deviceId) {
-  return getSettings().devicesToSearchFor[deviceId];
-}function updateDeviceInDevicesToSearchFor(deviceId, propName, propValue) {
-  return updateSetting('devicesToSearchFor', _extends({}, getSettings().devicesToSearchFor, {
-    [deviceId]: _extends({}, getSettings().devicesToSearchFor[deviceId], { [propName]: propValue })
-  }));
-} /**
-   * When a user starts up BlueLoss after previously exiting, the
-   * lastSeen value will be out of date for the devices in
-   * devicesToSearchFor. This would cause BlueLoss to lock the
-   * system straight away because the lastSeen value + timeToLock
-   *  will be less than Date.now(). So to prevent this, we give all
-   * devices in devicesToSearchFor a lastSeen of 10 years from now.
-   * (when a device is seen again during a scan, lastSeen is updated.)
-   */
-function updateLastSeenForDevicesLookingForOnStartup() {
-  for (let _obj3 = getSettings().devicesToSearchFor, _i2 = 0, _keys2 = Object.keys(_obj3), _len2 = _keys2.length; _i2 < _len2; _i2++) {
-    const _k = _keys2[_i2];const { deviceId } = _obj3[_k];
-    updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', (0, _utils.tenYearsFromNow)());
-  }
-}function logSettingsUpdateForVerboseLogging(newSettingKey, newSettingValue) {
-  if (!getSettings().verboseLogging) return;
-  const debugMessage = `Updated Setting: updated '${newSettingKey}' with:`;
-  if (_typa2.default.obj(newSettingValue)) {
-    _logging.logger.debug(debugMessage, { [newSettingKey]: newSettingValue });
-  } else {
-    _logging.logger.debug(`${debugMessage} ${newSettingValue}`);
-  }
+  (0, _logSettingsUpdates.logSettingsUpdateForVerboseLogging)(newSettingKey, newSettingValue);
 }exports.initSettings = initSettings;
 exports.updateSetting = updateSetting;
 exports.getSettings = getSettings;
-exports.addNewDeviceToSearchFor = addNewDeviceToSearchFor;
-exports.removeNewDeviceToSearchFor = removeNewDeviceToSearchFor;
-exports.updateDeviceInDevicesToSearchFor = updateDeviceInDevicesToSearchFor;
 
 /***/ }),
 
@@ -1473,7 +1549,7 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect-brk app/appMain-compiled.js","styleWatch":"cross-env NODE_ENV=development stylus -w app/components/settingsWindow/frontEnd/assets/styles/stylus/index.styl -o app/components/settingsWindow/frontEnd/assets/styles/css/settingsWindowCss-compiled.css","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","body-parser":"^1.18.3","dotenv":"^5.0.1","execa":"^0.10.0","express":"^4.16.3","formbase":"^6.0.4","fs-extra":"^6.0.1","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","js-cookie":"^2.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","modern-normalize":"^0.4.0","ono":"^4.0.5","parallel-webpack":"^2.3.0","promise-rat-race":"^1.5.1","rollbar":"^2.4.1","sse-pusher":"^1.1.1","systray":"^1.0.5","the-answer":"^1.0.0","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.2","nexe":"^2.0.0-rc.29","nodemon":"^1.17.5","pkg":"^4.3.1","rollup":"^0.59.4","rollup-plugin-babel":"^3.0.4","rollup-plugin-commonjs":"^9.1.3","rollup-plugin-json":"^3.0.0","rollup-plugin-node-resolve":"^3.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect app/appMain-compiled.js","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","body-parser":"^1.18.3","delay":"^3.0.0","dotenv":"^5.0.1","execa":"^0.10.0","express":"^4.16.3","formbase":"^6.0.4","fs-extra":"^6.0.1","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","joi":"^13.4.0","js-cookie":"^2.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","modern-normalize":"^0.4.0","ono":"^4.0.5","parallel-webpack":"^2.3.0","promise-rat-race":"^1.5.1","rollbar":"^2.4.1","sse-pusher":"^1.1.1","systray":"^1.0.5","the-answer":"^1.0.0","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.2","nexe":"^2.0.0-rc.29","nodemon":"^1.17.5","pkg":"^4.3.1","rollup":"^0.59.4","rollup-plugin-babel":"^3.0.4","rollup-plugin-commonjs":"^9.1.3","rollup-plugin-json":"^3.0.0","rollup-plugin-node-resolve":"^3.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
 
 /***/ }),
 
@@ -1485,6 +1561,17 @@ module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1
 /***/ (function(module, exports) {
 
 module.exports = require("body-parser");
+
+/***/ }),
+
+/***/ "delay":
+/*!************************!*\
+  !*** external "delay" ***!
+  \************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("delay");
 
 /***/ }),
 
@@ -1551,6 +1638,17 @@ module.exports = require("gawk");
 /***/ (function(module, exports) {
 
 module.exports = require("is-empty");
+
+/***/ }),
+
+/***/ "joi":
+/*!**********************!*\
+  !*** external "joi" ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("joi");
 
 /***/ }),
 

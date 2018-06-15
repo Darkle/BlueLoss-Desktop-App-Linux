@@ -1,22 +1,22 @@
 import execa from 'execa'
 import tp from 'timeproxy'
+import delay from 'delay'
 
 import { handleScanResults } from './handleScanResults.lsc'
 import { logger } from '../logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
 
-scanForBlueToothDevices():void ->
-  if !getSettings().blueLossEnabled: return scheduleScan()
+scanForBlueToothDevices():Promise ->
+  if !getSettings().blueLossEnabled: scheduleScan()
   logger.debug('=======New Scan Started=======')
-  execa.shell('hcitool scan').then(handleScanResults).catch(logger.error)
-  scheduleScan()
+  execa.shell('hcitool scan')
+    .then(handleScanResults)
+    .catch(logger.error)
+    .then(scheduleScan)
 
-scheduleScan():void ->
-  setTimeout(
-    scanForBlueToothDevices,
-    tp`${ getSettings().scanInterval } seconds`
-  )
-
+scheduleScan():Promise ->
+  delay(tp`${ getSettings().scanInterval } seconds`)
+    .then(scanForBlueToothDevices)
 
 export {
   scanForBlueToothDevices,

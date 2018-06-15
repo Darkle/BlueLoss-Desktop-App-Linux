@@ -1,6 +1,6 @@
 import { h } from 'hyperapp'
 
-export default deviceCard({lookingForDevice, device, actions}) ->
+export default deviceCard({lookingForDevice, device, remove, add}) ->
   <div class="card deviceCard">
     <div class="cardDeviceIcon">
       <img src={ `assets/icons/devicesIconForCards-${ if lookingForDevice: 'blue' else: 'grey' }.svg` } />
@@ -12,9 +12,9 @@ export default deviceCard({lookingForDevice, device, actions}) ->
     <div class="deviceCardButtons">
       {
         if lookingForDevice:
-          <a class="btn-flat" onclick={() -> actions.removeDevice(device) }>Remove</a>
+          <a class="btn-flat" onclick={() -> remove(device) }>Remove</a>
         else:
-          <a class="btn-flat" onclick={() -> actions.addNewDevice(device) }>Add</a>
+          <a class="btn-flat" onclick={() -> add(device) }>Add</a>
       }
     </div>
   </div>
