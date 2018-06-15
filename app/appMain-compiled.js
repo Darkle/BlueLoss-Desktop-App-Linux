@@ -1366,7 +1366,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 let systray = null;
 
 function initTrayMenu() {
-  return new Promise(resolve => {
+  return new Promise(function (resolve) {
     systray = new _systray2.default({
       menu: {
         icon: _iconsData.base64IconData[getTrayIconColor()],
@@ -1378,26 +1378,29 @@ function initTrayMenu() {
       copyDir: true // copy go tray binary to outside directory, useful for packing tool like pkg.
     });
     systray.onClick(systrayClickHandler);
-    return systray.onReady(resolve);
+    systray.onReady(resolve);
   });
-}function systrayClickHandler(action) {
+} /*****
+  * seq_id:
+  * 0 - Open settings window
+  * 1 - Enable/Disable BlueLoss
+  * 2 - Toggle system tray icon color
+  * 3 - Open logs folder
+  * 4 - Exit BlueLoss
+  */
+function systrayClickHandler(action) {
   if (action.seq_id === 0) {
-    //Open settings window
     (0, _settingsWindow.openSettingsWindow)();
   }if (action.seq_id === 1) {
-    //Enable/Disable BlueLoss
     (0, _settings.updateSetting)('blueLossEnabled', !(0, _settings.getSettings)().blueLossEnabled);
     updateEnabledDisabledMenuItem(action);
     (0, _sendOSnotification.sendOSnotification)(generateNotifcationText());
   }if (action.seq_id === 2) {
-    //Toggle system tray icon color
     toggleTrayIconColorSetting();
     updateSystrayIcon(action);
   }if (action.seq_id === 3) {
-    //Open logs folder
     (0, _opn2.default)((0, _createBlueLossConfig.getBlueLossLogsFolderPath)()).catch(_logging.logger.error);
   }if (action.seq_id === 4) {
-    //Exit BlueLoss
     systray.kill();
   }
 }function updateEnabledDisabledMenuItem(action) {
