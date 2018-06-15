@@ -748,7 +748,7 @@ var _createBlueLossConfig = __webpack_require__(/*! ./bluelossConfig/createBlueL
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-let weCreatedFileLock = false;
+let weCreatedLockFile = false;
 const anotherInstanceErrorMessage = 'BlueLoss is already running (BlueLoss.lock file already exists), exiting...';
 
 function makeSingleInstance() {
@@ -758,12 +758,12 @@ function makeSingleInstance() {
       console.error(new Error(anotherInstanceErrorMessage));
       return process.exit(1);
     } else {
-      weCreatedFileLock = true;
+      weCreatedLockFile = true;
       return _fsExtra2.default.ensureFile(getLockFilePath());
     }
   });
 }process.on('exit', function () {
-  if (weCreatedFileLock) {
+  if (weCreatedLockFile) {
     try {
       _fsExtra2.default.removeSync(getLockFilePath());
     } catch (e) {
@@ -1577,7 +1577,7 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect app/appMain-compiled.js","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","body-parser":"^1.18.3","dotenv":"^5.0.1","execa":"^0.10.0","express":"^4.16.3","formbase":"^6.0.4","fs-extra":"^6.0.1","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","joi":"^13.4.0","js-cookie":"^2.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","modern-normalize":"^0.4.0","ono":"^4.0.5","parallel-webpack":"^2.3.0","promise-rat-race":"^1.5.1","rollbar":"^2.4.1","sse-pusher":"^1.1.1","systray":"^1.0.5","the-answer":"^1.0.0","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.2","nexe":"^2.0.0-rc.29","nodemon":"^1.17.5","pkg":"^4.3.1","rollup":"^0.59.4","rollup-plugin-babel":"^3.0.4","rollup-plugin-commonjs":"^9.1.3","rollup-plugin-json":"^3.0.0","rollup-plugin-node-resolve":"^3.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect app/appMain-compiled.js","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","body-parser":"^1.18.3","dotenv":"^5.0.1","execa":"^0.10.0","express":"^4.16.3","fs-extra":"^6.0.1","gawk":"^4.4.5","hyperapp":"^1.2.5","is-empty":"^1.2.0","joi":"^13.4.0","js-cookie":"^2.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","modern-normalize":"^0.4.0","ono":"^4.0.5","promise-rat-race":"^1.5.1","rollbar":"^2.4.1","sse-pusher":"^1.1.1","systray":"^1.0.5","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.2","nexe":"^2.0.0-rc.29","nodemon":"^1.17.5","parallel-webpack":"^2.3.0","pkg":"^4.3.1","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
 
 /***/ }),
 

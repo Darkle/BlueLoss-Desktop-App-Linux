@@ -4,7 +4,7 @@ import fs from 'fs-extra'
 
 import { getBlueLossConfigFolderPath } from './bluelossConfig/createBlueLossConfig.lsc'
 
-let weCreatedFileLock = false
+let weCreatedLockFile = false
 anotherInstanceErrorMessage = 'BlueLoss is already running (BlueLoss.lock file already exists), exiting...'
 
 makeSingleInstance():Promise ->
@@ -15,12 +15,12 @@ makeSingleInstance():Promise ->
         console.error(new Error(anotherInstanceErrorMessage))
         process.exit(1)
       else:
-        now weCreatedFileLock = true
+        now weCreatedLockFile = true
         return fs.ensureFile(getLockFilePath())
     })
 
 process.on('exit', ():void ->
-  if weCreatedFileLock:
+  if weCreatedLockFile:
     try: fs.removeSync(getLockFilePath())
     catch(e): return
 )
