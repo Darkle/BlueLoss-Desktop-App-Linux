@@ -759,10 +759,10 @@ async function makeSingleInstance() {
     return process.exit(1);
   }weCreatedLockFile = true;
   return _fsExtra2.default.ensureFile(getLockFilePath());
-}process.on('exit', function () {
+}process.on('exit', () => {
   if (weCreatedLockFile) {
     try {
-      _fsExtra2.default.removeSync(getLockFilePath());
+      return _fsExtra2.default.removeSync(getLockFilePath());
     } catch (e) {
       return;
     }
