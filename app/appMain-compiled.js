@@ -640,7 +640,9 @@ function logSettingsUpdateForVerboseLogging(newSettingKey, newSettingValue) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.initLogging = exports.changeLogLevel = exports.addWinstonFileLogging = exports.removeRollbarLogging = exports.addRollbarLogging = exports.logger = undefined;
+exports.initLogging = exports.changeLogLevel = exports.removeRollbarLogging = exports.addRollbarLogging = exports.logger = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _path = __webpack_require__(/*! path */ "path");
 
@@ -666,6 +668,13 @@ const rollbarTransportOptions = {
   handleExceptions: true,
   humanReadableUnhandledException: true
 };
+const fileTransportOptions = {
+  maxsize: fiveHundredKilobytes,
+  maxFiles: 6,
+  prettyPrint: true,
+  depth: 10,
+  level: 'verbose'
+};
 
 function initLogging() {
   /*****
@@ -676,7 +685,7 @@ function initLogging() {
     exitOnError: false
   });
 
-  addWinstonFileLogging();
+  logger.add(_winston2.default.transports.File, _extends({}, fileTransportOptions, { filename: _path2.default.join((0, _createBlueLossConfig.getBlueLossLogsFolderPath)(), 'BlueLoss.log.txt') }));
 
   if (true) {
     logger.add(_winston2.default.transports.Console, {
@@ -699,15 +708,6 @@ function initLogging() {
 }function removeRollbarLogging() {
   _customRollbarTransport.rollbarLogger.configure({ enabled: false });
   logger.remove('rollbarTransport');
-}function addWinstonFileLogging() {
-  logger.add(_winston2.default.transports.File, {
-    filename: _path2.default.join((0, _createBlueLossConfig.getBlueLossLogsFolderPath)(), 'BlueLoss.log.txt'),
-    maxsize: fiveHundredKilobytes,
-    maxFiles: 6,
-    prettyPrint: true,
-    depth: 10,
-    level: 'verbose'
-  });
 }function initialLogLevel() {
   if (true) return 'verbose';else {}
 }function changeLogLevel(level) {
@@ -715,7 +715,6 @@ function initLogging() {
 }exports.logger = logger;
 exports.addRollbarLogging = addRollbarLogging;
 exports.removeRollbarLogging = removeRollbarLogging;
-exports.addWinstonFileLogging = addWinstonFileLogging;
 exports.changeLogLevel = changeLogLevel;
 exports.initLogging = initLogging;
 

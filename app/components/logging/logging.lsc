@@ -14,6 +14,13 @@ rollbarTransportOptions = {
   handleExceptions: true,
   humanReadableUnhandledException: true,
 }
+fileTransportOptions = {
+  maxsize: fiveHundredKilobytes,
+  maxFiles: 6,
+  prettyPrint: true,
+  depth: 10,
+  level: 'verbose'
+}
 
 initLogging():void ->
   /*****
@@ -24,7 +31,13 @@ initLogging():void ->
     exitOnError: false
   })
 
-  addWinstonFileLogging()
+  logger.add(
+    winston.transports.File,
+    {
+      ...fileTransportOptions,
+      ...{ filename: path.join(getBlueLossLogsFolderPath(), 'BlueLoss.log.txt') },
+    }
+  )
 
   if ISDEV:
     logger.add(winston.transports.Console, {
@@ -51,19 +64,6 @@ removeRollbarLogging():void ->
   rollbarLogger.configure({enabled: false})
   logger.remove('rollbarTransport')
 
-addWinstonFileLogging():void ->
-  logger.add(
-    winston.transports.File,
-    {
-      filename: path.join(getBlueLossLogsFolderPath(), 'BlueLoss.log.txt'),
-      maxsize: fiveHundredKilobytes,
-      maxFiles: 6,
-      prettyPrint: true,
-      depth: 10,
-      level: 'verbose'
-    }
-  )
-
 initialLogLevel():String ->
   if ISDEV || getSettings().verboseLogging: 'verbose' else: 'error'
 
@@ -74,7 +74,6 @@ export {
   logger,
   addRollbarLogging,
   removeRollbarLogging,
-  addWinstonFileLogging,
   changeLogLevel,
   initLogging,
 }
