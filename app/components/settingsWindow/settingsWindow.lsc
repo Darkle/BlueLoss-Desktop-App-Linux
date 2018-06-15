@@ -28,7 +28,7 @@ openSettingsWindow():Promise ->
     openSettingsWindowInBrowser(browser)
   )
   //fall back to opening with OS's default browser
-  .catch(err -> opn(getServerAddress()))  // eslint-disable-line handle-callback-err, no-unused-vars
+  .catch(() -> opn(getServerAddress()))
 
 openSettingsWindowInBrowser(browser):Promise ->
   if browser === 'firefox':

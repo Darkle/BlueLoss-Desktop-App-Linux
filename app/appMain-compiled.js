@@ -1283,12 +1283,10 @@ function openSettingsWindow() {
     return openSettingsWindowInBrowser(browser);
   })
   //fall back to opening with OS's default browser
-  .catch(function (err) {
+  .catch(function () {
     return (0, _opn2.default)((0, _server.getServerAddress)());
   });
-} // eslint-disable-line handle-callback-err, no-unused-vars
-
-function openSettingsWindowInBrowser(browser) {
+}function openSettingsWindowInBrowser(browser) {
   if (browser === 'firefox') {
     return _execa2.default.shell(`${firefoxCliSpawnParams} -profile ${getFirefoxProfilePath()} ${(0, _server.getServerAddress)()}`);
   }return _execa2.default.shell(`${browser} --app=${(0, _server.getServerAddress)()} --user-data-dir=${getChromiumProfilePath()}`);
