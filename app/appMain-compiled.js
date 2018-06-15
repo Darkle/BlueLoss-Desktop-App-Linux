@@ -661,19 +661,18 @@ var _createBlueLossConfig = __webpack_require__(/*! ../bluelossConfig/createBlue
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 let logger = {};
-const fiveHundredKilobytes = 500000;
 const rollbarTransportOptions = {
   name: 'rollbarTransport',
   level: 'error',
   handleExceptions: true,
   humanReadableUnhandledException: true
 };
+const fiveHundredKilobytes = 500000;
 const fileTransportOptions = {
   maxsize: fiveHundredKilobytes,
   maxFiles: 6,
   prettyPrint: true,
-  depth: 10,
-  level: 'verbose'
+  depth: 10
 };
 
 function initLogging() {
@@ -691,7 +690,6 @@ function initLogging() {
     logger.add(_winston2.default.transports.Console, {
       handleExceptions: true,
       humanReadableUnhandledException: true
-      // json: true
     });
   } /*****
     * We dont send errors to rollbar in dev and also only if enabled.
@@ -1271,6 +1269,10 @@ var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/*****
+* We don't want to return a Promise here because execa.shell will not resolve until the
+* settings window is closed (we can just fire and forget).
+*/
 function openSettingsWindow() {
   /*****
   * We send a message to all open windows (via Server Side Events) to close themselves, so there
@@ -1278,7 +1280,7 @@ function openSettingsWindow() {
   */
   (0, _server.tellAllSettingsWindowsToClose)();
 
-  return (0, _promiseRatRace2.default)([_execa2.default.shell('command -v google-chrome'), _execa2.default.shell('command -v chromium-browser'), _execa2.default.shell('command -v firefox')]).then(openSettingsWindowInPreferredBrowser).catch(function () {
+  (0, _promiseRatRace2.default)([_execa2.default.shell('command -v google-chrome'), _execa2.default.shell('command -v chromium-browser'), _execa2.default.shell('command -v firefox')]).then(openSettingsWindowInPreferredBrowser).catch(function () {
     return (0, _opn2.default)((0, _server.getServerAddress)());
   });
 } //fall back to opening with OS's default browser

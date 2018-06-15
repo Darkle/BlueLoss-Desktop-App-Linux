@@ -8,7 +8,11 @@ import { getServerAddress, tellAllSettingsWindowsToClose } from '../server/serve
 import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 import { capitalizeFirstLetter } from '../utils.lsc'
 
-openSettingsWindow():Promise ->
+/*****
+* We don't want to return a Promise here because execa.shell will not resolve until the
+* settings window is closed (we can just fire and forget).
+*/
+openSettingsWindow():void ->
   /*****
   * We send a message to all open windows (via Server Side Events) to close themselves, so there
   * isn't more than one settings window open at once.

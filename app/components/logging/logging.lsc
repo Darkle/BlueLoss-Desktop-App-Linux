@@ -7,19 +7,18 @@ import { getSettings } from '../settings/settings.lsc'
 import { getBlueLossLogsFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 
 let logger = {}
-fiveHundredKilobytes = 500000
 rollbarTransportOptions = {
   name: 'rollbarTransport',
   level: 'error',
   handleExceptions: true,
   humanReadableUnhandledException: true,
 }
+fiveHundredKilobytes = 500000
 fileTransportOptions = {
   maxsize: fiveHundredKilobytes,
   maxFiles: 6,
   prettyPrint: true,
   depth: 10,
-  level: 'verbose'
 }
 
 initLogging():void ->
@@ -43,7 +42,6 @@ initLogging():void ->
     logger.add(winston.transports.Console, {
       handleExceptions: true,
       humanReadableUnhandledException: true,
-      // json: true
     })
   /*****
   * We dont send errors to rollbar in dev and also only if enabled.
