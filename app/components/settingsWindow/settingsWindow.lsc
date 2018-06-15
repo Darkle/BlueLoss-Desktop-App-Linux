@@ -6,7 +6,7 @@ import pRatRace from 'promise-rat-race'
 
 import { getServerAddress, tellAllSettingsWindowsToClose } from '../server/server.lsc'
 import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
-import { capetilizeFirstLetter } from '../utils.lsc'
+import { capitalizeFirstLetter } from '../utils.lsc'
 
 openSettingsWindow():Promise ->
   /*****
@@ -36,7 +36,7 @@ generateChromeCliParams(browser:String):String ->
   `${ browser } --app=${ getServerAddress() } --user-data-dir=${ getBrowserProfilePath('Chromium') }`
 
 getBrowserProfilePath(browser:String):String ->
-  path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', capetilizeFirstLetter(browser))
+  path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', capitalizeFirstLetter(browser))
 
 getBrowserExecNameFromPath(browserPath:String):String ->
   browserPath.slice(browserPath.lastIndexOf('/') +1)

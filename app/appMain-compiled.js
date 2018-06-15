@@ -1291,7 +1291,7 @@ function openSettingsWindowInPreferredBrowser({ stdout: browserPath }) {
 }function generateChromeCliParams(browser) {
   return `${browser} --app=${(0, _server.getServerAddress)()} --user-data-dir=${getBrowserProfilePath('Chromium')}`;
 }function getBrowserProfilePath(browser) {
-  return _path2.default.join((0, _createBlueLossConfig.getBlueLossConfigFolderPath)(), 'BrowserProfiles', (0, _utils.capetilizeFirstLetter)(browser));
+  return _path2.default.join((0, _createBlueLossConfig.getBlueLossConfigFolderPath)(), 'BrowserProfiles', (0, _utils.capitalizeFirstLetter)(browser));
 }function getBrowserExecNameFromPath(browserPath) {
   return browserPath.slice(browserPath.lastIndexOf('/') + 1);
 }exports.openSettingsWindow = openSettingsWindow;
@@ -1480,7 +1480,7 @@ function systrayClickHandler(action) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.capetilizeFirstLetter = exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = undefined;
+exports.capitalizeFirstLetter = exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = undefined;
 
 var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
@@ -1530,7 +1530,7 @@ function setUpDev() {
 
 function tenYearsFromNow() {
   return Date.now() + _timeproxy2.default.FIVE_HUNDRED_WEEKS;
-}function capetilizeFirstLetter(string) {
+}function capitalizeFirstLetter(string) {
   return `${string[0].toUpperCase()}${string.slice(1)}`;
 }exports.setUpDev = setUpDev;
 exports.noop = noop;
@@ -1541,7 +1541,7 @@ exports.range = range;
 exports.compose = compose;
 exports.identity = identity;
 exports.tenYearsFromNow = tenYearsFromNow;
-exports.capetilizeFirstLetter = capetilizeFirstLetter;
+exports.capitalizeFirstLetter = capitalizeFirstLetter;
 
 /***/ }),
 
