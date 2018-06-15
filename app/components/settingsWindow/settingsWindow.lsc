@@ -25,8 +25,7 @@ openSettingsWindow():Promise ->
 
 openSettingsWindowInPreferredBrowser({stdout: browserPath}):Promise ->
   browser = getBrowserExecNameFromPath(browserPath)
-  if browser === 'firefox':
-    return execa.shell(generateFirefoxCliParams())
+  if browser === 'firefox': return execa.shell(generateFirefoxCliParams())
   execa.shell(generateChromeCliParams(browser))
 
 generateFirefoxCliParams():String ->

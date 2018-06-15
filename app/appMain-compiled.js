@@ -1283,9 +1283,8 @@ function openSettingsWindow() {
 
 function openSettingsWindowInPreferredBrowser({ stdout: browserPath }) {
   const browser = getBrowserExecNameFromPath(browserPath);
-  if (browser === 'firefox') {
-    return _execa2.default.shell(generateFirefoxCliParams());
-  }return _execa2.default.shell(generateChromeCliParams(browser));
+  if (browser === 'firefox') return _execa2.default.shell(generateFirefoxCliParams());
+  return _execa2.default.shell(generateChromeCliParams(browser));
 }function generateFirefoxCliParams() {
   return `firefox -new-instance --width=910 --height=760 -profile ${getBrowserProfilePath('Firefox')} ${(0, _server.getServerAddress)()}`;
 }function generateChromeCliParams(browser) {
