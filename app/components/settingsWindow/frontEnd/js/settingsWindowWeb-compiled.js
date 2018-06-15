@@ -1006,6 +1006,9 @@ exports.default = function (state, actions) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.logInDev = exports.sendNewSettingToServer = exports.identity = undefined;
+
+var _logger = __webpack_require__(/*! @hyperapp/logger */ "./node_modules/@hyperapp/logger/src/index.js");
 
 function identity(param) {
   return param;
@@ -1020,8 +1023,11 @@ function identity(param) {
   }).catch(e => {
     return console.error(e);
   });
+}function logInDev() {
+  return  true ? _logger.withLogger : undefined;
 }exports.identity = identity;
 exports.sendNewSettingToServer = sendNewSettingToServer;
+exports.logInDev = logInDev;
 
 /***/ }),
 
@@ -1039,8 +1045,6 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 
 var _hyperapp = __webpack_require__(/*! hyperapp */ "./node_modules/hyperapp/src/index.js");
-
-var _logger = __webpack_require__(/*! @hyperapp/logger */ "./node_modules/@hyperapp/logger/src/index.js");
 
 var _jsCookie = __webpack_require__(/*! js-cookie */ "./node_modules/js-cookie/src/js.cookie.js");
 
@@ -1065,9 +1069,7 @@ const initialState = _extends({
 
 _jsCookie2.default.remove('bluelossSettings');
 
-const logInDev =  true ? _logger.withLogger : undefined;
-
-const settingsWindowApp = logInDev(_hyperapp.app)(initialState, _actionsIndex2.default, _viewsIndex2.default, document.body);
+const settingsWindowApp = (0, _frontEndUtils.logInDev)()(_hyperapp.app)(initialState, _actionsIndex2.default, _viewsIndex2.default, document.body);
 
 const serverSideEventSource = new EventSource('/sse-update');
 

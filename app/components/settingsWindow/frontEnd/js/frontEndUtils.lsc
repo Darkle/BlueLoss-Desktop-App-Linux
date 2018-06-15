@@ -1,3 +1,4 @@
+import { withLogger } from '@hyperapp/logger'
 
 identity(param) -> param
 
@@ -13,7 +14,10 @@ sendNewSettingToServer(settingName, settingValue):void ->
     console.error(e)
   })
 
+logInDev():Function -> if ISDEV: withLogger else: identity
+
 export {
   identity,
   sendNewSettingToServer,
+  logInDev,
 }

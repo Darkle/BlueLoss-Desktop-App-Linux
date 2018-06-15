@@ -1,10 +1,9 @@
 import { h, app } from 'hyperapp'  // eslint-disable-line no-unused-vars
-import { withLogger } from '@hyperapp/logger'
 import Cookies from 'js-cookie'
 
 import appActions from './components/actions/actionsIndex.lsc'
 import views from './components/views/viewsIndex.lsc'
-import { identity } from './frontEndUtils.lsc'
+import { logInDev } from './frontEndUtils.lsc'
 
 initialState = {
   ...{
@@ -16,9 +15,7 @@ initialState = {
 
 Cookies.remove('bluelossSettings')
 
-logInDev = if ISDEV: withLogger else: identity
-
-settingsWindowApp = logInDev(app)(initialState, appActions, views, document.body)
+settingsWindowApp = logInDev()(app)(initialState, appActions, views, document.body)
 
 serverSideEventSource = new EventSource('/sse-update')
 
