@@ -1211,6 +1211,8 @@ var _runOnStartup = __webpack_require__(/*! ../runOnStartup.lsc */ "./app/compon
 
 var _server = __webpack_require__(/*! ../server/server.lsc */ "./app/components/server/server.lsc");
 
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function initSettingsObservers(settings) {
@@ -1221,7 +1223,7 @@ function initSettingsObservers(settings) {
     (0, _server.pushUpdatesToFrontEnd)('blueLossEnabled', enabled);
   });
   _gawk2.default.watch(settings, ['runOnStartup'], function (enabled) {
-    if (enabled) (0, _runOnStartup.enableRunOnStartup)().catch();else (0, _runOnStartup.disableRunOnStartup)().catch();
+    if (enabled) (0, _runOnStartup.enableRunOnStartup)().catch(_utils.noop);else (0, _runOnStartup.disableRunOnStartup)().catch(_utils.noop);
   });
   _gawk2.default.watch(settings, ['verboseLogging'], function (enabled) {
     (0, _logging.changeLogLevel)(enabled ? 'verbose' : 'error');

@@ -2,7 +2,6 @@ import low from 'lowdb'
 import FileSync from 'lowdb/adapters/FileSync'
 import gawk from 'gawk'
 
-
 import { defaultSettings } from './settingsDefaults.lsc'
 import { initSettingsObservers } from './settingsObservers.lsc'
 import { getBlueLossSettingsFilePath } from '../bluelossConfig/createBlueLossConfig.lsc'

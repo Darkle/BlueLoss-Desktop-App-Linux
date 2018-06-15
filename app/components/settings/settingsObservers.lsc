@@ -3,6 +3,7 @@ import gawk from 'gawk'
 import { addRollbarLogging, removeRollbarLogging, changeLogLevel } from '../logging/logging.lsc'
 import { enableRunOnStartup, disableRunOnStartup } from '../runOnStartup.lsc'
 import { pushUpdatesToFrontEnd } from '../server/server.lsc'
+import { noop } from '../utils.lsc'
 
 initSettingsObservers(settings:Object):void ->
   gawk.watch(settings, ['reportErrors'], (enabled: Boolean):void ->
@@ -13,8 +14,8 @@ initSettingsObservers(settings:Object):void ->
     pushUpdatesToFrontEnd('blueLossEnabled', enabled)
   )
   gawk.watch(settings, ['runOnStartup'], (enabled: Boolean):void ->
-    if enabled: enableRunOnStartup().catch()
-    else: disableRunOnStartup().catch()
+    if enabled: enableRunOnStartup().catch(noop)
+    else: disableRunOnStartup().catch(noop)
   )
   gawk.watch(settings, ['verboseLogging'], (enabled: Boolean):void ->
     changeLogLevel(if enabled: 'verbose' else: 'error')
