@@ -751,17 +751,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 let weCreatedLockFile = false;
 const anotherInstanceErrorMessage = 'BlueLoss is already running (BlueLoss.lock file already exists), exiting...';
 
-function makeSingleInstance() {
+async function makeSingleInstance() {
   if (true) return Promise.resolve();
-  return _fsExtra2.default.pathExists(getLockFilePath()).then(exists => {
-    if (exists) {
-      console.error(new Error(anotherInstanceErrorMessage));
-      return process.exit(1);
-    } else {
-      weCreatedLockFile = true;
-      return _fsExtra2.default.ensureFile(getLockFilePath());
-    }
-  });
+  const exists = await _fsExtra2.default.pathExists(getLockFilePath());
+  if (exists) {
+    console.error(new Error(anotherInstanceErrorMessage));
+    return process.exit(1);
+  }weCreatedLockFile = true;
+  return _fsExtra2.default.ensureFile(getLockFilePath());
 }process.on('exit', function () {
   if (weCreatedLockFile) {
     try {

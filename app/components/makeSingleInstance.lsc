@@ -7,17 +7,14 @@ import { getBlueLossConfigFolderPath } from './bluelossConfig/createBlueLossConf
 let weCreatedLockFile = false
 anotherInstanceErrorMessage = 'BlueLoss is already running (BlueLoss.lock file already exists), exiting...'
 
-makeSingleInstance():Promise ->
+makeSingleInstance():Promise -/>
   if ISDEV: return Promise.resolve()
-  fs.pathExists(getLockFilePath())
-    .then(exists => {
-      if exists:
-        console.error(new Error(anotherInstanceErrorMessage))
-        process.exit(1)
-      else:
-        now weCreatedLockFile = true
-        return fs.ensureFile(getLockFilePath())
-    })
+  exists = <- fs.pathExists(getLockFilePath())
+  if exists:
+    console.error(new Error(anotherInstanceErrorMessage))
+    return process.exit(1)
+  now weCreatedLockFile = true
+  fs.ensureFile(getLockFilePath())
 
 process.on('exit', ():void ->
   if weCreatedLockFile:
