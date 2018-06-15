@@ -1267,13 +1267,12 @@ var _createBlueLossConfig = __webpack_require__(/*! ../bluelossConfig/createBlue
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// import { logger } from '../logging/logging.lsc'
 const firefoxCliSpawnParams = 'firefox -new-instance --width=910 --height=760';
 
 function openSettingsWindow() {
   /*****
   * We send a message to all open windows (via Server Side Events) to close themselves, so there
-  * isn't more that one settings window open at once.
+  * isn't more than one settings window open at once.
   */
   (0, _server.tellAllSettingsWindowsToClose)();
 

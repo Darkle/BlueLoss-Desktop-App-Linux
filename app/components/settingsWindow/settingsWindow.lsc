@@ -4,7 +4,6 @@ import opn from 'opn'
 import execa from 'execa'
 import pRatRace from 'promise-rat-race'
 
-// import { logger } from '../logging/logging.lsc'
 import { getServerAddress, tellAllSettingsWindowsToClose } from '../server/server.lsc'
 import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 
@@ -13,7 +12,7 @@ firefoxCliSpawnParams = 'firefox -new-instance --width=910 --height=760'
 openSettingsWindow():Promise ->
   /*****
   * We send a message to all open windows (via Server Side Events) to close themselves, so there
-  * isn't more that one settings window open at once.
+  * isn't more than one settings window open at once.
   */
   tellAllSettingsWindowsToClose()
 
