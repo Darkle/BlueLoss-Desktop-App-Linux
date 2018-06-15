@@ -9,7 +9,7 @@ anotherInstanceErrorMessage = 'BlueLoss is already running (BlueLoss.lock file a
 
 makeSingleInstance():Promise -/>
   if ISDEV: return Promise.resolve()
-  exists = <- fs.pathExists(getLockFilePath())
+  exists <- fs.pathExists(getLockFilePath())
   if exists:
     console.error(new Error(anotherInstanceErrorMessage))
     return process.exit(1)
