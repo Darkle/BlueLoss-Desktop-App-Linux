@@ -826,7 +826,7 @@ function enableRunOnStartup(firstRun) {
   return _fsExtra2.default.remove(bluelossDesktopFilePath).catch(_logging.logger.error);
 } /*****
   * https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.0.html
-  * Version is the Free Desktop spec version.
+  * "Version" is the Free Desktop spec version.
   */
 function generateDesktopFile() {
   return `
