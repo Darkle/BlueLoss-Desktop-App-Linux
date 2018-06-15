@@ -103,7 +103,7 @@ toggleTrayIconColorSetting():void ->
 generateNotifcationText():String ->
   if getSettings().blueLossEnabled: 'BlueLoss Enabled' else: 'BlueLoss Disabled'
 
-generateEnabledDisabledLabel():string ->
+generateEnabledDisabledLabel():String ->
   `${ if getSettings().blueLossEnabled: 'Disable' else: 'Enable' } BlueLoss`
 
 export {

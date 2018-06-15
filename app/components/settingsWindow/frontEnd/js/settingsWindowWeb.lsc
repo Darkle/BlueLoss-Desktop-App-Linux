@@ -22,15 +22,10 @@ settingsWindowApp = logInDev(app)(initialState, appActions, views, document.body
 
 serverSideEventSource = new EventSource('/sse-update')
 
-serverSideEventSource.onmessage = (e):void ->
-  console.log(e.data)
-
-serverSideEventSource.addEventListener('settingsUpdate', (e):void ->
-  console.log(e.data)
+serverSideEventSource.addEventListener('settingsUpdate', (e) => {
   settingsWindowApp.updateStateOnServerMessage(JSON.parse(e.data))
-)
+})
 
-serverSideEventSource.addEventListener('closeSelf', (e):void ->
-  console.log(e.data)
+serverSideEventSource.addEventListener('closeSelf', () => {
   window.close()
-)
+})

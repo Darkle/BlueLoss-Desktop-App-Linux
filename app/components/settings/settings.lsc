@@ -1,14 +1,14 @@
 import low from 'lowdb'
 import FileSync from 'lowdb/adapters/FileSync'
-import is from 'typa'
 import gawk from 'gawk'
 
-import { tenYearsFromNow } from '../utils.lsc'
-import { DeviceType, SettingsTypes } from '../types/types.lsc'
+
 import { defaultSettings } from './settingsDefaults.lsc'
 import { initSettingsObservers } from './settingsObservers.lsc'
-import { logger } from '../logging/logging.lsc'
 import { getBlueLossSettingsFilePath } from '../bluelossConfig/createBlueLossConfig.lsc'
+import { logSettingsUpdateForVerboseLogging as logSettingsUpdates } from '../logging/logSettingsUpdates.lsc'
+import { updateLastSeenForDevicesLookingForOnStartup } from './devices.lsc'
+import { SettingsTypes } from '../types/types.lsc'
 
 let db = null
 let settings = null
@@ -25,68 +25,11 @@ getSettings() -> settings
 updateSetting(newSettingKey: string, newSettingValue: SettingsTypes):void ->
   settings[newSettingKey] = newSettingValue
   db.set(newSettingKey, newSettingValue).write()
-  logSettingsUpdateForVerboseLogging(newSettingKey, newSettingValue)
+  logSettingsUpdates(newSettingKey, newSettingValue)
 
-addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
-  { deviceId } = deviceToAdd
-  if deviceIsInDevicesToSearchFor(deviceId): return
-  updateSetting('devicesToSearchFor',
-    {...getSettings().devicesToSearchFor, ...{ [ deviceId ]: deviceToAdd }}
-  )
-
-removeNewDeviceToSearchFor(deviceToRemove: DeviceType):void ->
-  { deviceId } = deviceToRemove
-  if !deviceIsInDevicesToSearchFor(deviceId): return
-  updateSetting('devicesToSearchFor', filterDevicesToSearchFor(deviceId))
-
-filterDevicesToSearchFor(deviceIdToRemove: string):Object ->
-  {
-    ...for key deviceId, val device in getSettings().devicesToSearchFor:
-      if deviceId != deviceIdToRemove: { [ deviceId ]: device }
-  }
-
-deviceIsInDevicesToSearchFor(deviceId: string):boolean ->
-  getSettings().devicesToSearchFor[deviceId]
-
-updateDeviceInDevicesToSearchFor(deviceId: string, propName: string, propValue: any):Object ->
-  updateSetting('devicesToSearchFor',
-    {
-      ...getSettings().devicesToSearchFor,
-      ...{
-        [ deviceId ]: {
-          ...getSettings().devicesToSearchFor[deviceId],
-          ...{ [ propName ]: propValue }
-        }
-      }
-    }
-  )
-
-/**
- * When a user starts up BlueLoss after previously exiting, the
- * lastSeen value will be out of date for the devices in
- * devicesToSearchFor. This would cause BlueLoss to lock the
- * system straight away because the lastSeen value + timeToLock
- *  will be less than Date.now(). So to prevent this, we give all
- * devices in devicesToSearchFor a lastSeen of 10 years from now.
- * (when a device is seen again during a scan, lastSeen is updated.)
- */
-updateLastSeenForDevicesLookingForOnStartup():void ->
-  for val { deviceId } in getSettings().devicesToSearchFor:
-    updateDeviceInDevicesToSearchFor(deviceId, 'lastSeen', tenYearsFromNow())
-
-logSettingsUpdateForVerboseLogging(newSettingKey: string, newSettingValue: SettingsTypes):void ->
-  if !getSettings().verboseLogging: return
-  debugMessage = `Updated Setting: updated '${ newSettingKey }' with:`
-  if is.obj(newSettingValue):
-    logger.debug(debugMessage, { [newSettingKey]: newSettingValue })
-  else:
-    logger.debug(`${ debugMessage } ${ newSettingValue }`)
 
 export {
   initSettings,
   updateSetting,
   getSettings,
-  addNewDeviceToSearchFor,
-  removeNewDeviceToSearchFor,
-  updateDeviceInDevicesToSearchFor,
 }
