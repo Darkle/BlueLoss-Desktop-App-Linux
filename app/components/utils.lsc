@@ -3,8 +3,6 @@ import tp from 'timeproxy'
 import { openSettingsWindow } from '../components/settingsWindow/settingsWindow.lsc'
 import { getSettings } from './settings/settings.lsc'
 
-getAppVersion():String -> require('../../package.json').version
-
 setUpDev():void -> if ISDEV && !getSettings().firstRun: openSettingsWindow()
 
 noop() -> return
@@ -24,7 +22,6 @@ range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + sta
 tenYearsFromNow():Number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 
 export {
-  getAppVersion,
   setUpDev,
   noop,
   pipe,

@@ -1483,7 +1483,7 @@ function initTrayMenu() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = exports.getAppVersion = undefined;
+exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = undefined;
 
 var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
@@ -1495,9 +1495,7 @@ var _settings = __webpack_require__(/*! ./settings/settings.lsc */ "./app/compon
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getAppVersion() {
-  return __webpack_require__(/*! ../../package.json */ "./package.json").version;
-}function setUpDev() {
+function setUpDev() {
   true && !(0, _settings.getSettings)().firstRun ? (0, _settingsWindow.openSettingsWindow)() : void 0;
 }function noop() {
   return;
@@ -1535,8 +1533,7 @@ function getAppVersion() {
 
 function tenYearsFromNow() {
   return Date.now() + _timeproxy2.default.FIVE_HUNDRED_WEEKS;
-}exports.getAppVersion = getAppVersion;
-exports.setUpDev = setUpDev;
+}exports.setUpDev = setUpDev;
 exports.noop = noop;
 exports.pipe = pipe;
 exports.curry = curry;
