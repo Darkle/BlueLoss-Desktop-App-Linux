@@ -1,5 +1,6 @@
 import tp from 'timeproxy'
 import execa from 'execa'
+import omit from 'lodash.omit'
 
 import { openSettingsWindow } from '../components/settingsWindow/settingsWindow.lsc'
 import { logger } from '../components/logging/logging.lsc'
@@ -36,6 +37,17 @@ range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + sta
 
 tenYearsFromNow():Number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 
+generateServerSettingsCookie():String ->
+  JSON.stringify(omit(
+    getSettings(),
+    [
+      'trayIconColor',
+      'dateLastCheckedForAppUpdate',
+      'skipUpdateVersion',
+      'firstRun',
+    ]
+  ))
+
 export {
   getScreenResolution,
   getAppVersion,
@@ -48,4 +60,5 @@ export {
   compose,
   identity,
   tenYearsFromNow,
+  generateServerSettingsCookie,
 }

@@ -884,10 +884,6 @@ var _express = __webpack_require__(/*! express */ "express");
 
 var _express2 = _interopRequireDefault(_express);
 
-var _lodash = __webpack_require__(/*! lodash.omit */ "lodash.omit");
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
 var _bodyParser = __webpack_require__(/*! body-parser */ "body-parser");
 
 var _bodyParser2 = _interopRequireDefault(_bodyParser);
@@ -896,15 +892,13 @@ var _ssePusher = __webpack_require__(/*! sse-pusher */ "sse-pusher");
 
 var _ssePusher2 = _interopRequireDefault(_ssePusher);
 
-var _joi = __webpack_require__(/*! joi */ "joi");
-
-var _joi2 = _interopRequireDefault(_joi);
-
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
 
-var _settingsDefaults = __webpack_require__(/*! ../settings/settingsDefaults.lsc */ "./app/components/settings/settingsDefaults.lsc");
+var _validation = __webpack_require__(/*! ./validation.lsc */ "./app/components/server/validation.lsc");
+
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -913,15 +907,7 @@ const frontEndDirPath = _path2.default.resolve(__dirname, '..', 'app', 'componen
 const assetsPath = _path2.default.join(frontEndDirPath, 'assets');
 const jsPath = _path2.default.join(frontEndDirPath, 'js');
 const settingsPagePath = _path2.default.join(frontEndDirPath, 'html', 'settingsWindow.html');
-const postBodyValidationSchema = _joi2.default.object().keys({
-  blueLossEnabled: _joi2.default.boolean(),
-  runOnStartup: _joi2.default.boolean(),
-  devicesToSearchFor: _joi2.default.object(),
-  timeToLock: _joi2.default.number().integer().min(_settingsDefaults.defaultSettings.timeToLock),
-  scanInterval: _joi2.default.number().integer().min(_settingsDefaults.defaultSettings.scanInterval),
-  reportErrors: _joi2.default.boolean(),
-  verboseLogging: _joi2.default.boolean()
-});
+
 const push = (0, _ssePusher2.default)();
 const expressApp = (0, _express2.default)();
 expressApp.use('/assets', _express2.default.static(assetsPath));
@@ -929,10 +915,10 @@ expressApp.use('/js', _express2.default.static(jsPath));
 expressApp.use(_bodyParser2.default.json());
 
 expressApp.get('/', function (req, res) {
-  res.cookie('bluelossSettings', generateCookieSettingsData());
+  res.cookie('bluelossSettings', (0, _utils.generateServerSettingsCookie)());
   return res.sendFile(settingsPagePath);
 });
-expressApp.post('/updatesettings', validateUpdatePost, updateSettingsPostHandler);
+expressApp.post('/updatesettings', _validation.validateUpdatePost, updateSettingsPostHandler);
 expressApp.use('/sse-update', push.handler());
 
 /*****
@@ -954,14 +940,6 @@ function startServer() {
   const [[settingName, newSettingValue]] = Object.entries(req.body);
   (0, _settings.updateSetting)(settingName, newSettingValue);
   return res.end();
-}function validateUpdatePost(req, res, next) {
-  var _Joi$validate;
-
-  const validationError = (_Joi$validate = _joi2.default.validate(req == null ? void 0 : req.body, postBodyValidationSchema)) == null ? void 0 : _Joi$validate.error;
-  if (validationError) {
-    _logging.logger.error(validationError);
-    return res.status(400).end();
-  }return next();
 }function storeServerAddress({ family, address, port }) {
   const ip = family.toLowerCase() === 'ipv6' ? `[${address}]` : address;
   serverAddress = `http://${ip}:${port}`;
@@ -970,14 +948,59 @@ function startServer() {
   return serverAddress;
 }function pushUpdatesToFrontEnd(settingName, settingValue) {
   push('settingsUpdate', { [settingName]: settingValue });
-}function generateCookieSettingsData() {
-  return JSON.stringify((0, _lodash2.default)((0, _settings.getSettings)(), ['trayIconColor', 'dateLastCheckedForAppUpdate', 'skipUpdateVersion', 'firstRun']));
 }function tellAllSettingsWindowsToClose() {
   push('closeSelf', true);
 }exports.startServer = startServer;
 exports.getServerAddress = getServerAddress;
 exports.pushUpdatesToFrontEnd = pushUpdatesToFrontEnd;
 exports.tellAllSettingsWindowsToClose = tellAllSettingsWindowsToClose;
+
+/***/ }),
+
+/***/ "./app/components/server/validation.lsc":
+/*!**********************************************!*\
+  !*** ./app/components/server/validation.lsc ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.validateUpdatePost = undefined;
+
+var _joi = __webpack_require__(/*! joi */ "joi");
+
+var _joi2 = _interopRequireDefault(_joi);
+
+var _settingsDefaults = __webpack_require__(/*! ../settings/settingsDefaults.lsc */ "./app/components/settings/settingsDefaults.lsc");
+
+var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const postBodyValidationSchema = _joi2.default.object().keys({
+  blueLossEnabled: _joi2.default.boolean(),
+  runOnStartup: _joi2.default.boolean(),
+  devicesToSearchFor: _joi2.default.object(),
+  timeToLock: _joi2.default.number().integer().min(_settingsDefaults.defaultSettings.timeToLock),
+  scanInterval: _joi2.default.number().integer().min(_settingsDefaults.defaultSettings.scanInterval),
+  reportErrors: _joi2.default.boolean(),
+  verboseLogging: _joi2.default.boolean()
+});
+
+function validateUpdatePost(req, res, next) {
+  var _Joi$validate;
+
+  const validationError = (_Joi$validate = _joi2.default.validate(req == null ? void 0 : req.body, postBodyValidationSchema)) == null ? void 0 : _Joi$validate.error;
+  if (validationError) {
+    _logging.logger.error(validationError);
+    return res.status(400).end();
+  }return next();
+}exports.validateUpdatePost = validateUpdatePost;
 
 /***/ }),
 
@@ -1437,7 +1460,7 @@ function initTrayMenu() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = exports.getAppVersion = exports.getScreenResolution = undefined;
+exports.generateServerSettingsCookie = exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = exports.getAppVersion = exports.getScreenResolution = undefined;
 
 var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
@@ -1446,6 +1469,10 @@ var _timeproxy2 = _interopRequireDefault(_timeproxy);
 var _execa = __webpack_require__(/*! execa */ "execa");
 
 var _execa2 = _interopRequireDefault(_execa);
+
+var _lodash = __webpack_require__(/*! lodash.omit */ "lodash.omit");
+
+var _lodash2 = _interopRequireDefault(_lodash);
 
 var _settingsWindow = __webpack_require__(/*! ../components/settingsWindow/settingsWindow.lsc */ "./app/components/settingsWindow/settingsWindow.lsc");
 
@@ -1503,6 +1530,8 @@ function getAppVersion() {
 
 function tenYearsFromNow() {
   return Date.now() + _timeproxy2.default.FIVE_HUNDRED_WEEKS;
+}function generateServerSettingsCookie() {
+  return JSON.stringify((0, _lodash2.default)((0, _settings.getSettings)(), ['trayIconColor', 'dateLastCheckedForAppUpdate', 'skipUpdateVersion', 'firstRun']));
 }exports.getScreenResolution = getScreenResolution;
 exports.getAppVersion = getAppVersion;
 exports.setUpDev = setUpDev;
@@ -1514,6 +1543,7 @@ exports.range = range;
 exports.compose = compose;
 exports.identity = identity;
 exports.tenYearsFromNow = tenYearsFromNow;
+exports.generateServerSettingsCookie = generateServerSettingsCookie;
 
 /***/ }),
 

@@ -1,0 +1,25 @@
+import Joi from 'joi'
+
+import { defaultSettings } from '../settings/settingsDefaults.lsc'
+import { logger } from '../logging/logging.lsc'
+
+postBodyValidationSchema = Joi.object().keys({
+  blueLossEnabled: Joi.boolean(),
+  runOnStartup: Joi.boolean(),
+  devicesToSearchFor: Joi.object(),
+  timeToLock: Joi.number().integer().min(defaultSettings.timeToLock),
+  scanInterval: Joi.number().integer().min(defaultSettings.scanInterval),
+  reportErrors: Joi.boolean(),
+  verboseLogging: Joi.boolean(),
+})
+
+validateUpdatePost(req, res, next):Function ->
+  validationError = Joi.validate(req?.body, postBodyValidationSchema)?.error
+  if validationError:
+    logger.error(validationError)
+    return res.status(400).end()
+  next()
+
+export {
+  validateUpdatePost
+}
