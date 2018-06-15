@@ -11,7 +11,7 @@ import { openSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
 let systray = null
 
 initTrayMenu():Promise ->
-  new Promise((resolve):void ->
+  new Promise((resolve) => {
     now systray = new SysTray({
       menu: {
         icon: base64IconData[getTrayIconColor()],
@@ -24,7 +24,7 @@ initTrayMenu():Promise ->
     })
     systray.onClick(systrayClickHandler)
     systray.onReady(resolve)
-  )
+  })
 
 systrayClickHandler(action:Object):void ->
   if action.seq_id === 0: //Open settings window

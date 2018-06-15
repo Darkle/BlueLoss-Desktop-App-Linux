@@ -1,5 +1,4 @@
 
-
 type DeviceType = { deviceName: string, deviceId: string, lastSeen: ?number }
 type SettingsTypes = number | boolean | string | Object
 

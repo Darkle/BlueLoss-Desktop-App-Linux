@@ -1366,7 +1366,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 let systray = null;
 
 function initTrayMenu() {
-  return new Promise(function (resolve) {
+  return new Promise(resolve => {
     systray = new _systray2.default({
       menu: {
         icon: _iconsData.base64IconData[getTrayIconColor()],
@@ -1378,7 +1378,7 @@ function initTrayMenu() {
       copyDir: true // copy go tray binary to outside directory, useful for packing tool like pkg.
     });
     systray.onClick(systrayClickHandler);
-    systray.onReady(resolve);
+    return systray.onReady(resolve);
   });
 }function systrayClickHandler(action) {
   if (action.seq_id === 0) {
