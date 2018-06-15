@@ -2,41 +2,36 @@ import './config/env.lsc'
 
 import { createBlueLossConfig as initAppConfigFiles } from './components/bluelossConfig/createBlueLossConfig.lsc'
 import { makeSingleInstance } from './components/makeSingleInstance.lsc'
-import { logger, addWinstonFileLogging } from './components/logging/logging.lsc'
-import { scanForBlueToothDevices } from './components/bluetooth/bluetoothScan.lsc'
 import { initSettings, updateSetting, getSettings } from './components/settings/settings.lsc'
-import { setUpDev } from './components/utils.lsc'
+import { initLogging, logger } from './components/logging/logging.lsc'
 import { initTrayMenu } from './components/tray/tray.lsc'
+import { startServer } from './components/server/server.lsc'
+import { setUpDev } from './components/utils.lsc'
+import { scanForBlueToothDevices } from './components/bluetooth/bluetoothScan.lsc'
 import { openSettingsWindow } from './components/settingsWindow/settingsWindow.lsc'
 import { enableRunOnStartup } from './components/runOnStartup.lsc'
-import { startServer } from './components/server/server.lsc'
-// // import { checkForUpdate as checkForAppUpdate } from '../appUpdates/appUpdates.lsc'
 
 initAppConfigFiles()
   .then(makeSingleInstance)
   .then(initSettings)
-  .then(addWinstonFileLogging)
+  .then(initLogging)
   .then(initTrayMenu)
   .then(startServer)
   .then(setUpDev)
+  .then(firstRunSetup)
   .then(scanForBlueToothDevices)
-  // // .then(checkForAppUpdate)
-  .then(() ->
-    { firstRun } = getSettings()
-    if !firstRun: return
-    updateSetting('firstRun', !firstRun)
-    enableRunOnStartup(firstRun)
-      .then(() -> openSettingsWindow(firstRun))
-  )
-  .catch((err) => {
-    logger.error(err)
-    process.exit(1)
-  })
+  .catch(bailOnFatalError)
 
+firstRunSetup():Promise ->
+  { firstRun } = getSettings()
+  if !firstRun: return Promise.resolve()
+  updateSetting('firstRun', !firstRun)
+  enableRunOnStartup(firstRun).then(openSettingsWindow)
 
-process.on('unhandledRejection', logger.error)
-process.on('uncaughtException', (err) => {
-  logger.error(err)
+process.on('unhandledRejection', bailOnFatalError)
+process.on('uncaughtException', bailOnFatalError)
+
+bailOnFatalError(err):void ->
+  console.error(err)
+  logger?.error(err)
   process.exit(1)
-})
-

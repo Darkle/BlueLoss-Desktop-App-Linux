@@ -3,11 +3,11 @@ import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
 import ssePusher from 'sse-pusher'
+import omit from 'lodash.omit'
 
 import { logger } from '../logging/logging.lsc'
-import { updateSetting } from '../settings/settings.lsc'
+import { updateSetting, getSettings } from '../settings/settings.lsc'
 import { validateUpdatePost } from './validation.lsc'
-import { generateServerSettingsCookie } from '../utils.lsc'
 
 let serverAddress = null
 frontEndDirPath = path.resolve(__dirname, '..', 'app', 'components', 'settingsWindow', 'frontEnd')
@@ -20,7 +20,6 @@ expressApp = express()
 expressApp.use('/assets', express.static(assetsPath))
 expressApp.use('/js', express.static(jsPath))
 expressApp.use(bodyParser.json())
-
 expressApp.get('/', (req, res) ->
   res.cookie('bluelossSettings', generateServerSettingsCookie())
   res.sendFile(settingsPagePath)
@@ -39,11 +38,11 @@ startServer():Promise ->
     })
   })
 
+/*****
+* The frontend only updates (sends back) one setting at a time.
+* Object.entries returns an array of arrays of key/value pairs for an object.
+*/
 updateSettingsPostHandler(req, res):Function ->
-  /*****
-  * The frontend only updates (sends back) one setting at a time.
-  * Object.entries returns an array of arrays of key/value pairs for an object.
-  */
   [[settingName, newSettingValue]] = Object.entries(req.body)
   updateSetting(settingName, newSettingValue)
   return res.end()
@@ -51,7 +50,7 @@ updateSettingsPostHandler(req, res):Function ->
 storeServerAddress({family, address, port}):void ->
   ip = if family.toLowerCase() === 'ipv6': `[${ address }]` else: address
   now serverAddress = `http://${ ip }:${ port }`
-  logger.debug('serverAddress: ', serverAddress)
+  logger.verbose('serverAddress: ', serverAddress)
 
 getServerAddress():String -> serverAddress
 
@@ -60,6 +59,17 @@ pushUpdatesToFrontEnd(settingName, settingValue):void ->
 
 tellAllSettingsWindowsToClose():void ->
   push('closeSelf', true)
+
+generateServerSettingsCookie():String ->
+  JSON.stringify(omit(
+    getSettings(),
+    [
+      'trayIconColor',
+      'dateLastCheckedForAppUpdate',
+      'skipUpdateVersion',
+      'firstRun',
+    ]
+  ))
 
 export{
   startServer,

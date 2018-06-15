@@ -102,43 +102,37 @@ var _createBlueLossConfig = __webpack_require__(/*! ./components/bluelossConfig/
 
 var _makeSingleInstance = __webpack_require__(/*! ./components/makeSingleInstance.lsc */ "./app/components/makeSingleInstance.lsc");
 
+var _settings = __webpack_require__(/*! ./components/settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
 var _logging = __webpack_require__(/*! ./components/logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
-var _bluetoothScan = __webpack_require__(/*! ./components/bluetooth/bluetoothScan.lsc */ "./app/components/bluetooth/bluetoothScan.lsc");
+var _tray = __webpack_require__(/*! ./components/tray/tray.lsc */ "./app/components/tray/tray.lsc");
 
-var _settings = __webpack_require__(/*! ./components/settings/settings.lsc */ "./app/components/settings/settings.lsc");
+var _server = __webpack_require__(/*! ./components/server/server.lsc */ "./app/components/server/server.lsc");
 
 var _utils = __webpack_require__(/*! ./components/utils.lsc */ "./app/components/utils.lsc");
 
-var _tray = __webpack_require__(/*! ./components/tray/tray.lsc */ "./app/components/tray/tray.lsc");
+var _bluetoothScan = __webpack_require__(/*! ./components/bluetooth/bluetoothScan.lsc */ "./app/components/bluetooth/bluetoothScan.lsc");
 
 var _settingsWindow = __webpack_require__(/*! ./components/settingsWindow/settingsWindow.lsc */ "./app/components/settingsWindow/settingsWindow.lsc");
 
 var _runOnStartup = __webpack_require__(/*! ./components/runOnStartup.lsc */ "./app/components/runOnStartup.lsc");
 
-var _server = __webpack_require__(/*! ./components/server/server.lsc */ "./app/components/server/server.lsc");
+(0, _createBlueLossConfig.createBlueLossConfig)().then(_makeSingleInstance.makeSingleInstance).then(_settings.initSettings).then(_logging.initLogging).then(_tray.initTrayMenu).then(_server.startServer).then(_utils.setUpDev).then(firstRunSetup).then(_bluetoothScan.scanForBlueToothDevices).catch(bailOnFatalError);
 
-// // import { checkForUpdate as checkForAppUpdate } from '../appUpdates/appUpdates.lsc'
-
-(0, _createBlueLossConfig.createBlueLossConfig)().then(_makeSingleInstance.makeSingleInstance).then(_settings.initSettings).then(_logging.addWinstonFileLogging).then(_tray.initTrayMenu).then(_server.startServer).then(_utils.setUpDev).then(_bluetoothScan.scanForBlueToothDevices)
-// // .then(checkForAppUpdate)
-.then(function () {
+function firstRunSetup() {
   const { firstRun } = (0, _settings.getSettings)();
-  if (!firstRun) return;
+  if (!firstRun) return Promise.resolve();
   (0, _settings.updateSetting)('firstRun', !firstRun);
-  return (0, _runOnStartup.enableRunOnStartup)(firstRun).then(function () {
-    return (0, _settingsWindow.openSettingsWindow)(firstRun);
-  });
-}).catch(err => {
-  _logging.logger.error(err);
-  return process.exit(1);
-});
+  return (0, _runOnStartup.enableRunOnStartup)(firstRun).then(_settingsWindow.openSettingsWindow);
+}process.on('unhandledRejection', bailOnFatalError);
+process.on('uncaughtException', bailOnFatalError);
 
-process.on('unhandledRejection', _logging.logger.error);
-process.on('uncaughtException', err => {
-  _logging.logger.error(err);
-  return process.exit(1);
-});
+function bailOnFatalError(err) {
+  console.error(err);
+  _logging.logger == null ? void 0 : _logging.logger.error(err);
+  process.exit(1);
+}
 
 /***/ }),
 
@@ -159,7 +153,11 @@ exports.getChromePrefs = exports.getFirefoxPrefsJs = exports.getFirefoxUserChrom
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _utils = __webpack_require__(/*! ../../utils.lsc */ "./app/components/utils.lsc");
+var _execa = __webpack_require__(/*! execa */ "execa");
+
+var _execa2 = _interopRequireDefault(_execa);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function getFirefoxUserChrome() {
   return `
@@ -185,7 +183,7 @@ user_pref("browser.tabs.warnOnCloseOtherTabs", false);
   * 127.0.0.1
   */
 function getChromePrefs() {
-  const screenResolution = (0, _utils.getScreenResolution)();
+  const screenResolution = getScreenResolution();
   if (!screenResolution) return {};
   const browserWindowPosition = generateBrowserWindowPosition(screenResolution);
   return {
@@ -235,7 +233,16 @@ function generateBrowserWindowPosition({ screenHeight, screenWidth }) {
   };
 }
 
-exports.getFirefoxUserChrome = getFirefoxUserChrome;
+function getScreenResolution() {
+  try {
+    const [width, height] = _execa2.default.shellSync(`xrandr |grep \\* |awk '{print $1}'`).stdout.split('x');
+    return { screenWidth: Number(width), screenHeight: Number(height) };
+  } catch (e) {
+    //winston logger isn't ready yet here, so fall back to using console
+    console.error(e);
+    return null;
+  }
+}exports.getFirefoxUserChrome = getFirefoxUserChrome;
 exports.getFirefoxPrefsJs = getFirefoxPrefsJs;
 exports.getChromePrefs = getChromePrefs;
 
@@ -334,10 +341,6 @@ var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
 var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
-var _delay = __webpack_require__(/*! delay */ "delay");
-
-var _delay2 = _interopRequireDefault(_delay);
-
 var _handleScanResults = __webpack_require__(/*! ./handleScanResults.lsc */ "./app/components/bluetooth/handleScanResults.lsc");
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
@@ -346,12 +349,18 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/compo
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/*****
+* We don't return a promise here as we want scanForBlueToothDevices to
+* be spun off seperately. Also, if we returned a promise here that calls
+* itself recursively we get stuck in appMain.lsc.
+*/
 function scanForBlueToothDevices() {
   if (!(0, _settings.getSettings)().blueLossEnabled) scheduleScan();
-  _logging.logger.debug('=======New Scan Started=======');
-  return _execa2.default.shell('hcitool scan').then(_handleScanResults.handleScanResults).catch(_logging.logger.error).then(scheduleScan);
+  _logging.logger.verbose('=======New Scan Started=======');
+  _execa2.default.shell('hcitool scan').then(_handleScanResults.handleScanResults).catch(_logging.logger.error);
+  scheduleScan();
 }function scheduleScan() {
-  return (0, _delay2.default)(_timeproxy2.default`${(0, _settings.getSettings)().scanInterval} seconds`).then(scanForBlueToothDevices);
+  return setTimeout(scanForBlueToothDevices, _timeproxy2.default`${(0, _settings.getSettings)().scanInterval} seconds`);
 }exports.scanForBlueToothDevices = scanForBlueToothDevices;
 
 /***/ }),
@@ -391,7 +400,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function handleScanResults(spawnCommandResult) {
   const deviceList = processScanResultsText(spawnCommandResult);
-  _logging.logger.debug(`Found these Bluetooth devices in scan: `, { deviceList });
+  _logging.logger.verbose(`Found these Bluetooth devices in scan: `, { deviceList });
 
   const { devicesToSearchFor } = (0, _settings.getSettings)();
   const timeStampedDeviceList = addTimeStampToSeenDevices(deviceList);
@@ -601,8 +610,6 @@ var _typa = __webpack_require__(/*! typa */ "typa");
 
 var _typa2 = _interopRequireDefault(_typa);
 
-var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
-
 var _logging = __webpack_require__(/*! ./logging.lsc */ "./app/components/logging/logging.lsc");
 
 var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/types/types.lsc");
@@ -610,12 +617,11 @@ var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/typ
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function logSettingsUpdateForVerboseLogging(newSettingKey, newSettingValue) {
-  if (!(0, _settings.getSettings)().verboseLogging) return;
   const debugMessage = `Updated Setting: updated '${newSettingKey}' with:`;
   if (_typa2.default.obj(newSettingValue)) {
-    _logging.logger.debug(debugMessage, { [newSettingKey]: newSettingValue });
+    _logging.logger.verbose(debugMessage, { [newSettingKey]: newSettingValue });
   } else {
-    _logging.logger.debug(`${debugMessage} ${newSettingValue}`);
+    _logging.logger.verbose(`${debugMessage} ${newSettingValue}`);
   }
 }exports.logSettingsUpdateForVerboseLogging = logSettingsUpdateForVerboseLogging;
 
@@ -634,7 +640,7 @@ function logSettingsUpdateForVerboseLogging(newSettingKey, newSettingValue) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.addWinstonFileLogging = exports.removeRollbarLogging = exports.addRollbarLogging = exports.logger = undefined;
+exports.initLogging = exports.changeLogLevel = exports.addWinstonFileLogging = exports.removeRollbarLogging = exports.addRollbarLogging = exports.logger = undefined;
 
 var _path = __webpack_require__(/*! path */ "path");
 
@@ -652,49 +658,66 @@ var _createBlueLossConfig = __webpack_require__(/*! ../bluelossConfig/createBlue
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+let logger = {};
+const fiveHundredKilobytes = 500000;
 const rollbarTransportOptions = {
   name: 'rollbarTransport',
   level: 'error',
   handleExceptions: true,
   humanReadableUnhandledException: true
+};
 
-  // https://github.com/winstonjs/winston/tree/2.4.0
-};const logger = new _winston2.default.Logger({
-  level: 'debug',
-  exitOnError: false
-});
-
-if (true) {
-  logger.add(_winston2.default.transports.Console, {
-    handleExceptions: true,
-    humanReadableUnhandledException: true
-    // json: true
+function initLogging() {
+  /*****
+  * Note: we're using the old Winston 2.4 branch: https://github.com/winstonjs/winston/tree/2.4.0
+  */
+  exports.logger = logger = new _winston2.default.Logger({
+    level: initialLogLevel(),
+    exitOnError: false
   });
-} // dont send errors to rollbar in dev && only if enabled.
-if (false) {}
-/**
-* We also need to enable/disable the rollbar module itself as well,
-* as it is set to report uncaught exceptions as well as logging
-* caught errors.
-*/
-function addRollbarLogging() {
+
+  addWinstonFileLogging();
+
+  if (true) {
+    logger.add(_winston2.default.transports.Console, {
+      handleExceptions: true,
+      humanReadableUnhandledException: true
+      // json: true
+    });
+  } /*****
+    * We dont send errors to rollbar in dev and also only if enabled.
+    */
+  if (false) {}
+}function addRollbarLogging() {
+  /**
+  * We also need to enable/disable the rollbar module itself as well,
+  * as it is set to report uncaught exceptions as well as logging
+  * caught errors.
+  */
   _customRollbarTransport.rollbarLogger.configure({ enabled: true });
   logger.add(_customRollbarTransport.CustomRollbarTransport, rollbarTransportOptions);
 }function removeRollbarLogging() {
   _customRollbarTransport.rollbarLogger.configure({ enabled: false });
   logger.remove('rollbarTransport');
 }function addWinstonFileLogging() {
-  return _winston2.default.add(_winston2.default.transports.File, {
+  logger.add(_winston2.default.transports.File, {
     filename: _path2.default.join((0, _createBlueLossConfig.getBlueLossLogsFolderPath)(), 'BlueLoss.log.txt'),
-    maxsize: 500000, // 500KB
+    maxsize: fiveHundredKilobytes,
     maxFiles: 6,
     prettyPrint: true,
-    depth: 10
+    depth: 10,
+    level: 'verbose'
   });
+}function initialLogLevel() {
+  if (true) return 'verbose';else {}
+}function changeLogLevel(level) {
+  logger.level = level;
 }exports.logger = logger;
 exports.addRollbarLogging = addRollbarLogging;
 exports.removeRollbarLogging = removeRollbarLogging;
 exports.addWinstonFileLogging = addWinstonFileLogging;
+exports.changeLogLevel = changeLogLevel;
+exports.initLogging = initLogging;
 
 /***/ }),
 
@@ -892,13 +915,15 @@ var _ssePusher = __webpack_require__(/*! sse-pusher */ "sse-pusher");
 
 var _ssePusher2 = _interopRequireDefault(_ssePusher);
 
+var _lodash = __webpack_require__(/*! lodash.omit */ "lodash.omit");
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
 
 var _validation = __webpack_require__(/*! ./validation.lsc */ "./app/components/server/validation.lsc");
-
-var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -913,9 +938,8 @@ const expressApp = (0, _express2.default)();
 expressApp.use('/assets', _express2.default.static(assetsPath));
 expressApp.use('/js', _express2.default.static(jsPath));
 expressApp.use(_bodyParser2.default.json());
-
 expressApp.get('/', function (req, res) {
-  res.cookie('bluelossSettings', (0, _utils.generateServerSettingsCookie)());
+  res.cookie('bluelossSettings', generateServerSettingsCookie());
   return res.sendFile(settingsPagePath);
 });
 expressApp.post('/updatesettings', _validation.validateUpdatePost, updateSettingsPostHandler);
@@ -932,24 +956,26 @@ function startServer() {
     });
     return listener;
   });
-}function updateSettingsPostHandler(req, res) {
-  /*****
+} /*****
   * The frontend only updates (sends back) one setting at a time.
   * Object.entries returns an array of arrays of key/value pairs for an object.
   */
+function updateSettingsPostHandler(req, res) {
   const [[settingName, newSettingValue]] = Object.entries(req.body);
   (0, _settings.updateSetting)(settingName, newSettingValue);
   return res.end();
 }function storeServerAddress({ family, address, port }) {
   const ip = family.toLowerCase() === 'ipv6' ? `[${address}]` : address;
   serverAddress = `http://${ip}:${port}`;
-  _logging.logger.debug('serverAddress: ', serverAddress);
+  _logging.logger.verbose('serverAddress: ', serverAddress);
 }function getServerAddress() {
   return serverAddress;
 }function pushUpdatesToFrontEnd(settingName, settingValue) {
   push('settingsUpdate', { [settingName]: settingValue });
 }function tellAllSettingsWindowsToClose() {
   push('closeSelf', true);
+}function generateServerSettingsCookie() {
+  return JSON.stringify((0, _lodash2.default)((0, _settings.getSettings)(), ['trayIconColor', 'dateLastCheckedForAppUpdate', 'skipUpdateVersion', 'firstRun']));
 }exports.startServer = startServer;
 exports.getServerAddress = getServerAddress;
 exports.pushUpdatesToFrontEnd = pushUpdatesToFrontEnd;
@@ -1155,8 +1181,6 @@ const defaultSettings = {
   timeToLock: 2,
   reportErrors: true,
   firstRun: true,
-  dateLastCheckedForAppUpdate: Date.now(),
-  skipUpdateVersion: '0',
   scanInterval: 30,
   verboseLogging: false
 };
@@ -1203,9 +1227,8 @@ function initSettingsObservers(settings) {
     if (enabled) (0, _runOnStartup.enableRunOnStartup)().catch();else (0, _runOnStartup.disableRunOnStartup)().catch();
   });
   _gawk2.default.watch(settings, ['verboseLogging'], function (enabled) {
-    console.log('switch to verbose logging');
-  } //TODO: switch to verbose logging
-  );
+    (0, _logging.changeLogLevel)(enabled ? 'verbose' : 'error');
+  });
 }exports.initSettingsObservers = initSettingsObservers;
 
 /***/ }),
@@ -1460,23 +1483,13 @@ function initTrayMenu() {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.generateServerSettingsCookie = exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = exports.getAppVersion = exports.getScreenResolution = undefined;
+exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = exports.getAppVersion = undefined;
 
 var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
 var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
-var _execa = __webpack_require__(/*! execa */ "execa");
-
-var _execa2 = _interopRequireDefault(_execa);
-
-var _lodash = __webpack_require__(/*! lodash.omit */ "lodash.omit");
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
 var _settingsWindow = __webpack_require__(/*! ../components/settingsWindow/settingsWindow.lsc */ "./app/components/settingsWindow/settingsWindow.lsc");
-
-var _logging = __webpack_require__(/*! ../components/logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
 var _settings = __webpack_require__(/*! ./settings/settings.lsc */ "./app/components/settings/settings.lsc");
 
@@ -1484,16 +1497,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function getAppVersion() {
   return __webpack_require__(/*! ../../package.json */ "./package.json").version;
-}function getScreenResolution() {
-  try {
-    const [width, height] = _execa2.default.shellSync(`xrandr |grep \\* |awk '{print $1}'`).stdout.split('x');
-    return { screenWidth: Number(width), screenHeight: Number(height) };
-  } catch (e) {
-    _logging.logger.error(e);
-    return null;
-  }
 }function setUpDev() {
-  true && !(0, _settings.getSettings)().firstRun ? (0, _settingsWindow.openSettingsWindow)().catch(_logging.logger.error) : void 0;
+  true && !(0, _settings.getSettings)().firstRun ? (0, _settingsWindow.openSettingsWindow)() : void 0;
 }function noop() {
   return;
 }function pipe(...fns) {
@@ -1530,10 +1535,7 @@ function getAppVersion() {
 
 function tenYearsFromNow() {
   return Date.now() + _timeproxy2.default.FIVE_HUNDRED_WEEKS;
-}function generateServerSettingsCookie() {
-  return JSON.stringify((0, _lodash2.default)((0, _settings.getSettings)(), ['trayIconColor', 'dateLastCheckedForAppUpdate', 'skipUpdateVersion', 'firstRun']));
-}exports.getScreenResolution = getScreenResolution;
-exports.getAppVersion = getAppVersion;
+}exports.getAppVersion = getAppVersion;
 exports.setUpDev = setUpDev;
 exports.noop = noop;
 exports.pipe = pipe;
@@ -1543,7 +1545,6 @@ exports.range = range;
 exports.compose = compose;
 exports.identity = identity;
 exports.tenYearsFromNow = tenYearsFromNow;
-exports.generateServerSettingsCookie = generateServerSettingsCookie;
 
 /***/ }),
 
@@ -1579,7 +1580,7 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect app/appMain-compiled.js","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","body-parser":"^1.18.3","delay":"^3.0.0","dotenv":"^5.0.1","execa":"^0.10.0","express":"^4.16.3","formbase":"^6.0.4","fs-extra":"^6.0.1","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","joi":"^13.4.0","js-cookie":"^2.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","modern-normalize":"^0.4.0","ono":"^4.0.5","parallel-webpack":"^2.3.0","promise-rat-race":"^1.5.1","rollbar":"^2.4.1","sse-pusher":"^1.1.1","systray":"^1.0.5","the-answer":"^1.0.0","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.2","nexe":"^2.0.0-rc.29","nodemon":"^1.17.5","pkg":"^4.3.1","rollup":"^0.59.4","rollup-plugin-babel":"^3.0.4","rollup-plugin-commonjs":"^9.1.3","rollup-plugin-json":"^3.0.0","rollup-plugin-node-resolve":"^3.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect app/appMain-compiled.js","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","body-parser":"^1.18.3","dotenv":"^5.0.1","execa":"^0.10.0","express":"^4.16.3","formbase":"^6.0.4","fs-extra":"^6.0.1","gawk":"^4.4.5","got":"^8.3.0","hyperapp":"^1.2.5","is-empty":"^1.2.0","joi":"^13.4.0","js-cookie":"^2.2.0","lock-system":"^1.3.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","modern-normalize":"^0.4.0","ono":"^4.0.5","parallel-webpack":"^2.3.0","promise-rat-race":"^1.5.1","rollbar":"^2.4.1","sse-pusher":"^1.1.1","systray":"^1.0.5","the-answer":"^1.0.0","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.2","nexe":"^2.0.0-rc.29","nodemon":"^1.17.5","pkg":"^4.3.1","rollup":"^0.59.4","rollup-plugin-babel":"^3.0.4","rollup-plugin-commonjs":"^9.1.3","rollup-plugin-json":"^3.0.0","rollup-plugin-node-resolve":"^3.3.0","semver":"^5.5.0","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
 
 /***/ }),
 
@@ -1591,17 +1592,6 @@ module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1
 /***/ (function(module, exports) {
 
 module.exports = require("body-parser");
-
-/***/ }),
-
-/***/ "delay":
-/*!************************!*\
-  !*** external "delay" ***!
-  \************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("delay");
 
 /***/ }),
 

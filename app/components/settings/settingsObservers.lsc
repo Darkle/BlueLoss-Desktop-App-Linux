@@ -1,6 +1,6 @@
 import gawk from 'gawk'
 
-import { addRollbarLogging, removeRollbarLogging } from '../logging/logging.lsc'
+import { addRollbarLogging, removeRollbarLogging, changeLogLevel } from '../logging/logging.lsc'
 import { enableRunOnStartup, disableRunOnStartup } from '../runOnStartup.lsc'
 import { pushUpdatesToFrontEnd } from '../server/server.lsc'
 
@@ -17,8 +17,7 @@ initSettingsObservers(settings:Object):void ->
     else: disableRunOnStartup().catch()
   )
   gawk.watch(settings, ['verboseLogging'], (enabled: Boolean):void ->
-    console.log('switch to verbose logging')
-    //TODO: switch to verbose logging
+    changeLogLevel(if enabled: 'verbose' else: 'error')
   )
 
 export {

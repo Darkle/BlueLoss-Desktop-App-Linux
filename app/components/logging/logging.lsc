@@ -6,6 +6,8 @@ import { CustomRollbarTransport, rollbarLogger } from './customRollbarTransport.
 import { getSettings } from '../settings/settings.lsc'
 import { getBlueLossLogsFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 
+let logger = {}
+fiveHundredKilobytes = 500000
 rollbarTransportOptions = {
   name: 'rollbarTransport',
   level: 'error',
@@ -13,26 +15,35 @@ rollbarTransportOptions = {
   humanReadableUnhandledException: true,
 }
 
-// https://github.com/winstonjs/winston/tree/2.4.0
-logger = new winston.Logger({
-  level: 'debug',
-  exitOnError: false
-})
-
-if ISDEV:
-  logger.add(winston.transports.Console, {
-    handleExceptions: true,
-    humanReadableUnhandledException: true,
-    // json: true
+initLogging():void ->
+  /*****
+  * Note: we're using the old Winston 2.4 branch: https://github.com/winstonjs/winston/tree/2.4.0
+  */
+  now logger = new winston.Logger({
+    level: initialLogLevel(),
+    exitOnError: false
   })
-// dont send errors to rollbar in dev && only if enabled.
-if !ISDEV and getSettings().reportErrors: addRollbarLogging()
-/**
-* We also need to enable/disable the rollbar module itself as well,
-* as it is set to report uncaught exceptions as well as logging
-* caught errors.
-*/
+
+  addWinstonFileLogging()
+
+  if ISDEV:
+    logger.add(winston.transports.Console, {
+      handleExceptions: true,
+      humanReadableUnhandledException: true,
+      // json: true
+    })
+  /*****
+  * We dont send errors to rollbar in dev and also only if enabled.
+  */
+  if !ISDEV and getSettings().reportErrors:
+    addRollbarLogging()
+
 addRollbarLogging():void ->
+  /**
+  * We also need to enable/disable the rollbar module itself as well,
+  * as it is set to report uncaught exceptions as well as logging
+  * caught errors.
+  */
   rollbarLogger.configure({enabled: true})
   logger.add(CustomRollbarTransport, rollbarTransportOptions)
 
@@ -40,21 +51,30 @@ removeRollbarLogging():void ->
   rollbarLogger.configure({enabled: false})
   logger.remove('rollbarTransport')
 
-addWinstonFileLogging():Promise ->
-  winston.add(
+addWinstonFileLogging():void ->
+  logger.add(
     winston.transports.File,
     {
       filename: path.join(getBlueLossLogsFolderPath(), 'BlueLoss.log.txt'),
-      maxsize: 500000,  // 500KB
+      maxsize: fiveHundredKilobytes,
       maxFiles: 6,
       prettyPrint: true,
-      depth: 10
+      depth: 10,
+      level: 'verbose'
     }
   )
+
+initialLogLevel():String ->
+  if ISDEV || getSettings().verboseLogging: 'verbose' else: 'error'
+
+changeLogLevel(level):void ->
+  logger.level = level
 
 export {
   logger,
   addRollbarLogging,
   removeRollbarLogging,
   addWinstonFileLogging,
+  changeLogLevel,
+  initLogging,
 }

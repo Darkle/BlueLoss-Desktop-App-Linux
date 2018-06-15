@@ -1,4 +1,4 @@
-import { getScreenResolution } from '../../utils.lsc'
+import execa from 'execa'
 
 getFirefoxUserChrome():string -> `
 @-moz-document url(chrome://browser/content/browser.xul) {
@@ -76,6 +76,18 @@ generateBrowserWindowPosition({ screenHeight, screenWidth }):Object ->
       "right": Math.round((screenWidth/2) + (910/2))
     }
   )
+
+getScreenResolution():Object|null ->
+  try:
+    [ width, height ] = execa
+      .shellSync(`xrandr |grep \\* |awk '{print $1}'`)
+      .stdout
+      .split('x')
+    return { screenWidth: Number(width), screenHeight: Number(height) }
+  catch(e):
+    //winston logger isn't ready yet here, so fall back to using console
+    console.error(e)
+    return null
 
 export {
   getFirefoxUserChrome,

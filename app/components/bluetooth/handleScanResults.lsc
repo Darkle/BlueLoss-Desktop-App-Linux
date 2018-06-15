@@ -8,7 +8,7 @@ import { lockSystemIfDeviceLost } from './lockCheck.lsc'
 
 handleScanResults(spawnCommandResult:Object):void ->
   deviceList = processScanResultsText(spawnCommandResult)
-  logger.debug(`Found these Bluetooth devices in scan: `, { deviceList })
+  logger.verbose(`Found these Bluetooth devices in scan: `, { deviceList })
 
   { devicesToSearchFor } = getSettings()
   timeStampedDeviceList = addTimeStampToSeenDevices(deviceList)

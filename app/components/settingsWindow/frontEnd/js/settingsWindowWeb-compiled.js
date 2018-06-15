@@ -108,8 +108,6 @@ const defaultSettings = {
   timeToLock: 2,
   reportErrors: true,
   firstRun: true,
-  dateLastCheckedForAppUpdate: Date.now(),
-  skipUpdateVersion: '0',
   scanInterval: 30,
   verboseLogging: false
 };

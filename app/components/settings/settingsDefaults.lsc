@@ -7,8 +7,6 @@ defaultSettings: {
   timeToLock: Number,
   reportErrors: Boolean,
   firstRun: Boolean,
-  dateLastCheckedForAppUpdate: Number,
-  skipUpdateVersion: String,
   scanInterval: Number,
   verboseLogging: Boolean
 } = {
@@ -19,8 +17,6 @@ defaultSettings: {
   timeToLock: 2,
   reportErrors: true,
   firstRun: true,
-  dateLastCheckedForAppUpdate: Date.now(),
-  skipUpdateVersion: '0',
   scanInterval: 30,
   verboseLogging: false
 }
