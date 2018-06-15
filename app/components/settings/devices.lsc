@@ -1,4 +1,3 @@
-
 import { getSettings, updateSetting } from './settings.lsc'
 import { tenYearsFromNow } from '../utils.lsc'
 import { DeviceType } from '../types/types.lsc'

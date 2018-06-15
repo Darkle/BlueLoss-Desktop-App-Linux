@@ -932,6 +932,7 @@ const settingsPagePath = _path2.default.join(frontEndDirPath, 'html', 'settingsW
 
 const push = (0, _ssePusher2.default)();
 const expressApp = (0, _express2.default)();
+
 expressApp.use('/assets', _express2.default.static(assetsPath));
 expressApp.use('/js', _express2.default.static(jsPath));
 expressApp.use(_bodyParser2.default.json());

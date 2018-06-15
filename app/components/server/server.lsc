@@ -17,6 +17,7 @@ settingsPagePath = path.join(frontEndDirPath, 'html', 'settingsWindow.html')
 
 push = ssePusher()
 expressApp = express()
+
 expressApp.use('/assets', express.static(assetsPath))
 expressApp.use('/js', express.static(jsPath))
 expressApp.use(bodyParser.json())
