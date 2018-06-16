@@ -2,12 +2,11 @@ import { promisify } from 'util'
 import { exec } from 'child_process'
 import path from 'path'
 
-import opn from 'opn'
 import pRatRace from 'promise-rat-race'
 
 import { getServerAddress, tellAllSettingsWindowsToClose } from '../server/server.lsc'
 import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
-import { capitalizeFirstLetter, getExecNameFromStdOut } from '../utils.lsc'
+import { capitalizeFirstLetter, getExecNameFromStdOut, xdgOpenServerWebPage } from '../utils.lsc'
 
 pExec = promisify(exec)
 
@@ -23,13 +22,13 @@ openSettingsWindow():void ->
   tellAllSettingsWindowsToClose()
 
   pRatRace([
-    pExec('command -v google-chrome'),
-    pExec('command -v chromium-browser'),
     pExec('command -v firefox'),
+    pExec('command -v chromium-browser'),
+    pExec('command -v google-chrome'),
   ])
   .then(getExecNameFromStdOut)
   .then(openSettingsWindowInPreferredBrowser)
-  .catch(() -> opn(getServerAddress()))  //fall back to opening with OS's default browser
+  .catch(xdgOpenServerWebPage)  //fall back to opening with OS's default browser
 
 openSettingsWindowInPreferredBrowser(browser):Promise ->
   if browser === 'firefox': return pExec(generateFirefoxCliParams())

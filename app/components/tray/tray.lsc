@@ -1,10 +1,9 @@
 import SysTray from 'systray'
-import opn from 'opn'
 
 import { updateSetting, getSettings } from '../settings/settings.lsc'
 import { base64IconData } from './iconsData.lsc'
 import { sendOSnotification } from '../sendOSnotification.lsc'
-import { getBlueLossLogsFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
+import { xdgOpenLogsFolder } from '../utils.lsc'
 import { logger } from '../logging/logging.lsc'
 import { openSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
 
@@ -45,7 +44,7 @@ systrayClickHandler(action:Object):void ->
     toggleTrayIconColorSetting()
     updateSystrayIcon(action)
   if action.seq_id === 3:
-    opn(getBlueLossLogsFolderPath()).catch(logger.error)
+    xdgOpenLogsFolder().catch(logger.error)
   if action.seq_id === 4:
     systray.kill()
 

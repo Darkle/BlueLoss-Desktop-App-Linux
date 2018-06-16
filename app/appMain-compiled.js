@@ -1273,10 +1273,6 @@ var _path = __webpack_require__(/*! path */ "path");
 
 var _path2 = _interopRequireDefault(_path);
 
-var _opn = __webpack_require__(/*! opn */ "opn");
-
-var _opn2 = _interopRequireDefault(_opn);
-
 var _promiseRatRace = __webpack_require__(/*! promise-rat-race */ "promise-rat-race");
 
 var _promiseRatRace2 = _interopRequireDefault(_promiseRatRace);
@@ -1302,9 +1298,7 @@ function openSettingsWindow() {
   */
   (0, _server.tellAllSettingsWindowsToClose)();
 
-  (0, _promiseRatRace2.default)([pExec('command -v google-chrome'), pExec('command -v chromium-browser'), pExec('command -v firefox')]).then(_utils.getExecNameFromStdOut).then(openSettingsWindowInPreferredBrowser).catch(function () {
-    return (0, _opn2.default)((0, _server.getServerAddress)());
-  });
+  (0, _promiseRatRace2.default)([pExec('command -v firefox'), pExec('command -v chromium-browser'), pExec('command -v google-chrome')]).then(_utils.getExecNameFromStdOut).then(openSettingsWindowInPreferredBrowser).catch(_utils.xdgOpenServerWebPage);
 } //fall back to opening with OS's default browser
 
 function openSettingsWindowInPreferredBrowser(browser) {
@@ -1364,17 +1358,13 @@ var _systray = __webpack_require__(/*! systray */ "systray");
 
 var _systray2 = _interopRequireDefault(_systray);
 
-var _opn = __webpack_require__(/*! opn */ "opn");
-
-var _opn2 = _interopRequireDefault(_opn);
-
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
 
 var _iconsData = __webpack_require__(/*! ./iconsData.lsc */ "./app/components/tray/iconsData.lsc");
 
 var _sendOSnotification = __webpack_require__(/*! ../sendOSnotification.lsc */ "./app/components/sendOSnotification.lsc");
 
-var _createBlueLossConfig = __webpack_require__(/*! ../bluelossConfig/createBlueLossConfig.lsc */ "./app/components/bluelossConfig/createBlueLossConfig.lsc");
+var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
@@ -1418,7 +1408,7 @@ function systrayClickHandler(action) {
     toggleTrayIconColorSetting();
     updateSystrayIcon(action);
   }if (action.seq_id === 3) {
-    (0, _opn2.default)((0, _createBlueLossConfig.getBlueLossLogsFolderPath)()).catch(_logging.logger.error);
+    (0, _utils.xdgOpenLogsFolder)().catch(_logging.logger.error);
   }if (action.seq_id === 4) {
     systray.kill();
   }
@@ -1502,7 +1492,13 @@ function systrayClickHandler(action) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getExecNameFromStdOut = exports.capitalizeFirstLetter = exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = undefined;
+exports.xdgOpenLogsFolder = exports.xdgOpenServerWebPage = exports.getExecNameFromStdOut = exports.capitalizeFirstLetter = exports.tenYearsFromNow = exports.identity = exports.compose = exports.range = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = undefined;
+
+var _util = __webpack_require__(/*! util */ "util");
+
+var _child_process = __webpack_require__(/*! child_process */ "child_process");
+
+var _url = __webpack_require__(/*! url */ "url");
 
 var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
@@ -1512,7 +1508,13 @@ var _settingsWindow = __webpack_require__(/*! ../components/settingsWindow/setti
 
 var _settings = __webpack_require__(/*! ./settings/settings.lsc */ "./app/components/settings/settings.lsc");
 
+var _createBlueLossConfig = __webpack_require__(/*! ./bluelossConfig/createBlueLossConfig.lsc */ "./app/components/bluelossConfig/createBlueLossConfig.lsc");
+
+var _server = __webpack_require__(/*! ./server/server.lsc */ "./app/components/server/server.lsc");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const pExec = (0, _util.promisify)(_child_process.exec);
 
 function setUpDev() {
   true && !(0, _settings.getSettings)().firstRun ? (0, _settingsWindow.openSettingsWindow)() : void 0;
@@ -1557,6 +1559,10 @@ function tenYearsFromNow() {
 }function getExecNameFromStdOut({ stdout }) {
   const browserPath = stdout.trim();
   return browserPath.slice(browserPath.lastIndexOf('/') + 1);
+}function xdgOpenServerWebPage() {
+  return pExec(`xdg-open ${(0, _server.getServerAddress)()}`);
+}function xdgOpenLogsFolder() {
+  return pExec(`xdg-open ${(0, _createBlueLossConfig.getBlueLossLogsFolderPath)()}`);
 }exports.setUpDev = setUpDev;
 exports.noop = noop;
 exports.pipe = pipe;
@@ -1568,6 +1574,8 @@ exports.identity = identity;
 exports.tenYearsFromNow = tenYearsFromNow;
 exports.capitalizeFirstLetter = capitalizeFirstLetter;
 exports.getExecNameFromStdOut = getExecNameFromStdOut;
+exports.xdgOpenServerWebPage = xdgOpenServerWebPage;
+exports.xdgOpenLogsFolder = xdgOpenLogsFolder;
 
 /***/ }),
 
@@ -1728,17 +1736,6 @@ module.exports = require("lowdb/adapters/FileSync");
 
 /***/ }),
 
-/***/ "opn":
-/*!**********************!*\
-  !*** external "opn" ***!
-  \**********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("opn");
-
-/***/ }),
-
 /***/ "os":
 /*!*********************!*\
   !*** external "os" ***!
@@ -1835,6 +1832,17 @@ module.exports = require("typa");
 /***/ (function(module, exports) {
 
 module.exports = require("untildify");
+
+/***/ }),
+
+/***/ "url":
+/*!**********************!*\
+  !*** external "url" ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("url");
 
 /***/ }),
 

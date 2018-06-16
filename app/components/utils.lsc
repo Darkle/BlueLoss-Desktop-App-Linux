@@ -1,7 +1,15 @@
+import { promisify } from 'util'
+import { exec } from 'child_process'
+import { URL } from 'url'
+
 import tp from 'timeproxy'
 
 import { openSettingsWindow } from '../components/settingsWindow/settingsWindow.lsc'
 import { getSettings } from './settings/settings.lsc'
+import { getBlueLossLogsFolderPath } from './bluelossConfig/createBlueLossConfig.lsc'
+import { getServerAddress } from './server/server.lsc'
+
+pExec = promisify(exec)
 
 setUpDev():void -> if ISDEV && !getSettings().firstRun: openSettingsWindow()
 
@@ -28,6 +36,12 @@ getExecNameFromStdOut({stdout}):String ->
   browserPath = stdout.trim()
   browserPath.slice(browserPath.lastIndexOf('/') +1)
 
+xdgOpenServerWebPage():Promise ->
+  pExec(`xdg-open ${ getServerAddress() }`)
+
+xdgOpenLogsFolder():Promise ->
+  pExec(`xdg-open ${ getBlueLossLogsFolderPath() }`)
+
 export {
   setUpDev,
   noop,
@@ -40,4 +54,6 @@ export {
   tenYearsFromNow,
   capitalizeFirstLetter,
   getExecNameFromStdOut,
+  xdgOpenServerWebPage,
+  xdgOpenLogsFolder,
 }
