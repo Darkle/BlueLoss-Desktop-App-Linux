@@ -4,6 +4,11 @@ import { logger } from './logging.lsc'
 import { SettingsTypes } from '../types/types.lsc'
 
 logSettingsUpdateForVerboseLogging(newSettingKey: String, newSettingValue: SettingsTypes):void ->
+  /*****
+  * Check if the logger is instantiated first as logSettingsUpdateForVerboseLogging gets
+  * called early on startup.
+  */
+  if !logger: return
   debugMessage = `Updated Setting: updated '${ newSettingKey }' with:`
   if is.obj(newSettingValue):
     logger.verbose(debugMessage, { [newSettingKey]: newSettingValue })

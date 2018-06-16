@@ -130,7 +130,7 @@ process.on('uncaughtException', bailOnFatalError);
 
 function bailOnFatalError(err) {
   console.error(err);
-  _logging.logger == null ? void 0 : _logging.logger.error(err);
+  _logging.logger == null ? void 0 : typeof _logging.logger.error !== 'function' ? void 0 : _logging.logger.error(err);
   process.exit(1);
 }
 
@@ -290,7 +290,7 @@ const blueLossConfigFirefoxPrefsFilePath = _path2.default.join(blueLossConfigFol
 async function createBlueLossConfig() {
   const exists = await _fsExtra2.default.pathExists(blueLossSettingsFilePath);
   if (exists) return Promise.resolve();
-  return Promise.all([_fsExtra2.default.ensureFile(blueLossSettingsFilePath), _fsExtra2.default.ensureDir(blueLossLogsFolderPath), createChromiumProfileFiles(), createFirefoxProfileFiles()]);
+  return await Promise.all([_fsExtra2.default.ensureFile(blueLossSettingsFilePath), _fsExtra2.default.ensureDir(blueLossLogsFolderPath), createChromiumProfileFiles(), createFirefoxProfileFiles()]);
 }function createChromiumProfileFiles() {
   return _fsExtra2.default.ensureFile(blueLossConfigChromiumPrefsFilePath).then(function () {
     return _fsExtra2.default.writeJson(blueLossConfigChromiumPrefsFilePath, (0, _browserProfileData.getChromePrefs)());
@@ -394,6 +394,8 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/compo
 
 var _server = __webpack_require__(/*! ../server/server.lsc */ "./app/components/server/server.lsc");
 
+var _devices = __webpack_require__(/*! ../settings/devices.lsc */ "./app/components/settings/devices.lsc");
+
 var _lockCheck = __webpack_require__(/*! ./lockCheck.lsc */ "./app/components/bluetooth/lockCheck.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -415,7 +417,7 @@ function handleScanResults(spawnCommandResult) {
   for (let _i = 0, _len = deviceList.length; _i < _len; _i++) {
     const { deviceId } = deviceList[_i];
     if (devicesToSearchFor[deviceId]) {
-      (0, _settings.updateLastSeenForDeviceSearchingFor)(deviceId, Date.now());
+      (0, _devices.updateLastSeenForDeviceSearchingFor)(deviceId, Date.now());
     }
   }(0, _lockCheck.lockSystemIfDeviceLost)();
 } /*****
@@ -465,11 +467,17 @@ var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
 var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
+var _lockSystem = __webpack_require__(/*! lock-system */ "lock-system");
+
+var _lockSystem2 = _interopRequireDefault(_lockSystem);
+
 var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc");
 
-var _lockSystem = __webpack_require__(/*! ../lockSystem.lsc */ "./app/components/lockSystem.lsc");
+var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
 var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/components/settings/settings.lsc");
+
+var _devices = __webpack_require__(/*! ../settings/devices.lsc */ "./app/components/settings/devices.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -481,54 +489,25 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 * from now (not using Infinity cause it doesn't JSON.stringify for storage).
 */
 function lockSystemIfDeviceLost() {
-  const { devicesToSearchFor, timeToLock } = (0, _settings.getSettings)();
+  const { devicesToSearchFor, timeToLock, blueLossEnabled } = (0, _settings.getSettings)();
   for (let _i = 0, _keys = Object.keys(devicesToSearchFor), _len = _keys.length; _i < _len; _i++) {
     const _k = _keys[_i];const { lastSeen, deviceId } = devicesToSearchFor[_k];
     if (deviceHasBeenLost(lastSeen, timeToLock)) {
-      (0, _lockSystem.lockTheSystem)();
-      (0, _settings.updateLastSeenForDeviceSearchingFor)(deviceId, (0, _utils.tenYearsFromNow)());
+      lockTheSystem(blueLossEnabled);
+      (0, _devices.updateLastSeenForDeviceSearchingFor)(deviceId, (0, _utils.tenYearsFromNow)());
     }
   }
 }function deviceHasBeenLost(lastTimeSawDevice, timeToLock) {
   return Date.now() > lastTimeSawDevice + _timeproxy2.default`${timeToLock} minutes`;
-}exports.lockSystemIfDeviceLost = lockSystemIfDeviceLost;
-
-/***/ }),
-
-/***/ "./app/components/lockSystem.lsc":
-/*!***************************************!*\
-  !*** ./app/components/lockSystem.lsc ***!
-  \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.lockTheSystem = undefined;
-
-var _lockSystem = __webpack_require__(/*! lock-system */ "lock-system");
-
-var _lockSystem2 = _interopRequireDefault(_lockSystem);
-
-var _logging = __webpack_require__(/*! ./logging/logging.lsc */ "./app/components/logging/logging.lsc");
-
-var _settings = __webpack_require__(/*! ./settings/settings.lsc */ "./app/components/settings/settings.lsc");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function lockTheSystem() {
-  if (!(0, _settings.getSettings)().blueLossEnabled) return;
-  // lockSystem throws on error, so use try/catch
+} // lockSystem throws on error, so use try/catch
+function lockTheSystem(blueLossEnabled) {
+  if (!blueLossEnabled) return;
   try {
     (0, _lockSystem2.default)();
   } catch (err) {
     _logging.logger.error('Error occured trying to lock the system : ', err);
   }
-}exports.lockTheSystem = lockTheSystem;
+}exports.lockSystemIfDeviceLost = lockSystemIfDeviceLost;
 
 /***/ }),
 
@@ -617,6 +596,11 @@ var _types = __webpack_require__(/*! ../types/types.lsc */ "./app/components/typ
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function logSettingsUpdateForVerboseLogging(newSettingKey, newSettingValue) {
+  /*****
+  * Check if the logger is instantiated first as logSettingsUpdateForVerboseLogging gets
+  * called early on startup.
+  */
+  if (!_logging.logger) return;
   const debugMessage = `Updated Setting: updated '${newSettingKey}' with:`;
   if (_typa2.default.obj(newSettingValue)) {
     _logging.logger.verbose(debugMessage, { [newSettingKey]: newSettingValue });
@@ -660,7 +644,7 @@ var _createBlueLossConfig = __webpack_require__(/*! ../bluelossConfig/createBlue
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-let logger = {};
+let logger = null;
 const rollbarTransportOptions = {
   name: 'rollbarTransport',
   level: 'error',

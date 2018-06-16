@@ -2,8 +2,9 @@ import tp from 'timeproxy'
 import lockSystem from 'lock-system'
 
 import { tenYearsFromNow } from '../utils.lsc'
-import { logger } from './logging/logging.lsc'
-import { getSettings, updateLastSeenForDeviceSearchingFor } from '../settings/settings.lsc'
+import { logger } from '../logging/logging.lsc'
+import { getSettings } from '../settings/settings.lsc'
+import { updateLastSeenForDeviceSearchingFor } from '../settings/devices.lsc'
 
 /**
 * If a device is lost we lock the computer, however, after that, if

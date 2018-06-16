@@ -19,7 +19,7 @@ createBlueLossConfig():Promise -/>
   <- [fs.ensureFile(blueLossSettingsFilePath),
     fs.ensureDir(blueLossLogsFolderPath),
     createChromiumProfileFiles(),
-    createFirefoxProfileFiles(),]
+    createFirefoxProfileFiles()]
 
 createChromiumProfileFiles():Promise ->
   fs.ensureFile(blueLossConfigChromiumPrefsFilePath)

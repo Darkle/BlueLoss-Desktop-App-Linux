@@ -6,7 +6,7 @@ import { CustomRollbarTransport, rollbarLogger } from './customRollbarTransport.
 import { getSettings } from '../settings/settings.lsc'
 import { getBlueLossLogsFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 
-let logger = {}
+let logger = null
 rollbarTransportOptions = {
   name: 'rollbarTransport',
   level: 'error',

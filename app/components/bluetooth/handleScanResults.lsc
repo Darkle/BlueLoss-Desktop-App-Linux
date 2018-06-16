@@ -2,8 +2,9 @@ import isEmpty from 'is-empty'
 
 import { logger } from '../logging/logging.lsc'
 import { DeviceType } from '../types/types.lsc'
-import { getSettings, updateLastSeenForDeviceSearchingFor } from '../settings/settings.lsc'
+import { getSettings } from '../settings/settings.lsc'
 import { pushUpdatesToFrontEnd } from '../server/server.lsc'
+import { updateLastSeenForDeviceSearchingFor } from '../settings/devices.lsc'
 import { lockSystemIfDeviceLost } from './lockCheck.lsc'
 
 handleScanResults(spawnCommandResult:Object):void ->
