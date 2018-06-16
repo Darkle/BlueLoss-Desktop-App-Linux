@@ -1,7 +1,8 @@
 import tp from 'timeproxy'
+import lockSystem from 'lock-system'
 
 import { tenYearsFromNow } from '../utils.lsc'
-import { lockTheSystem } from '../lockSystem.lsc'
+import { logger } from './logging/logging.lsc'
 import { getSettings, updateLastSeenForDeviceSearchingFor } from '../settings/settings.lsc'
 
 /**
@@ -21,7 +22,15 @@ lockSystemIfDeviceLost():void ->
 deviceHasBeenLost(lastTimeSawDevice: number, timeToLock: number):boolean ->
   Date.now() > (lastTimeSawDevice + tp`${ timeToLock } minutes`)
 
+lockTheSystem():void ->
+  if !getSettings().blueLossEnabled: return
+  // lockSystem throws on error, so use try/catch
+  try:
+    lockSystem()
+  catch(err):
+    logger.error('Error occured trying to lock the system : ', err)
 
 export {
   lockSystemIfDeviceLost
 }
+
