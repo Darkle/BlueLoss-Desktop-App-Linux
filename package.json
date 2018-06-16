@@ -13,6 +13,17 @@
     "devTasks": "cross-env NODE_ENV=production node devTasks/tasks.js",
     "test": "snyk test"
   },
+  "pkg": {
+    "assets": [
+      "app/config/.env",
+      "app/components/settingsWindow/frontEnd/js/settingsWindowWeb-compiled.js",
+      "app/components/settingsWindow/frontEnd/assets/styles/*.css",
+      "app/components/settingsWindow/frontEnd/assets/vendor/materialize/materialize.css",
+      "app/components/settingsWindow/frontEnd/assets/vendor/modern-normalize/modern-normalize.css",
+      "app/components/settingsWindow/frontEnd/assets/icons/*",
+      "app/components/settingsWindow/frontEnd/html/settingsWindow.html"
+    ]
+  },
   "repository": "https://github.com/Darkle/BlueLoss.git",
   "author": "Darkle <coop.coding@gmail.com>",
   "license": "MIT",
@@ -30,7 +41,6 @@
     "js-cookie": "^2.2.0",
     "lodash.omit": "^4.5.0",
     "lowdb": "^1.0.0",
-    "modern-normalize": "^0.4.0",
     "ono": "^4.0.5",
     "promise-rat-race": "^1.5.1",
     "rollbar": "^2.4.1",
@@ -61,6 +71,7 @@
     "inquirer": "^5.2.0",
     "moment": "^2.22.2",
     "nexe": "^2.0.0-rc.29",
+    "node-7z": "^0.4.0",
     "nodemon": "^1.17.5",
     "parallel-webpack": "^2.3.0",
     "pkg": "^4.3.1",

@@ -1,67 +1,69 @@
 // @ts-nocheck
 const path = require('path')
 
-// const { compile } = require('nexe')
 const { exec } = require('pkg')
 const exeq = require('exeq')
 const chalk = require('chalk')
 const del = require('del')
 const stringifyObject = require('stringify-object')
-// const Zip = require('node-7z')
+const Zip = require('node-7z')
+const fs = require('fs-extra')
 
 const basePath = path.resolve(__dirname, '..')
 const inputJSfile = path.join(basePath, 'app', 'appMain-compiled.js')
-const platformBuildFolder = path.join(basePath, 'build')
-const globsForCleanPlatformFolder = [path.join(platformBuildFolder, '**', '*.*'), path.join(platformBuildFolder, '**'), `!${ platformBuildFolder }`]
-// const archive7zip = new Zip()
-
+const buildFolder = path.join(basePath, 'build')
+const zipFolder = path.join(buildFolder, 'zip')
+const pkgOutputFolder = path.join(buildFolder, 'BlueLoss')
+const pkgBuildFile = path.join(pkgOutputFolder, 'BlueLoss')
+const appIconSrc = path.join(basePath, 'resources', 'icons', 'Blue', 'BlueLoss-blue-512x512.png')
+const appIconOutput = path.join(pkgOutputFolder, 'BlueLoss.png')
+const globsForCleanPlatformFolder = [path.join(buildFolder, '**', '*.*'), path.join(buildFolder, '**'), `!${buildFolder }`]
+const archive7zip = new Zip()
+const pkgParams = [
+  '--config',
+  'package.json',
+  inputJSfile,
+  '--target',
+  'node8-linux-x64',
+  '--output',
+  pkgBuildFile
+]
 
 function packageLinux64() {
   return prepareForPackaging()
-    // .then(() => compile({
-    //   input: inputJSfile,
-    //   resources: [],
-    //   build: true,
-    //   python: '/usr/bin/python'
-    //   // target: `Linux-x64-${appVersion }`
-    // }))
-    .then(() =>
-      exec(
-        [
-          inputJSfile,
-          '--target',
-          'node8-linux-x64',
-          '--output',
-          'build/BlueLoss'
-        ]
-      )
-    )
-    // .then(createPortableVersion)
+    .then(runPkg)
+    .then(copyAppIcon)
+    .then(createZipVersion)
     // .then(createSnap)
     // .then(createAppImage)
     .then(() => {
       console.log(chalk.green('Successfully Packaged App!'))
     })
     .catch(err => {
-      console.error(chalk.red(`There was an error creating the package`), err)
+      console.error(chalk.red(`There was an error packaging`), err)
     })
 }
-
 
 function prepareForPackaging(){
   return webpackBuild()
     .then(() => {
-      console.log(chalk.yellow(`Cleaning: \n ${ stringifyObject(globsForCleanPlatformFolder) }`))
+      console.log(chalk.blue(`Cleaning: \n ${ stringifyObject(globsForCleanPlatformFolder) }`))
       return del(globsForCleanPlatformFolder, { glob: true })
     })
 }
 
-// function createPortableVersion() {
-//   return archive7zip.add(
-//     path.join(platformBuildFolder, `BlueLoss-Windows-Portable-(x86_64-${ appVersion }).7z`),
-//     path.join(platformBuildFolder, 'BlueLoss-win32-x64')
-//   )
-// }
+function runPkg(){
+  console.log(chalk.blue(`Running Pkg`))
+  return exec(pkgParams)
+}
+
+function createZipVersion() {
+  console.log(chalk.blue(`Creating Zip Version`))
+  return archive7zip.add(
+    path.join(zipFolder, `BlueLoss-Linux-x86_64.7z`),
+    path.join(buildFolder, 'BlueLoss')
+  )
+}
 
 // function createSnap() { } // make sure that it sets the right .desktop stuff
 
@@ -71,6 +73,11 @@ function prepareForPackaging(){
 function webpackBuild() {
   console.log(chalk.blue('Running Webpack Build'))
   return exeq(`cross-env NODE_ENV=production parallel-webpack`)
+}
+
+function copyAppIcon(){
+  console.log(chalk.blue(`Copying App Icon`))
+  return fs.copy(appIconSrc, appIconOutput)
 }
 
 module.exports = {

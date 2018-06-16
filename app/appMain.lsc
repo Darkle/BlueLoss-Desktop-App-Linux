@@ -1,5 +1,7 @@
 import './config/env.lsc'
 
+if !process.env.NODE_ENV: process.env.NODE_ENV = "production"
+
 import { createBlueLossConfig as initAppConfigFiles } from './components/bluelossConfig/createBlueLossConfig.lsc'
 import { makeSingleInstance } from './components/makeSingleInstance.lsc'
 import { initSettings, updateSetting, getSettings } from './components/settings/settings.lsc'
