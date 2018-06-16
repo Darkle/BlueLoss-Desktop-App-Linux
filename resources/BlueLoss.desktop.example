@@ -2,7 +2,6 @@
 Type=Application
 Version=1.0
 Name=BlueLoss
-Comment=Run BlueLoss
 Exec=appExepath
 Icon=iconPath
 StartupNotify=false
