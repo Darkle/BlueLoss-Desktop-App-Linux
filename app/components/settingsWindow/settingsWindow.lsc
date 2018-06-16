@@ -1,15 +1,18 @@
+import { promisify } from 'util'
+import { exec } from 'child_process'
 import path from 'path'
 
 import opn from 'opn'
-import execa from 'execa'
 import pRatRace from 'promise-rat-race'
 
 import { getServerAddress, tellAllSettingsWindowsToClose } from '../server/server.lsc'
 import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 import { capitalizeFirstLetter, getExecNameFromStdOut } from '../utils.lsc'
 
+pExec = promisify(exec)
+
 /*****
-* We don't want to return a Promise here because execa.shell will not resolve until the
+* We don't want to return a Promise here because pExec will not resolve until the
 * settings window is closed (we can just fire and forget).
 */
 openSettingsWindow():void ->
@@ -20,17 +23,17 @@ openSettingsWindow():void ->
   tellAllSettingsWindowsToClose()
 
   pRatRace([
-    execa.shell('command -v google-chrome'),
-    execa.shell('command -v chromium-browser'),
-    execa.shell('command -v firefox'),
+    pExec('command -v google-chrome'),
+    pExec('command -v chromium-browser'),
+    pExec('command -v firefox'),
   ])
   .then(getExecNameFromStdOut)
   .then(openSettingsWindowInPreferredBrowser)
   .catch(() -> opn(getServerAddress()))  //fall back to opening with OS's default browser
 
 openSettingsWindowInPreferredBrowser(browser):Promise ->
-  if browser === 'firefox': return execa.shell(generateFirefoxCliParams())
-  execa.shell(generateChromeCliParams(browser))
+  if browser === 'firefox': return pExec(generateFirefoxCliParams())
+  pExec(generateChromeCliParams(browser))
 
 generateFirefoxCliParams():String ->
   `firefox -new-instance --width=910 --height=760 -profile ${ getBrowserProfilePath('Firefox') } ${ getServerAddress() }`
