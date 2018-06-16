@@ -1,17 +1,22 @@
-import execa from 'execa'
+import { promisify } from 'util'
+import { exec } from 'child_process'
+
 import pRatRace from 'promise-rat-race'
 
-import { noop } from './utils.lsc'
+import { noop, getExecNameFromStdOut } from './utils.lsc'
+
+pExec = promisify(exec)
 
 sendOSnotification(message:String):void ->
   pRatRace([
-    execa.shell('command -v zenity'),
-    execa.shell('command -v notify-send'),
+    pExec('command -v zenity'),
+    pExec('command -v notify-send'),
   ])
-  .then(result ->
-    if result?.stdout?.endsWith('zenity'):
-      return execa.shell(`zenity --notification --text="${ message }"`).catch(noop)
-    execa.shell(`notify-send "${ message }"`).catch(noop)
+  .then(getExecNameFromStdOut)
+  .then(notificationExec ->
+    if notificationExec === 'zenity':
+      return pExec(`zenity --notification --text="${ message }"`)
+    pExec(`notify-send "${ message }"`)
   )
   .catch(noop)
 

@@ -1,13 +1,12 @@
-import util from 'util'
+import { promisify } from 'util'
 import { exec } from 'child_process'
 
 import pRatRace from 'promise-rat-race'
-import execa from 'execa'
 
 import { logger } from './logging/logging.lsc'
-import { getExecNameFromStdOut, noop } from './utils.lsc'
+import { getExecNameFromStdOut } from './utils.lsc'
 
-pExec = util.promisify(exec)
+pExec = promisify(exec)
 lockCommandArgs = {
   'xdg-screensaver': 'lock',
   'gnome-screensaver-command': '--lock',
@@ -17,7 +16,8 @@ lockCommandArgs = {
 
 /*****
 * Based on: https://github.com/sindresorhus/lock-system/blob/master/index.js
-* Using execa as execFileSync seems to error for me.
+* The spawed xdg-screensaved command always seems to error for me, so only log
+* the error when verbose logging is enabled.
 */
 lockSystem(blueLossEnabled):void ->
   if !blueLossEnabled: return
@@ -28,9 +28,8 @@ lockSystem(blueLossEnabled):void ->
     pExec('command -v dm-tool'),
   ])
   .then(getExecNameFromStdOut)
-  .then(lockCommand -> execa(lockCommand, [lockCommandArgs[lockCommand]]))
-  .then(logger.verbose)
-  .catch(noop)
+  .then(lockCommand -> pExec(`${ lockCommand } ${ lockCommandArgs[lockCommand] }`))
+  .catch(logger.verbose)
 
 
 export {

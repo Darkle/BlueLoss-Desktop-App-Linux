@@ -153,11 +153,7 @@ exports.getChromePrefs = exports.getFirefoxPrefsJs = exports.getFirefoxUserChrom
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _execa = __webpack_require__(/*! execa */ "execa");
-
-var _execa2 = _interopRequireDefault(_execa);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _child_process = __webpack_require__(/*! child_process */ "child_process");
 
 function getFirefoxUserChrome() {
   return `
@@ -235,7 +231,7 @@ function generateBrowserWindowPosition({ screenHeight, screenWidth }) {
 
 function getScreenResolution() {
   try {
-    const [width, height] = _execa2.default.shellSync(`xrandr |grep \\* |awk '{print $1}'`).stdout.split('x');
+    const [width, height] = (0, _child_process.execSync)(`xrandr |grep \\* |awk '{print $1}'`).toString().trim().split('x');
     return { screenWidth: Number(width), screenHeight: Number(height) };
   } catch (e) {
     //winston logger isn't ready yet here, so fall back to using console
@@ -333,9 +329,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.scanForBlueToothDevices = undefined;
 
-var _execa = __webpack_require__(/*! execa */ "execa");
+var _util = __webpack_require__(/*! util */ "util");
 
-var _execa2 = _interopRequireDefault(_execa);
+var _child_process = __webpack_require__(/*! child_process */ "child_process");
 
 var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
@@ -349,6 +345,8 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/compo
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const pExec = (0, _util.promisify)(_child_process.exec);
+
 /*****
 * We don't return a promise here as we want scanForBlueToothDevices to
 * be spun off seperately. Also, if we returned a promise here that calls
@@ -357,7 +355,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function scanForBlueToothDevices() {
   if (!(0, _settings.getSettings)().blueLossEnabled) scheduleScan();
   _logging.logger.verbose('=======New Scan Started=======');
-  _execa2.default.shell('hcitool scan').then(_handleScanResults.handleScanResults).catch(_logging.logger.error);
+  pExec('hcitool scan').then(_handleScanResults.handleScanResults).catch(_logging.logger.error);
   scheduleScan();
 }function scheduleScan() {
   return setTimeout(scanForBlueToothDevices, _timeproxy2.default`${(0, _settings.getSettings)().scanInterval} seconds`);
@@ -516,17 +514,11 @@ exports.lockSystem = undefined;
 
 var _util = __webpack_require__(/*! util */ "util");
 
-var _util2 = _interopRequireDefault(_util);
-
 var _child_process = __webpack_require__(/*! child_process */ "child_process");
 
 var _promiseRatRace = __webpack_require__(/*! promise-rat-race */ "promise-rat-race");
 
 var _promiseRatRace2 = _interopRequireDefault(_promiseRatRace);
-
-var _execa = __webpack_require__(/*! execa */ "execa");
-
-var _execa2 = _interopRequireDefault(_execa);
 
 var _logging = __webpack_require__(/*! ./logging/logging.lsc */ "./app/components/logging/logging.lsc");
 
@@ -534,7 +526,7 @@ var _utils = __webpack_require__(/*! ./utils.lsc */ "./app/components/utils.lsc"
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const pExec = _util2.default.promisify(_child_process.exec);
+const pExec = (0, _util.promisify)(_child_process.exec);
 const lockCommandArgs = {
   'xdg-screensaver': 'lock',
   'gnome-screensaver-command': '--lock',
@@ -543,13 +535,14 @@ const lockCommandArgs = {
 
   /*****
   * Based on: https://github.com/sindresorhus/lock-system/blob/master/index.js
-  * Using execa as execFileSync seems to error for me.
+  * The spawed xdg-screensaved command always seems to error for me, so only log
+  * the error when verbose logging is enabled.
   */
 };function lockSystem(blueLossEnabled) {
   if (!blueLossEnabled) return;
   (0, _promiseRatRace2.default)([pExec('command -v xdg-screensaver'), pExec('command -v gnome-screensaver-command'), pExec('command -v cinnamon-screensaver-command'), pExec('command -v dm-tool')]).then(_utils.getExecNameFromStdOut).then(function (lockCommand) {
-    return (0, _execa2.default)(lockCommand, [lockCommandArgs[lockCommand]]);
-  }).then(_logging.logger.verbose).catch(_utils.noop);
+    return pExec(`${lockCommand} ${lockCommandArgs[lockCommand]}`);
+  }).catch(_logging.logger.verbose);
 }exports.lockSystem = lockSystem;
 
 /***/ }),
@@ -881,9 +874,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.sendOSnotification = undefined;
 
-var _execa = __webpack_require__(/*! execa */ "execa");
+var _util = __webpack_require__(/*! util */ "util");
 
-var _execa2 = _interopRequireDefault(_execa);
+var _child_process = __webpack_require__(/*! child_process */ "child_process");
 
 var _promiseRatRace = __webpack_require__(/*! promise-rat-race */ "promise-rat-race");
 
@@ -893,13 +886,13 @@ var _utils = __webpack_require__(/*! ./utils.lsc */ "./app/components/utils.lsc"
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function sendOSnotification(message) {
-  (0, _promiseRatRace2.default)([_execa2.default.shell('command -v zenity'), _execa2.default.shell('command -v notify-send')]).then(function (result) {
-    var _result$stdout;
+const pExec = (0, _util.promisify)(_child_process.exec);
 
-    if (result == null ? void 0 : (_result$stdout = result.stdout) == null ? void 0 : _result$stdout.endsWith('zenity')) {
-      return _execa2.default.shell(`zenity --notification --text="${message}"`).catch(_utils.noop);
-    }return _execa2.default.shell(`notify-send "${message}"`).catch(_utils.noop);
+function sendOSnotification(message) {
+  (0, _promiseRatRace2.default)([pExec('command -v zenity'), pExec('command -v notify-send')]).then(_utils.getExecNameFromStdOut).then(function (notificationExec) {
+    if (notificationExec === 'zenity') {
+      return pExec(`zenity --notification --text="${message}"`);
+    }return pExec(`notify-send "${message}"`);
   }).catch(_utils.noop);
 }exports.sendOSnotification = sendOSnotification;
 
@@ -1272,6 +1265,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.openSettingsWindow = undefined;
 
+var _util = __webpack_require__(/*! util */ "util");
+
+var _child_process = __webpack_require__(/*! child_process */ "child_process");
+
 var _path = __webpack_require__(/*! path */ "path");
 
 var _path2 = _interopRequireDefault(_path);
@@ -1279,10 +1276,6 @@ var _path2 = _interopRequireDefault(_path);
 var _opn = __webpack_require__(/*! opn */ "opn");
 
 var _opn2 = _interopRequireDefault(_opn);
-
-var _execa = __webpack_require__(/*! execa */ "execa");
-
-var _execa2 = _interopRequireDefault(_execa);
 
 var _promiseRatRace = __webpack_require__(/*! promise-rat-race */ "promise-rat-race");
 
@@ -1296,8 +1289,10 @@ var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const pExec = (0, _util.promisify)(_child_process.exec);
+
 /*****
-* We don't want to return a Promise here because execa.shell will not resolve until the
+* We don't want to return a Promise here because pExec will not resolve until the
 * settings window is closed (we can just fire and forget).
 */
 function openSettingsWindow() {
@@ -1307,14 +1302,14 @@ function openSettingsWindow() {
   */
   (0, _server.tellAllSettingsWindowsToClose)();
 
-  (0, _promiseRatRace2.default)([_execa2.default.shell('command -v google-chrome'), _execa2.default.shell('command -v chromium-browser'), _execa2.default.shell('command -v firefox')]).then(_utils.getExecNameFromStdOut).then(openSettingsWindowInPreferredBrowser).catch(function () {
+  (0, _promiseRatRace2.default)([pExec('command -v google-chrome'), pExec('command -v chromium-browser'), pExec('command -v firefox')]).then(_utils.getExecNameFromStdOut).then(openSettingsWindowInPreferredBrowser).catch(function () {
     return (0, _opn2.default)((0, _server.getServerAddress)());
   });
 } //fall back to opening with OS's default browser
 
 function openSettingsWindowInPreferredBrowser(browser) {
-  if (browser === 'firefox') return _execa2.default.shell(generateFirefoxCliParams());
-  return _execa2.default.shell(generateChromeCliParams(browser));
+  if (browser === 'firefox') return pExec(generateFirefoxCliParams());
+  return pExec(generateChromeCliParams(browser));
 }function generateFirefoxCliParams() {
   return `firefox -new-instance --width=910 --height=760 -profile ${getBrowserProfilePath('Firefox')} ${(0, _server.getServerAddress)()}`;
 }function generateChromeCliParams(browser) {
@@ -1608,7 +1603,7 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 /*! exports provided: name, productName, version, description, main, scripts, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect app/appMain-compiled.js","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","body-parser":"^1.18.3","dotenv":"^5.0.1","execa":"^0.10.0","express":"^4.16.3","fs-extra":"^6.0.1","gawk":"^4.4.5","hyperapp":"^1.2.5","is-empty":"^1.2.0","joi":"^13.4.0","js-cookie":"^2.2.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","modern-normalize":"^0.4.0","ono":"^4.0.5","promise-rat-race":"^1.5.1","rollbar":"^2.4.1","sse-pusher":"^1.1.1","systray":"^1.0.5","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.2","nexe":"^2.0.0-rc.29","nodemon":"^1.17.5","parallel-webpack":"^2.3.0","pkg":"^4.3.1","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect app/appMain-compiled.js","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","body-parser":"^1.18.3","dotenv":"^5.0.1","express":"^4.16.3","fs-extra":"^6.0.1","gawk":"^4.4.5","hyperapp":"^1.2.5","is-empty":"^1.2.0","joi":"^13.4.0","js-cookie":"^2.2.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","modern-normalize":"^0.4.0","ono":"^4.0.5","promise-rat-race":"^1.5.1","rollbar":"^2.4.1","sse-pusher":"^1.1.1","systray":"^1.0.5","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","moment":"^2.22.2","nexe":"^2.0.0-rc.29","nodemon":"^1.17.5","parallel-webpack":"^2.3.0","pkg":"^4.3.1","sleep-ms":"^2.0.1","snyk":"^1.82.0","stringify-object":"^3.2.2","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
 
 /***/ }),
 
@@ -1642,17 +1637,6 @@ module.exports = require("child_process");
 /***/ (function(module, exports) {
 
 module.exports = require("dotenv");
-
-/***/ }),
-
-/***/ "execa":
-/*!************************!*\
-  !*** external "execa" ***!
-  \************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("execa");
 
 /***/ }),
 

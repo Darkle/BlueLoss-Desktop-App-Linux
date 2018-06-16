@@ -1,9 +1,13 @@
-import execa from 'execa'
+import { promisify } from 'util'
+import { exec } from 'child_process'
+
 import tp from 'timeproxy'
 
 import { handleScanResults } from './handleScanResults.lsc'
 import { logger } from '../logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
+
+pExec = promisify(exec)
 
 /*****
 * We don't return a promise here as we want scanForBlueToothDevices to
@@ -13,7 +17,7 @@ import { getSettings } from '../settings/settings.lsc'
 scanForBlueToothDevices():void ->
   if !getSettings().blueLossEnabled: scheduleScan()
   logger.verbose('=======New Scan Started=======')
-  execa.shell('hcitool scan').then(handleScanResults).catch(logger.error)
+  pExec('hcitool scan').then(handleScanResults).catch(logger.error)
   scheduleScan()
 
 scheduleScan():Promise ->

@@ -1,4 +1,4 @@
-import execa from 'execa'
+import { execSync } from 'child_process'
 
 getFirefoxUserChrome():string -> `
 @-moz-document url(chrome://browser/content/browser.xul) {
@@ -79,9 +79,9 @@ generateBrowserWindowPosition({ screenHeight, screenWidth }):Object ->
 
 getScreenResolution():Object|null ->
   try:
-    [ width, height ] = execa
-      .shellSync(`xrandr |grep \\* |awk '{print $1}'`)
-      .stdout
+    [ width, height ] = execSync(`xrandr |grep \\* |awk '{print $1}'`)
+      .toString()
+      .trim()
       .split('x')
     return { screenWidth: Number(width), screenHeight: Number(height) }
   catch(e):
