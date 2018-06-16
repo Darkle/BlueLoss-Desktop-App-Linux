@@ -35,12 +35,6 @@ const commonWebpackOptions = {
   resolve: {
     extensions: ['.lsc', '.js']
   },
-  optimization: {
-    minimize: false
-  },
-  performance: {
-    hints: isDev ? false : 'error'
-  },
   plugins: [
     // Gonna still use DefinePlugin as its a bit shorter than using global.ISDEV.
     new webpack.DefinePlugin({
