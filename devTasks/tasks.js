@@ -1,9 +1,9 @@
 const inquirer = require('inquirer')
 
 const tasks = {
+  ...require('./packageApp.js'),
   ...require('./snyk.js'),
   ...require('./createEnvFile.js'),
-  ...require('./packageApp.js'),
 }
 
 const promptOptions = {

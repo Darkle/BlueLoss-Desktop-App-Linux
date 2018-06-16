@@ -74,7 +74,6 @@
     "parallel-webpack": "^2.3.0",
     "pkg": "^4.3.1",
     "snyk": "^1.82.0",
-    "stringify-object": "^3.2.2",
     "webpack": "^4.10.2",
     "webpack-node-externals": "^1.7.2"
   },

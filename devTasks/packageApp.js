@@ -1,11 +1,10 @@
 // @ts-nocheck
 const path = require('path')
 
-const { exec } = require('pkg')
+const { exec: execPkg } = require('pkg')
 const exeq = require('exeq')
 const chalk = require('chalk')
 const del = require('del')
-const stringifyObject = require('stringify-object')
 const Zip = require('node-7z')
 const fs = require('fs-extra')
 
@@ -17,7 +16,7 @@ const pkgOutputFolder = path.join(buildFolder, 'BlueLoss')
 const pkgBuildFile = path.join(pkgOutputFolder, 'BlueLoss')
 const appIconSrc = path.join(basePath, 'resources', 'icons', 'Blue', 'BlueLoss-blue-512x512.png')
 const appIconOutput = path.join(pkgOutputFolder, 'BlueLoss.png')
-const globsForCleanPlatformFolder = [path.join(buildFolder, '**', '*.*'), path.join(buildFolder, '**'), `!${buildFolder }`]
+const foldersToClean = [path.join(buildFolder, '**', '*.*'), path.join(buildFolder, '**'), `!${buildFolder }`]
 const archive7zip = new Zip()
 const pkgParams = [
   '--config',
@@ -47,14 +46,14 @@ function packageLinux64() {
 function prepareForPackaging(){
   return webpackBuild()
     .then(() => {
-      console.log(chalk.blue(`Cleaning: \n ${ stringifyObject(globsForCleanPlatformFolder) }`))
-      return del(globsForCleanPlatformFolder, { glob: true })
+      console.log(chalk.blue(`Cleaning: ${prettyGlobs(foldersToClean) }`))
+      return del(foldersToClean, { glob: true })
     })
 }
 
 function runPkg(){
   console.log(chalk.blue(`Running Pkg`))
-  return exec(pkgParams)
+  return execPkg(pkgParams)
 }
 
 function createZipVersion() {
@@ -78,6 +77,12 @@ function webpackBuild() {
 function copyAppIcon(){
   console.log(chalk.blue(`Copying App Icon`))
   return fs.copy(appIconSrc, appIconOutput)
+}
+
+function prettyGlobs(globArr){
+  return globArr.reduce((str, nextItem) =>
+    `${str}\n${nextItem}`
+  , '')
 }
 
 module.exports = {
