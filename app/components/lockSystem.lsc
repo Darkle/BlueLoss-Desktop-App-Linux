@@ -1,9 +1,13 @@
+import util from 'util'
+import { exec } from 'child_process'
+
 import pRatRace from 'promise-rat-race'
 import execa from 'execa'
 
 import { logger } from './logging/logging.lsc'
-import { getExecNameFromStdOut } from './utils.lsc'
+import { getExecNameFromStdOut, noop } from './utils.lsc'
 
+pExec = util.promisify(exec)
 lockCommandArgs = {
   'xdg-screensaver': 'lock',
   'gnome-screensaver-command': '--lock',
@@ -18,14 +22,15 @@ lockCommandArgs = {
 lockSystem(blueLossEnabled):void ->
   if !blueLossEnabled: return
   pRatRace([
-    execa.shell('command -v xdg-screensaver'),
-    execa.shell('command -v gnome-screensaver-command'),
-    execa.shell('command -v cinnamon-screensaver-command'),
-    execa.shell('command -v dm-tool'),
+    pExec('command -v xdg-screensaver'),
+    pExec('command -v gnome-screensaver-command'),
+    pExec('command -v cinnamon-screensaver-command'),
+    pExec('command -v dm-tool'),
   ])
   .then(getExecNameFromStdOut)
   .then(lockCommand -> execa(lockCommand, [lockCommandArgs[lockCommand]]))
-  .catch(logger.error)
+  .then(logger.verbose)
+  .catch(noop)
 
 
 export {

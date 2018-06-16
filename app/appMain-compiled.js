@@ -94,7 +94,7 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-// @ts-nocheck
+
 
 __webpack_require__(/*! ./config/env.lsc */ "./app/config/env.lsc");
 
@@ -145,7 +145,7 @@ function bailOnFatalError(err) {
 
 "use strict";
 
-// @ts-nocheck
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -514,6 +514,12 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.lockSystem = undefined;
 
+var _util = __webpack_require__(/*! util */ "util");
+
+var _util2 = _interopRequireDefault(_util);
+
+var _child_process = __webpack_require__(/*! child_process */ "child_process");
+
 var _promiseRatRace = __webpack_require__(/*! promise-rat-race */ "promise-rat-race");
 
 var _promiseRatRace2 = _interopRequireDefault(_promiseRatRace);
@@ -528,6 +534,7 @@ var _utils = __webpack_require__(/*! ./utils.lsc */ "./app/components/utils.lsc"
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const pExec = _util2.default.promisify(_child_process.exec);
 const lockCommandArgs = {
   'xdg-screensaver': 'lock',
   'gnome-screensaver-command': '--lock',
@@ -540,9 +547,9 @@ const lockCommandArgs = {
   */
 };function lockSystem(blueLossEnabled) {
   if (!blueLossEnabled) return;
-  (0, _promiseRatRace2.default)([_execa2.default.shell('command -v xdg-screensaver'), _execa2.default.shell('command -v gnome-screensaver-command'), _execa2.default.shell('command -v cinnamon-screensaver-command'), _execa2.default.shell('command -v dm-tool')]).then(_utils.getExecNameFromStdOut).then(function (lockCommand) {
+  (0, _promiseRatRace2.default)([pExec('command -v xdg-screensaver'), pExec('command -v gnome-screensaver-command'), pExec('command -v cinnamon-screensaver-command'), pExec('command -v dm-tool')]).then(_utils.getExecNameFromStdOut).then(function (lockCommand) {
     return (0, _execa2.default)(lockCommand, [lockCommandArgs[lockCommand]]);
-  }).catch(_logging.logger.error);
+  }).then(_logging.logger.verbose).catch(_utils.noop);
 }exports.lockSystem = lockSystem;
 
 /***/ }),
@@ -1552,7 +1559,8 @@ function tenYearsFromNow() {
   return Date.now() + _timeproxy2.default.FIVE_HUNDRED_WEEKS;
 }function capitalizeFirstLetter(string) {
   return `${string[0].toUpperCase()}${string.slice(1)}`;
-}function getExecNameFromStdOut({ stdout: browserPath }) {
+}function getExecNameFromStdOut({ stdout }) {
+  const browserPath = stdout.trim();
   return browserPath.slice(browserPath.lastIndexOf('/') + 1);
 }exports.setUpDev = setUpDev;
 exports.noop = noop;
@@ -1612,6 +1620,17 @@ module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1
 /***/ (function(module, exports) {
 
 module.exports = require("body-parser");
+
+/***/ }),
+
+/***/ "child_process":
+/*!********************************!*\
+  !*** external "child_process" ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("child_process");
 
 /***/ }),
 

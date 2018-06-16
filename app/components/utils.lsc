@@ -24,7 +24,8 @@ tenYearsFromNow():Number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 capitalizeFirstLetter(string:String):String ->
   `${ string[0].toUpperCase() }${ string.slice(1) }`
 
-getExecNameFromStdOut({stdout: browserPath}):String ->
+getExecNameFromStdOut({stdout}):String ->
+  browserPath = stdout.trim()
   browserPath.slice(browserPath.lastIndexOf('/') +1)
 
 export {
