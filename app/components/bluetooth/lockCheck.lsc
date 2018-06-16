@@ -1,10 +1,9 @@
 import tp from 'timeproxy'
-import lockSystem from 'lock-system'
 
 import { tenYearsFromNow } from '../utils.lsc'
-import { logger } from '../logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
 import { updateLastSeenForDeviceSearchingFor } from '../settings/devices.lsc'
+import { lockSystem } from '../lockSystem.lsc'
 
 /**
 * If a device is lost we lock the computer, however, after that, if
@@ -17,19 +16,11 @@ lockSystemIfDeviceLost():void ->
   { devicesToSearchFor, timeToLock, blueLossEnabled } = getSettings()
   for val { lastSeen, deviceId } in devicesToSearchFor:
     if deviceHasBeenLost(lastSeen, timeToLock):
-      lockTheSystem(blueLossEnabled)
+      lockSystem(blueLossEnabled)
       updateLastSeenForDeviceSearchingFor(deviceId, tenYearsFromNow())
 
 deviceHasBeenLost(lastTimeSawDevice: number, timeToLock: number):boolean ->
   Date.now() > (lastTimeSawDevice + tp`${ timeToLock } minutes`)
-
-// lockSystem throws on error, so use try/catch
-lockTheSystem(blueLossEnabled):void ->
-  if !blueLossEnabled: return
-  try:
-    lockSystem()
-  catch(err):
-    logger.error('Error occured trying to lock the system : ', err)
 
 export {
   lockSystemIfDeviceLost

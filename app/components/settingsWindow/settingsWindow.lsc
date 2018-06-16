@@ -6,7 +6,7 @@ import pRatRace from 'promise-rat-race'
 
 import { getServerAddress, tellAllSettingsWindowsToClose } from '../server/server.lsc'
 import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
-import { capitalizeFirstLetter } from '../utils.lsc'
+import { capitalizeFirstLetter, getExecNameFromStdOut } from '../utils.lsc'
 
 /*****
 * We don't want to return a Promise here because execa.shell will not resolve until the
@@ -24,11 +24,11 @@ openSettingsWindow():void ->
     execa.shell('command -v chromium-browser'),
     execa.shell('command -v firefox'),
   ])
+  .then(getExecNameFromStdOut)
   .then(openSettingsWindowInPreferredBrowser)
   .catch(() -> opn(getServerAddress()))  //fall back to opening with OS's default browser
 
-openSettingsWindowInPreferredBrowser({stdout: browserPath}):Promise ->
-  browser = getBrowserExecNameFromPath(browserPath)
+openSettingsWindowInPreferredBrowser(browser):Promise ->
   if browser === 'firefox': return execa.shell(generateFirefoxCliParams())
   execa.shell(generateChromeCliParams(browser))
 
@@ -40,9 +40,6 @@ generateChromeCliParams(browser:String):String ->
 
 getBrowserProfilePath(browser:String):String ->
   path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', capitalizeFirstLetter(browser))
-
-getBrowserExecNameFromPath(browserPath:String):String ->
-  browserPath.slice(browserPath.lastIndexOf('/') +1)
 
 export {
   openSettingsWindow
