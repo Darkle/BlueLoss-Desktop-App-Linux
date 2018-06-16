@@ -32,8 +32,8 @@ capitalizeFirstLetter(string:String):String ->
   `${ string[0].toUpperCase() }${ string.slice(1) }`
 
 getExecNameFromStdOut({stdout}):String ->
-  browserPath = stdout.trim()
-  browserPath.slice(browserPath.lastIndexOf('/') +1)
+  execName = stdout.trim()
+  execName.slice(execName.lastIndexOf('/') +1)
 
 xdgOpenServerWebPage():Promise ->
   pExec(`xdg-open ${ getServerAddress() }`)
