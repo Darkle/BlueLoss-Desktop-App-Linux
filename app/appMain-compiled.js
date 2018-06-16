@@ -514,8 +514,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.lockSystem = undefined;
 
-var _child_process = __webpack_require__(/*! child_process */ "child_process");
-
 var _promiseRatRace = __webpack_require__(/*! promise-rat-race */ "promise-rat-race");
 
 var _promiseRatRace2 = _interopRequireDefault(_promiseRatRace);
@@ -538,12 +536,12 @@ const lockCommandArgs = {
 
   /*****
   * Based on: https://github.com/sindresorhus/lock-system/blob/master/index.js
-  * Using spawn as execFileSync seems to error for me.
+  * Using execa as execFileSync seems to error for me.
   */
 };function lockSystem(blueLossEnabled) {
   if (!blueLossEnabled) return;
-  (0, _promiseRatRace2.default)([_execa2.default.shell('command -v xdg-screensaver'), _execa2.default.shell('command -v gnome-screensaver-command'), _execa2.default.shell('command -v cinnamon-screensaver-command'), _execa2.default.shell('command -v dm-tool')]).then(_utils.getExecNameFromStdOut).then(lockCommand => {
-    return (0, _child_process.spawn)(lockCommand, lockCommandArgs[lockCommand]);
+  (0, _promiseRatRace2.default)([_execa2.default.shell('command -v xdg-screensaver'), _execa2.default.shell('command -v gnome-screensaver-command'), _execa2.default.shell('command -v cinnamon-screensaver-command'), _execa2.default.shell('command -v dm-tool')]).then(_utils.getExecNameFromStdOut).then(function (lockCommand) {
+    return (0, _execa2.default)(lockCommand, [lockCommandArgs[lockCommand]]);
   }).catch(_logging.logger.error);
 }exports.lockSystem = lockSystem;
 
@@ -1614,17 +1612,6 @@ module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1
 /***/ (function(module, exports) {
 
 module.exports = require("body-parser");
-
-/***/ }),
-
-/***/ "child_process":
-/*!********************************!*\
-  !*** external "child_process" ***!
-  \********************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("child_process");
 
 /***/ }),
 

@@ -1,5 +1,3 @@
-import { spawn } from 'child_process'
-
 import pRatRace from 'promise-rat-race'
 import execa from 'execa'
 
@@ -15,7 +13,7 @@ lockCommandArgs = {
 
 /*****
 * Based on: https://github.com/sindresorhus/lock-system/blob/master/index.js
-* Using spawn as execFileSync seems to error for me.
+* Using execa as execFileSync seems to error for me.
 */
 lockSystem(blueLossEnabled):void ->
   if !blueLossEnabled: return
@@ -26,9 +24,7 @@ lockSystem(blueLossEnabled):void ->
     execa.shell('command -v dm-tool'),
   ])
   .then(getExecNameFromStdOut)
-  .then(lockCommand => {
-    spawn(lockCommand, lockCommandArgs[lockCommand])
-  })
+  .then(lockCommand -> execa(lockCommand, [lockCommandArgs[lockCommand]]))
   .catch(logger.error)
 
 
