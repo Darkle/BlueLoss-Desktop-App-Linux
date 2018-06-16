@@ -94,7 +94,7 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+// @ts-nocheck
 
 __webpack_require__(/*! ./config/env.lsc */ "./app/config/env.lsc");
 
@@ -145,7 +145,7 @@ function bailOnFatalError(err) {
 
 "use strict";
 
-
+// @ts-nocheck
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
