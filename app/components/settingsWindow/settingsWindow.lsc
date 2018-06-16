@@ -3,14 +3,13 @@ import { exec, execFile } from 'child_process'
 import path from 'path'
 
 import pRatRace from 'promise-rat-race'
-// import onExit from 'signal-exit'
 
-import { getServerAddress, tellAllSettingsWindowsToClose } from '../server/server.lsc'
+import { getServerAddress } from '../server/server.lsc'
 import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 import { getExecNameFromStdOut, xdgOpenServerWebPage } from '../utils.lsc'
 
 pExec = promisify(exec)
-pExecFile = promisify(execFile)
+let spawnedSettingsWindow = null
 
 /*****
 * We don't want to return a Promise here because pExec will not resolve until the
@@ -20,10 +19,11 @@ pExecFile = promisify(execFile)
 */
 openSettingsWindow():void ->
   /*****
-  * We send a message to all open windows (via Server Side Events) to close themselves, so there
-  * isn't more than one settings window open at once.
+  * We kill settings window if it's already open so there isn't more than one settings window open
+  * at once. This is slightly inefficiant, but wmctrl wasn't installed by default on my machine, so
+  * gonna do it this way.
   */
-  tellAllSettingsWindowsToClose()
+  killSpawnedSettingsWindow()
 
   pRatRace([
     pExec('command -v firefox'),
@@ -35,22 +35,26 @@ openSettingsWindow():void ->
   .catch(xdgOpenServerWebPage)  //fall back to opening with OS's default browser
 
 openSettingsWindowInPreferredBrowser(browser):Promise ->
-  pExecFile(browser,
-    if browser === 'firefox': generateFirefoxParams()
-    else: generateChromeParams()
+  return new Promise((resolve, reject):void ->
+    now spawnedSettingsWindow = execFile(
+      browser,
+      generateBrowserParams(browser),
+      (error):void ->
+        if error: return reject(error)
+        return resolve()
+    )
   )
 
-generateFirefoxParams():Array<String> ->
-  [
-    '-new-instance',
-    '--width=910',
-    '--height=760',
-    '-profile',
-    getBrowserProfilePath('firefox'),
-    getServerAddress(),
-  ]
-
-generateChromeParams():Array<String> ->
+generateBrowserParams(browser):Array<String> ->
+  if browser === 'firefox':
+    return [
+      '-new-instance',
+      '--width=910',
+      '--height=760',
+      '-profile',
+      getBrowserProfilePath('firefox'),
+      getServerAddress(),
+    ]
   [
     `--app=${ getServerAddress() }`,
     `--user-data-dir=${ getBrowserProfilePath('chromium') }`
@@ -59,18 +63,11 @@ generateChromeParams():Array<String> ->
 getBrowserProfilePath(browserType:String):String ->
   path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', browserType)
 
-/*****
-* Tell settings window to close when main process exits.
-*/
-// onExit(():void ->
-//   console.log('exititing')
-//   tellAllSettingsWindowsToClose()
-// )
+killSpawnedSettingsWindow():void ->
+  spawnedSettingsWindow?.kill()
+  now spawnedSettingsWindow = null
 
-// process.on('exit', () => {
-//   console.log('exititing')
-//   tellAllSettingsWindowsToClose()
-// })
+process.on('exit', () -> killSpawnedSettingsWindow())
 
 export {
   openSettingsWindow

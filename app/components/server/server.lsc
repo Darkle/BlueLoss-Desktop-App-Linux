@@ -58,9 +58,6 @@ getServerAddress():String -> serverAddress
 pushUpdatesToFrontEnd(settingName, settingValue):void ->
   push('settingsUpdate', {[settingName]: settingValue})
 
-tellAllSettingsWindowsToClose():void ->
-  push('closeSelf', true)
-
 generateServerSettingsCookie():String ->
   JSON.stringify(omit(
     getSettings(),
@@ -76,5 +73,4 @@ export{
   startServer,
   getServerAddress,
   pushUpdatesToFrontEnd,
-  tellAllSettingsWindowsToClose,
 }

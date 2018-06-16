@@ -1077,10 +1077,6 @@ serverSideEventSource.addEventListener('settingsUpdate', e => {
   return settingsWindowApp.updateStateOnServerMessage(JSON.parse(e.data));
 });
 
-serverSideEventSource.addEventListener('closeSelf', () => {
-  return window.close();
-});
-
 /***/ }),
 
 /***/ "./app/components/types/types.lsc":

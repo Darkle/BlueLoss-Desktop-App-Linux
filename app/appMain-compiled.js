@@ -917,7 +917,7 @@ function sendOSnotification(message) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.tellAllSettingsWindowsToClose = exports.pushUpdatesToFrontEnd = exports.getServerAddress = exports.startServer = undefined;
+exports.pushUpdatesToFrontEnd = exports.getServerAddress = exports.startServer = undefined;
 
 var _path = __webpack_require__(/*! path */ "path");
 
@@ -993,14 +993,11 @@ function updateSettingsPostHandler(req, res) {
   return serverAddress;
 }function pushUpdatesToFrontEnd(settingName, settingValue) {
   push('settingsUpdate', { [settingName]: settingValue });
-}function tellAllSettingsWindowsToClose() {
-  push('closeSelf', true);
 }function generateServerSettingsCookie() {
   return JSON.stringify((0, _lodash2.default)((0, _settings.getSettings)(), ['trayIconColor', 'dateLastCheckedForAppUpdate', 'skipUpdateVersion', 'firstRun']));
 }exports.startServer = startServer;
 exports.getServerAddress = getServerAddress;
 exports.pushUpdatesToFrontEnd = pushUpdatesToFrontEnd;
-exports.tellAllSettingsWindowsToClose = tellAllSettingsWindowsToClose;
 
 /***/ }),
 
@@ -1292,9 +1289,7 @@ var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const pExec = (0, _util.promisify)(_child_process.exec);
-// import onExit from 'signal-exit'
-
-const pExecFile = (0, _util.promisify)(_child_process.execFile);
+let spawnedSettingsWindow = null;
 
 /*****
 * We don't want to return a Promise here because pExec will not resolve until the
@@ -1304,34 +1299,34 @@ const pExecFile = (0, _util.promisify)(_child_process.execFile);
 */
 function openSettingsWindow() {
   /*****
-  * We send a message to all open windows (via Server Side Events) to close themselves, so there
-  * isn't more than one settings window open at once.
+  * We kill settings window if it's already open so there isn't more than one settings window open
+  * at once. This is slightly inefficiant, but wmctrl wasn't installed by default on my machine, so
+  * gonna do it this way.
   */
-  (0, _server.tellAllSettingsWindowsToClose)();
+  killSpawnedSettingsWindow();
 
   (0, _promiseRatRace2.default)([pExec('command -v firefox'), pExec('command -v chromium-browser'), pExec('command -v google-chrome')]).then(_utils.getExecNameFromStdOut).then(openSettingsWindowInPreferredBrowser).catch(_utils.xdgOpenServerWebPage);
 } //fall back to opening with OS's default browser
 
 function openSettingsWindowInPreferredBrowser(browser) {
-  return pExecFile(browser, browser === 'firefox' ? generateFirefoxParams() : generateChromeParams());
-}function generateFirefoxParams() {
-  return ['-new-instance', '--width=910', '--height=760', '-profile', getBrowserProfilePath('firefox'), (0, _server.getServerAddress)()];
-}function generateChromeParams() {
-  return [`--app=${(0, _server.getServerAddress)()}`, `--user-data-dir=${getBrowserProfilePath('chromium')}`];
+  return new Promise(function (resolve, reject) {
+    spawnedSettingsWindow = (0, _child_process.execFile)(browser, generateBrowserParams(browser), function (error) {
+      if (error) return reject(error);
+      return resolve();
+    });
+  });
+}function generateBrowserParams(browser) {
+  if (browser === 'firefox') {
+    return ['-new-instance', '--width=910', '--height=760', '-profile', getBrowserProfilePath('firefox'), (0, _server.getServerAddress)()];
+  }return [`--app=${(0, _server.getServerAddress)()}`, `--user-data-dir=${getBrowserProfilePath('chromium')}`];
 }function getBrowserProfilePath(browserType) {
   return _path2.default.join((0, _createBlueLossConfig.getBlueLossConfigFolderPath)(), 'BrowserProfiles', browserType);
-} /*****
-  * Tell settings window to close when main process exits.
-  */
-// onExit(():void ->
-//   console.log('exititing')
-//   tellAllSettingsWindowsToClose()
-// )
-
-// process.on('exit', () => {
-//   console.log('exititing')
-//   tellAllSettingsWindowsToClose()
-// })
+}function killSpawnedSettingsWindow() {
+  spawnedSettingsWindow == null ? void 0 : spawnedSettingsWindow.kill();
+  spawnedSettingsWindow = null;
+}process.on('exit', function () {
+  return killSpawnedSettingsWindow();
+});
 
 exports.openSettingsWindow = openSettingsWindow;
 

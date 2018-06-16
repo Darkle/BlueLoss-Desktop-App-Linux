@@ -22,7 +22,3 @@ serverSideEventSource = new EventSource('/sse-update')
 serverSideEventSource.addEventListener('settingsUpdate', (e) => {
   settingsWindowApp.updateStateOnServerMessage(JSON.parse(e.data))
 })
-
-serverSideEventSource.addEventListener('closeSelf', () => {
-  window.close()
-})
