@@ -1,18 +1,22 @@
 import { promisify } from 'util'
-import { exec } from 'child_process'
+import { exec, execFile } from 'child_process'
 import path from 'path'
 
 import pRatRace from 'promise-rat-race'
+// import onExit from 'signal-exit'
 
 import { getServerAddress, tellAllSettingsWindowsToClose } from '../server/server.lsc'
 import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 import { getExecNameFromStdOut, xdgOpenServerWebPage } from '../utils.lsc'
 
 pExec = promisify(exec)
+pExecFile = promisify(execFile)
 
 /*****
 * We don't want to return a Promise here because pExec will not resolve until the
 * settings window is closed (we can just fire and forget).
+* Note: we need to use exec (pExec) to run 'command -v ...' as that is a
+* shell-specific command.
 */
 openSettingsWindow():void ->
   /*****
@@ -31,17 +35,42 @@ openSettingsWindow():void ->
   .catch(xdgOpenServerWebPage)  //fall back to opening with OS's default browser
 
 openSettingsWindowInPreferredBrowser(browser):Promise ->
-  if browser === 'firefox': return pExec(generateFirefoxCliParams())
-  pExec(generateChromeCliParams(browser))
+  pExecFile(browser,
+    if browser === 'firefox': generateFirefoxParams()
+    else: generateChromeParams()
+  )
 
-generateFirefoxCliParams():String ->
-  `firefox -new-instance --width=910 --height=760 -profile ${ getBrowserProfilePath('firefox') } ${ getServerAddress() }`
+generateFirefoxParams():Array<String> ->
+  [
+    '-new-instance',
+    '--width=910',
+    '--height=760',
+    '-profile',
+    getBrowserProfilePath('firefox'),
+    getServerAddress(),
+  ]
 
-generateChromeCliParams(browser:String):String ->
-  `${ browser } --app=${ getServerAddress() } --user-data-dir=${ getBrowserProfilePath('chromium') }`
+generateChromeParams():Array<String> ->
+  [
+    `--app=${ getServerAddress() }`,
+    `--user-data-dir=${ getBrowserProfilePath('chromium') }`
+  ]
 
-getBrowserProfilePath(browser:String):String ->
-  path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', browser)
+getBrowserProfilePath(browserType:String):String ->
+  path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', browserType)
+
+/*****
+* Tell settings window to close when main process exits.
+*/
+// onExit(():void ->
+//   console.log('exititing')
+//   tellAllSettingsWindowsToClose()
+// )
+
+// process.on('exit', () => {
+//   console.log('exititing')
+//   tellAllSettingsWindowsToClose()
+// })
 
 export {
   openSettingsWindow

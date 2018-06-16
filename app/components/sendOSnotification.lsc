@@ -1,12 +1,17 @@
 import { promisify } from 'util'
-import { exec } from 'child_process'
+import { exec, execFile } from 'child_process'
 
 import pRatRace from 'promise-rat-race'
 
 import { noop, getExecNameFromStdOut } from './utils.lsc'
 
 pExec = promisify(exec)
+pExecFile = promisify(execFile)
 
+/*****
+* Note: we need to use exec (pExec) to run 'command -v ...' as that is a
+* shell-specific command.
+*/
 sendOSnotification(message:String):void ->
   pRatRace([
     pExec('command -v zenity'),
@@ -14,9 +19,10 @@ sendOSnotification(message:String):void ->
   ])
   .then(getExecNameFromStdOut)
   .then(notificationExec ->
-    if notificationExec === 'zenity':
-      return pExec(`zenity --notification --text="${ message }"`)
-    pExec(`notify-send "${ message }"`)
+    pExecFile(notificationExec,
+      if notificationExec === 'zenity': ['--notification', `--text="${ message }"`]
+      else: [message]
+    )
   )
   .catch(noop)
 

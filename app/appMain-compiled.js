@@ -347,7 +347,7 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/compo
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const pExec = (0, _util.promisify)(_child_process.exec);
+const pExecFile = (0, _util.promisify)(_child_process.execFile);
 
 /*****
 * We don't return a promise here as we want scanForBlueToothDevices to
@@ -357,7 +357,7 @@ const pExec = (0, _util.promisify)(_child_process.exec);
 function scanForBlueToothDevices() {
   if (!(0, _settings.getSettings)().blueLossEnabled) scheduleScan();
   _logging.logger.verbose('=======New Scan Started=======');
-  pExec('hcitool scan').then(_handleScanResults.handleScanResults).catch(_logging.logger.error);
+  pExecFile('hcitool', ['scan']).then(_handleScanResults.handleScanResults).catch(_logging.logger.error);
   scheduleScan();
 }function scheduleScan() {
   return setTimeout(scanForBlueToothDevices, _timeproxy2.default`${(0, _settings.getSettings)().scanInterval} seconds`);
@@ -424,10 +424,8 @@ function handleScanResults(spawnCommandResult) {
   * spawnCommandResult looks like:
   * {"code":0,"data":{"out":["Scanning ...\tE0:88:61:CF:F3:52\tMotoG3\n\t12:30:D3:CD:32:51\tn/a\n"],"err":[]}}
   */
-function processScanResultsText(spawnCommandResult) {
-  var _spawnCommandResult$s, _spawnCommandResult$s2;
-
-  const results = spawnCommandResult == null ? void 0 : (_spawnCommandResult$s = spawnCommandResult.stdout) == null ? void 0 : (_spawnCommandResult$s2 = _spawnCommandResult$s.trim()) == null ? void 0 : _spawnCommandResult$s2.replace('Scanning ...', '');
+function processScanResultsText({ stdout }) {
+  const results = stdout == null ? void 0 : stdout.trim().replace('Scanning ...', '');
   if (!(results == null ? void 0 : results.length)) return [];
 
   return results.split('\n').reduce(function (resultsArr, nextResult) {
@@ -529,6 +527,7 @@ var _utils = __webpack_require__(/*! ./utils.lsc */ "./app/components/utils.lsc"
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const pExec = (0, _util.promisify)(_child_process.exec);
+const pExecFile = (0, _util.promisify)(_child_process.execFile);
 const lockCommandArgs = {
   'xdg-screensaver': 'lock',
   'gnome-screensaver-command': '--lock',
@@ -539,11 +538,13 @@ const lockCommandArgs = {
   * Based on: https://github.com/sindresorhus/lock-system/blob/master/index.js
   * The spawned xdg-screensaved command always seems to error for me, so only log
   * the error when verbose logging is enabled.
+  * Note: we need to use exec (pExec) to run 'command -v ...' as that is a
+  * shell-specific command.
   */
 };function lockSystem(blueLossEnabled) {
   if (!blueLossEnabled) return;
   (0, _promiseRatRace2.default)([pExec('command -v xdg-screensaver'), pExec('command -v gnome-screensaver-command'), pExec('command -v cinnamon-screensaver-command'), pExec('command -v dm-tool')]).then(_utils.getExecNameFromStdOut).then(function (lockCommand) {
-    return pExec(`${lockCommand} ${lockCommandArgs[lockCommand]}`);
+    return pExecFile(lockCommand, [lockCommandArgs[lockCommand]]);
   }).catch(_logging.logger.verbose);
 }exports.lockSystem = lockSystem;
 
@@ -889,12 +890,15 @@ var _utils = __webpack_require__(/*! ./utils.lsc */ "./app/components/utils.lsc"
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const pExec = (0, _util.promisify)(_child_process.exec);
+const pExecFile = (0, _util.promisify)(_child_process.execFile);
 
+/*****
+* Note: we need to use exec (pExec) to run 'command -v ...' as that is a
+* shell-specific command.
+*/
 function sendOSnotification(message) {
   (0, _promiseRatRace2.default)([pExec('command -v zenity'), pExec('command -v notify-send')]).then(_utils.getExecNameFromStdOut).then(function (notificationExec) {
-    if (notificationExec === 'zenity') {
-      return pExec(`zenity --notification --text="${message}"`);
-    }return pExec(`notify-send "${message}"`);
+    return pExecFile(notificationExec, notificationExec === 'zenity' ? ['--notification', `--text="${message}"`] : [message]);
   }).catch(_utils.noop);
 }exports.sendOSnotification = sendOSnotification;
 
@@ -1288,10 +1292,15 @@ var _utils = __webpack_require__(/*! ../utils.lsc */ "./app/components/utils.lsc
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const pExec = (0, _util.promisify)(_child_process.exec);
+// import onExit from 'signal-exit'
+
+const pExecFile = (0, _util.promisify)(_child_process.execFile);
 
 /*****
 * We don't want to return a Promise here because pExec will not resolve until the
 * settings window is closed (we can just fire and forget).
+* Note: we need to use exec (pExec) to run 'command -v ...' as that is a
+* shell-specific command.
 */
 function openSettingsWindow() {
   /*****
@@ -1304,15 +1313,27 @@ function openSettingsWindow() {
 } //fall back to opening with OS's default browser
 
 function openSettingsWindowInPreferredBrowser(browser) {
-  if (browser === 'firefox') return pExec(generateFirefoxCliParams());
-  return pExec(generateChromeCliParams(browser));
-}function generateFirefoxCliParams() {
-  return `firefox -new-instance --width=910 --height=760 -profile ${getBrowserProfilePath('firefox')} ${(0, _server.getServerAddress)()}`;
-}function generateChromeCliParams(browser) {
-  return `${browser} --app=${(0, _server.getServerAddress)()} --user-data-dir=${getBrowserProfilePath('chromium')}`;
-}function getBrowserProfilePath(browser) {
-  return _path2.default.join((0, _createBlueLossConfig.getBlueLossConfigFolderPath)(), 'BrowserProfiles', browser);
-}exports.openSettingsWindow = openSettingsWindow;
+  return pExecFile(browser, browser === 'firefox' ? generateFirefoxParams() : generateChromeParams());
+}function generateFirefoxParams() {
+  return ['-new-instance', '--width=910', '--height=760', '-profile', getBrowserProfilePath('firefox'), (0, _server.getServerAddress)()];
+}function generateChromeParams() {
+  return [`--app=${(0, _server.getServerAddress)()}`, `--user-data-dir=${getBrowserProfilePath('chromium')}`];
+}function getBrowserProfilePath(browserType) {
+  return _path2.default.join((0, _createBlueLossConfig.getBlueLossConfigFolderPath)(), 'BrowserProfiles', browserType);
+} /*****
+  * Tell settings window to close when main process exits.
+  */
+// onExit(():void ->
+//   console.log('exititing')
+//   tellAllSettingsWindowsToClose()
+// )
+
+// process.on('exit', () => {
+//   console.log('exititing')
+//   tellAllSettingsWindowsToClose()
+// })
+
+exports.openSettingsWindow = openSettingsWindow;
 
 /***/ }),
 
@@ -1514,7 +1535,7 @@ var _server = __webpack_require__(/*! ./server/server.lsc */ "./app/components/s
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const pExec = (0, _util.promisify)(_child_process.exec);
+const pExecFile = (0, _util.promisify)(_child_process.execFile);
 
 function setUpDev() {
   true && !(0, _settings.getSettings)().firstRun ? (0, _settingsWindow.openSettingsWindow)() : void 0;
@@ -1558,9 +1579,9 @@ function tenYearsFromNow() {
   const execName = stdout.trim();
   return execName.slice(execName.lastIndexOf('/') + 1);
 }function xdgOpenServerWebPage() {
-  return pExec(`xdg-open ${(0, _server.getServerAddress)()}`);
+  return pExecFile(`xdg-open`, [(0, _server.getServerAddress)()]);
 }function xdgOpenLogsFolder() {
-  return pExec(`xdg-open ${(0, _createBlueLossConfig.getBlueLossLogsFolderPath)()}`);
+  return pExecFile(`xdg-open`, [(0, _createBlueLossConfig.getBlueLossLogsFolderPath)()]);
 }exports.setUpDev = setUpDev;
 exports.noop = noop;
 exports.pipe = pipe;

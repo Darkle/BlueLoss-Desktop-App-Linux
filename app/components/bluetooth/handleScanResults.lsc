@@ -31,8 +31,8 @@ handleScanResults(spawnCommandResult:Object):void ->
 * spawnCommandResult looks like:
 * {"code":0,"data":{"out":["Scanning ...\tE0:88:61:CF:F3:52\tMotoG3\n\t12:30:D3:CD:32:51\tn/a\n"],"err":[]}}
 */
-processScanResultsText(spawnCommandResult:Object):Array<DeviceType> ->
-  results = spawnCommandResult?.stdout?.trim()?.replace('Scanning ...', '')
+processScanResultsText({stdout}):Array<DeviceType> ->
+  results = stdout?.trim().replace('Scanning ...', '')
   if !results?.length: return []
 
   results.split('\n').reduce((resultsArr, nextResult) ->
