@@ -48,7 +48,6 @@ const commonWebpackOptions = {
 * We also dont want webpack to transpile the stuff in node_modules folder, so we use the
 * webpack-node-externals plugin.
 */
-
 const mainWebpackOptions = {
   ...commonWebpackOptions,
   ...{
