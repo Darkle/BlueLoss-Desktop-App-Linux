@@ -13,18 +13,18 @@ import { getSettings, updateLastSeenForDeviceSearchingFor } from '../settings/se
 * from now (not using Infinity cause it doesn't JSON.stringify for storage).
 */
 lockSystemIfDeviceLost():void ->
-  { devicesToSearchFor, timeToLock } = getSettings()
+  { devicesToSearchFor, timeToLock, blueLossEnabled } = getSettings()
   for val { lastSeen, deviceId } in devicesToSearchFor:
     if deviceHasBeenLost(lastSeen, timeToLock):
-      lockTheSystem()
+      lockTheSystem(blueLossEnabled)
       updateLastSeenForDeviceSearchingFor(deviceId, tenYearsFromNow())
 
 deviceHasBeenLost(lastTimeSawDevice: number, timeToLock: number):boolean ->
   Date.now() > (lastTimeSawDevice + tp`${ timeToLock } minutes`)
 
-lockTheSystem():void ->
-  if !getSettings().blueLossEnabled: return
-  // lockSystem throws on error, so use try/catch
+// lockSystem throws on error, so use try/catch
+lockTheSystem(blueLossEnabled):void ->
+  if !blueLossEnabled: return
   try:
     lockSystem()
   catch(err):
