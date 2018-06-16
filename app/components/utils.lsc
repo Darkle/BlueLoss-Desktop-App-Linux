@@ -28,9 +28,6 @@ range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + sta
 
 tenYearsFromNow():Number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 
-capitalizeFirstLetter(string:String):String ->
-  `${ string[0].toUpperCase() }${ string.slice(1) }`
-
 getExecNameFromStdOut({stdout}):String ->
   execName = stdout.trim()
   execName.slice(execName.lastIndexOf('/') +1)
@@ -51,7 +48,6 @@ export {
   compose,
   identity,
   tenYearsFromNow,
-  capitalizeFirstLetter,
   getExecNameFromStdOut,
   xdgOpenServerWebPage,
   xdgOpenLogsFolder,

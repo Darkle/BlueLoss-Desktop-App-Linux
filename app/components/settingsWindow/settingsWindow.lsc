@@ -6,7 +6,7 @@ import pRatRace from 'promise-rat-race'
 
 import { getServerAddress, tellAllSettingsWindowsToClose } from '../server/server.lsc'
 import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
-import { capitalizeFirstLetter, getExecNameFromStdOut, xdgOpenServerWebPage } from '../utils.lsc'
+import { getExecNameFromStdOut, xdgOpenServerWebPage } from '../utils.lsc'
 
 pExec = promisify(exec)
 
@@ -35,13 +35,13 @@ openSettingsWindowInPreferredBrowser(browser):Promise ->
   pExec(generateChromeCliParams(browser))
 
 generateFirefoxCliParams():String ->
-  `firefox -new-instance --width=910 --height=760 -profile ${ getBrowserProfilePath('Firefox') } ${ getServerAddress() }`
+  `firefox -new-instance --width=910 --height=760 -profile ${ getBrowserProfilePath('firefox') } ${ getServerAddress() }`
 
 generateChromeCliParams(browser:String):String ->
-  `${ browser } --app=${ getServerAddress() } --user-data-dir=${ getBrowserProfilePath('Chromium') }`
+  `${ browser } --app=${ getServerAddress() } --user-data-dir=${ getBrowserProfilePath('chromium') }`
 
 getBrowserProfilePath(browser:String):String ->
-  path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', capitalizeFirstLetter(browser))
+  path.join(getBlueLossConfigFolderPath(), 'BrowserProfiles', browser)
 
 export {
   openSettingsWindow

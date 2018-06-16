@@ -8,10 +8,10 @@ import { getChromePrefs, getFirefoxUserChrome, getFirefoxPrefsJs } from './brows
 blueLossConfigFolderPath = path.join(os.homedir(), '.config', 'BlueLoss')
 blueLossSettingsFilePath = path.join(blueLossConfigFolderPath, 'blueloss-settings.json')
 blueLossLogsFolderPath = path.join(blueLossConfigFolderPath, 'logs')
-blueLossConfigChromiumFirstRunFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Chromium', 'First Run')
-blueLossConfigChromiumPrefsFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Chromium', 'Default', 'Preferences')
-blueLossConfigFirefoxUserChromeFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Firefox', 'chrome', 'userChrome.css')
-blueLossConfigFirefoxPrefsFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'Firefox', 'prefs.js')
+blueLossConfigChromiumFirstRunFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'chromium', 'First Run')
+blueLossConfigChromiumPrefsFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'chromium', 'Default', 'Preferences')
+blueLossConfigFirefoxUserChromeFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'firefox', 'chrome', 'userChrome.css')
+blueLossConfigFirefoxPrefsFilePath = path.join(blueLossConfigFolderPath, 'BrowserProfiles', 'firefox', 'prefs.js')
 
 createBlueLossConfig():Promise -/>
   exists <- fs.pathExists(blueLossSettingsFilePath)

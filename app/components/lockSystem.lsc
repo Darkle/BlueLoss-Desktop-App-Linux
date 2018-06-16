@@ -16,7 +16,7 @@ lockCommandArgs = {
 
 /*****
 * Based on: https://github.com/sindresorhus/lock-system/blob/master/index.js
-* The spawed xdg-screensaved command always seems to error for me, so only log
+* The spawned xdg-screensaved command always seems to error for me, so only log
 * the error when verbose logging is enabled.
 */
 lockSystem(blueLossEnabled):void ->
