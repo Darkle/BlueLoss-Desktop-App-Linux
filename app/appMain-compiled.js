@@ -337,6 +337,10 @@ var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
 
 var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
+var _signalExit = __webpack_require__(/*! signal-exit */ "signal-exit");
+
+var _signalExit2 = _interopRequireDefault(_signalExit);
+
 var _handleScanResults = __webpack_require__(/*! ./handleScanResults.lsc */ "./app/components/bluetooth/handleScanResults.lsc");
 
 var _logging = __webpack_require__(/*! ../logging/logging.lsc */ "./app/components/logging/logging.lsc");
@@ -345,13 +349,13 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/compo
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-let spawnedScans = [];
+const spawnedScans = new Set();
 
 /*****
 * We don't return a promise here as we want scanForBlueToothDevices to
 * be spun off seperately. Also, if we returned a promise here that calls
 * itself recursively we get stuck in appMain.lsc.
-* Also we store the running scans in an array so that we can easily kill whatever
+* Also we store the running scans in an set so that we can easily kill whatever
 * is running on exit - it's possible one scan may not be finished by the time a new scan
 * starts, so that's why we keep a record of all the currently running scans instead
 * of just the latest one.
@@ -363,26 +367,20 @@ function scanForBlueToothDevices() {
   scheduleScan();
 }function spawnHciToolScan() {
   const scan = (0, _child_process.spawn)('hcitool', ['scan']);
-  spawnedScans.push(scan);
+  spawnedScans.add(scan);
 
   scan.stdout.on('data', _handleScanResults.handleScanResults);
-  scan.on('error', err => {
+  scan.on('error', function (err) {
     _logging.logger.verbose(err);
-    return removeStoredScan(scan.pid);
+    spawnedScans.delete(scan);
   });
   scan.on('close', function () {
-    return removeStoredScan(scan.pid);
-  });
-}function removeStoredScan(processId) {
-  spawnedScans = spawnedScans.filter(function ({ pid }) {
-    return pid === processId;
+    return spawnedScans.delete(scan);
   });
 }function scheduleScan() {
   return setTimeout(scanForBlueToothDevices, _timeproxy2.default`${(0, _settings.getSettings)().scanInterval} seconds`);
-}process.on('exit', function () {
-  return spawnedScans.forEach(function (scan) {
-    return scan.kill();
-  });
+}(0, _signalExit2.default)(() => {
+  for (const scan of spawnedScans) scan.kill();
 });
 
 exports.scanForBlueToothDevices = scanForBlueToothDevices;
@@ -424,8 +422,8 @@ var _lockCheck = __webpack_require__(/*! ./lockCheck.lsc */ "./app/components/bl
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function handleScanResults(spawnCommandResult) {
-  const deviceList = processScanResultsText(spawnCommandResult);
+function handleScanResults(scanResult) {
+  const deviceList = getDeviceDataFromScanResult(scanResult);
   _logging.logger.verbose(`Found these Bluetooth devices in scan: `, { deviceList });
 
   const { devicesToSearchFor } = (0, _settings.getSettings)();
@@ -445,11 +443,11 @@ function handleScanResults(spawnCommandResult) {
     }
   }(0, _lockCheck.lockSystemIfDeviceLost)();
 } /*****
-  * spawnCommandResult looks like:
-  * {"code":0,"data":{"out":["Scanning ...\tE0:88:61:CF:F3:52\tMotoG3\n\t12:30:D3:CD:32:51\tn/a\n"],"err":[]}}
+  * result will be a buffer which as text looks like:
+  * "Scanning ...\tE0:88:61:CF:F3:52\tMotoG3\n\t12:30:D3:CD:32:51\tn/a\n"
   */
-function processScanResultsText({ stdout }) {
-  const results = stdout == null ? void 0 : stdout.trim().replace('Scanning ...', '');
+function getDeviceDataFromScanResult(result) {
+  const results = result == null ? void 0 : result.toString().trim().replace('Scanning ...', '');
   if (!(results == null ? void 0 : results.length)) return [];
 
   return results.split('\n').reduce(function (resultsArr, nextResult) {
@@ -788,6 +786,10 @@ var _fsExtra = __webpack_require__(/*! fs-extra */ "fs-extra");
 
 var _fsExtra2 = _interopRequireDefault(_fsExtra);
 
+var _signalExit = __webpack_require__(/*! signal-exit */ "signal-exit");
+
+var _signalExit2 = _interopRequireDefault(_signalExit);
+
 var _createBlueLossConfig = __webpack_require__(/*! ./bluelossConfig/createBlueLossConfig.lsc */ "./app/components/bluelossConfig/createBlueLossConfig.lsc");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -803,7 +805,7 @@ async function makeSingleInstance() {
     return process.exit(1);
   }weCreatedLockFile = true;
   return _fsExtra2.default.ensureFile(getLockFilePath());
-}process.on('exit', () => {
+}(0, _signalExit2.default)(() => {
   if (weCreatedLockFile) {
     try {
       return _fsExtra2.default.removeSync(getLockFilePath());
@@ -811,13 +813,6 @@ async function makeSingleInstance() {
       return;
     }
   }
-});
-
-// https://github.com/moxystudio/node-proper-lockfile#graceful-exit
-process.once('SIGINT', function () {
-  return process.exit(1);
-}).once('SIGTERM', function () {
-  return process.exit(1);
 });
 
 function getLockFilePath() {
@@ -1304,6 +1299,10 @@ var _promiseRatRace = __webpack_require__(/*! promise-rat-race */ "promise-rat-r
 
 var _promiseRatRace2 = _interopRequireDefault(_promiseRatRace);
 
+var _signalExit = __webpack_require__(/*! signal-exit */ "signal-exit");
+
+var _signalExit2 = _interopRequireDefault(_signalExit);
+
 var _server = __webpack_require__(/*! ../server/server.lsc */ "./app/components/server/server.lsc");
 
 var _createBlueLossConfig = __webpack_require__(/*! ../bluelossConfig/createBlueLossConfig.lsc */ "./app/components/bluelossConfig/createBlueLossConfig.lsc");
@@ -1347,9 +1346,10 @@ function openSettingsWindowInPreferredBrowser(browser) {
 }function killSpawnedSettingsWindow() {
   spawnedSettingsWindow == null ? void 0 : spawnedSettingsWindow.kill();
   spawnedSettingsWindow = null;
-}process.on('exit', function () {
-  return killSpawnedSettingsWindow();
-});
+} /*****
+  * Kill settings window on app exit.
+  */
+(0, _signalExit2.default)(killSpawnedSettingsWindow);
 
 exports.openSettingsWindow = openSettingsWindow;
 
@@ -1647,7 +1647,7 @@ _dotenv2.default.config({ path: _path2.default.resolve(__dirname, '..', '..', 'c
 /*! exports provided: name, productName, version, description, main, scripts, pkg, repository, author, license, dependencies, devDependencies, snyk, default */
 /***/ (function(module) {
 
-module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect app/appMain-compiled.js","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"pkg":{"assets":["app/config/.env","app/components/settingsWindow/frontEnd/js/settingsWindowWeb-compiled.js","app/components/settingsWindow/frontEnd/assets/styles/*.css","app/components/settingsWindow/frontEnd/assets/vendor/materialize/materialize.css","app/components/settingsWindow/frontEnd/assets/vendor/modern-normalize/modern-normalize.css","app/components/settingsWindow/frontEnd/assets/icons/*","app/components/settingsWindow/frontEnd/html/settingsWindow.html"]},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","body-parser":"^1.18.3","dotenv":"^5.0.1","express":"^4.16.3","fs-extra":"^6.0.1","gawk":"^4.4.5","hyperapp":"^1.2.5","is-empty":"^1.2.0","joi":"^13.4.0","js-cookie":"^2.2.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","promise-rat-race":"^1.5.1","rollbar":"^2.4.1","sse-pusher":"^1.1.1","systray":"^1.0.5","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","node-7z":"^0.4.0","nodemon":"^1.17.5","parallel-webpack":"^2.3.0","pkg":"^4.3.1","snyk":"^1.82.0","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
+module.exports = {"name":"blueloss","productName":"BlueLoss","version":"2018.6.1","description":"A desktop app that locks your computer when a device is lost","main":"app/appMain-compiled.js","scripts":{"webpackWatch":"cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats","startDev":"cross-env NODE_ENV=development nodemon app/appMain-compiled.js","debug":"cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect app/appMain-compiled.js","lintWatch":"cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear","start":"cross-env NODE_ENV=production node app/appMain-compiled.js","devTasks":"cross-env NODE_ENV=production node devTasks/tasks.js","test":"snyk test"},"pkg":{"assets":["app/config/.env","app/components/settingsWindow/frontEnd/js/settingsWindowWeb-compiled.js","app/components/settingsWindow/frontEnd/assets/styles/*.css","app/components/settingsWindow/frontEnd/assets/vendor/materialize/materialize.css","app/components/settingsWindow/frontEnd/assets/vendor/modern-normalize/modern-normalize.css","app/components/settingsWindow/frontEnd/assets/icons/*","app/components/settingsWindow/frontEnd/html/settingsWindow.html"]},"repository":"https://github.com/Darkle/BlueLoss.git","author":"Darkle <coop.coding@gmail.com>","license":"MIT","dependencies":{"@hyperapp/logger":"^0.5.0","auto-launch":"^5.0.5","body-parser":"^1.18.3","dotenv":"^5.0.1","express":"^4.16.3","fs-extra":"^6.0.1","gawk":"^4.4.5","hyperapp":"^1.2.5","is-empty":"^1.2.0","joi":"^13.4.0","js-cookie":"^2.2.0","lodash.omit":"^4.5.0","lowdb":"^1.0.0","ono":"^4.0.5","promise-rat-race":"^1.5.1","rollbar":"^2.4.1","signal-exit":"^3.0.2","sse-pusher":"^1.1.1","systray":"^1.0.5","timeproxy":"^1.2.1","typa":"^0.1.18","untildify":"^3.0.3","winston":"^2.4.1"},"devDependencies":{"@oigroup/babel-preset-lightscript":"^3.1.1","@oigroup/lightscript-eslint":"^3.1.1","babel-core":"^6.26.0","babel-eslint":"^8.2.3","babel-loader":"^7.1.4","babel-plugin-external-helpers":"^6.22.0","babel-plugin-transform-react-jsx":"^6.24.1","babel-register":"^6.26.0","chalk":"^2.4.1","cross-env":"^5.1.6","del":"^3.0.0","eslint":"=4.8.0","eslint-plugin-jsx":"0.0.2","eslint-plugin-react":"^7.8.2","eslint-watch":"^3.1.5","exeq":"^3.0.0","inquirer":"^5.2.0","node-7z":"^0.4.0","nodemon":"^1.17.5","parallel-webpack":"^2.3.0","pkg":"^4.3.1","snyk":"^1.82.0","webpack":"^4.10.2","webpack-node-externals":"^1.7.2"},"snyk":true};
 
 /***/ }),
 
@@ -1813,6 +1813,17 @@ module.exports = require("promise-rat-race");
 /***/ (function(module, exports) {
 
 module.exports = require("rollbar");
+
+/***/ }),
+
+/***/ "signal-exit":
+/*!******************************!*\
+  !*** external "signal-exit" ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("signal-exit");
 
 /***/ }),
 

@@ -1,6 +1,7 @@
 import path from 'path'
 
 import fs from 'fs-extra'
+import onExit from 'signal-exit'
 
 import { getBlueLossConfigFolderPath } from './bluelossConfig/createBlueLossConfig.lsc'
 
@@ -16,16 +17,11 @@ makeSingleInstance():Promise -/>
   now weCreatedLockFile = true
   fs.ensureFile(getLockFilePath())
 
-process.on('exit', () => {
+onExit(() => {
   if weCreatedLockFile:
     try: fs.removeSync(getLockFilePath())
     catch(e): return
 })
-
-// https://github.com/moxystudio/node-proper-lockfile#graceful-exit
-process
-  .once('SIGINT', () -> process.exit(1))
-  .once('SIGTERM', () -> process.exit(1))
 
 getLockFilePath():String -> path.join(getBlueLossConfigFolderPath(), 'BlueLoss.lock')
 

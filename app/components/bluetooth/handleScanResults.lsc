@@ -7,8 +7,8 @@ import { pushUpdatesToFrontEnd } from '../server/server.lsc'
 import { updateLastSeenForDeviceSearchingFor } from '../settings/devices.lsc'
 import { lockSystemIfDeviceLost } from './lockCheck.lsc'
 
-handleScanResults(spawnCommandResult:Object):void ->
-  deviceList = processScanResultsText(spawnCommandResult)
+handleScanResults(scanResult:Buffer):void ->
+  deviceList = getDeviceDataFromScanResult(scanResult)
   logger.verbose(`Found these Bluetooth devices in scan: `, { deviceList })
 
   { devicesToSearchFor } = getSettings()
@@ -28,11 +28,11 @@ handleScanResults(spawnCommandResult:Object):void ->
   lockSystemIfDeviceLost()
 
 /*****
-* spawnCommandResult looks like:
-* {"code":0,"data":{"out":["Scanning ...\tE0:88:61:CF:F3:52\tMotoG3\n\t12:30:D3:CD:32:51\tn/a\n"],"err":[]}}
+* result will be a buffer which as text looks like:
+* "Scanning ...\tE0:88:61:CF:F3:52\tMotoG3\n\t12:30:D3:CD:32:51\tn/a\n"
 */
-processScanResultsText({stdout}):Array<DeviceType> ->
-  results = stdout?.trim().replace('Scanning ...', '')
+getDeviceDataFromScanResult(result:Buffer):Array<DeviceType> ->
+  results = result?.toString().trim().replace('Scanning ...', '')
   if !results?.length: return []
 
   results.split('\n').reduce((resultsArr, nextResult) ->

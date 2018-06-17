@@ -44,6 +44,7 @@
     "ono": "^4.0.5",
     "promise-rat-race": "^1.5.1",
     "rollbar": "^2.4.1",
+    "signal-exit": "^3.0.2",
     "sse-pusher": "^1.1.1",
     "systray": "^1.0.5",
     "timeproxy": "^1.2.1",
