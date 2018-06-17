@@ -16,6 +16,7 @@ const pkgOutputFolder = path.join(buildFolder, 'BlueLoss')
 const pkgBuildFile = path.join(pkgOutputFolder, 'BlueLoss')
 const appIconSrc = path.join(basePath, 'resources', 'icons', 'Blue', 'BlueLoss-blue-512x512.png')
 const appIconOutput = path.join(pkgOutputFolder, 'BlueLoss.png')
+const desktopFilePath = path.join(pkgOutputFolder, 'BlueLoss.desktop')
 const foldersToClean = [path.join(buildFolder, '**', '*.*'), path.join(buildFolder, '**'), `!${buildFolder }`]
 const archive7zip = new Zip()
 const pkgParams = [
@@ -27,11 +28,23 @@ const pkgParams = [
   '--output',
   pkgBuildFile
 ]
+const desktopFileData = `
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=BlueLoss
+Exec=BlueLoss
+Icon=BlueLoss.png
+StartupNotify=false
+Terminal=false
+Categories=Utility;
+`.trim()
 
 function packageLinux64() {
   return prepareForPackaging()
     .then(runPkg)
     .then(copyAppIcon)
+    .then(createDesktopFile)
     .then(createZipVersion)
     // .then(createSnap)
     // .then(createAppImage)
@@ -78,6 +91,17 @@ function copyAppIcon(){
   console.log(chalk.blue(`Copying App Icon`))
   return fs.copy(appIconSrc, appIconOutput)
 }
+
+function createDesktopFile(){
+  fs.outputFile(desktopFilePath, desktopFileData)
+
+}
+
+// function generateDesktopFileData(containerType){
+//   if(containerType === 'zip'){
+//     return
+//   }
+// }
 
 function prettyGlobs(globArr){
   return globArr.reduce((str, nextItem) =>
