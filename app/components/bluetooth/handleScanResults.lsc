@@ -31,8 +31,8 @@ handleScanResults(scanResult:Buffer):void ->
 * result will be a buffer which as text looks like:
 * "Scanning ...\tE0:88:61:CF:F3:52\tMotoG3\n\t12:30:D3:CD:32:51\tn/a\n"
 */
-getDeviceDataFromScanResult(result:Buffer):Array<DeviceType> ->
-  results = result?.toString().trim().replace('Scanning ...', '')
+getDeviceDataFromScanResult(scanResult:Buffer):Array<DeviceType> ->
+  results = scanResult?.toString().trim().replace('Scanning ...', '')
   if !results?.length: return []
 
   results.split('\n').reduce((resultsArr, nextResult) ->

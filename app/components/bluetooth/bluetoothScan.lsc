@@ -19,7 +19,7 @@ spawnedScans = new Set()
 * of just the latest one.
 */
 scanForBlueToothDevices():void ->
-  if !getSettings().blueLossEnabled: scheduleScan()
+  if !getSettings().blueLossEnabled: return scheduleScan()
   logger.verbose('=======New Scan Started=======')
   spawnHciToolScan()
   scheduleScan()

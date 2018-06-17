@@ -361,7 +361,7 @@ const spawnedScans = new Set();
 * of just the latest one.
 */
 function scanForBlueToothDevices() {
-  if (!(0, _settings.getSettings)().blueLossEnabled) scheduleScan();
+  if (!(0, _settings.getSettings)().blueLossEnabled) return scheduleScan();
   _logging.logger.verbose('=======New Scan Started=======');
   spawnHciToolScan();
   scheduleScan();
@@ -446,8 +446,8 @@ function handleScanResults(scanResult) {
   * result will be a buffer which as text looks like:
   * "Scanning ...\tE0:88:61:CF:F3:52\tMotoG3\n\t12:30:D3:CD:32:51\tn/a\n"
   */
-function getDeviceDataFromScanResult(result) {
-  const results = result == null ? void 0 : result.toString().trim().replace('Scanning ...', '');
+function getDeviceDataFromScanResult(scanResult) {
+  const results = scanResult == null ? void 0 : scanResult.toString().trim().replace('Scanning ...', '');
   if (!(results == null ? void 0 : results.length)) return [];
 
   return results.split('\n').reduce(function (resultsArr, nextResult) {
