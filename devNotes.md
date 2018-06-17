@@ -13,3 +13,4 @@
 
 * For building the AppImage, you will need to install the `appimagetool`: https://github.com/AppImage/AppImageKit/wiki/Creating-AppImages#6-manually-create-an-appdir
 
+* Built on node 8.11.3
