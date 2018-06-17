@@ -12,10 +12,9 @@ pExec = promisify(exec)
 let spawnedSettingsWindow = null
 
 /*****
-* We don't want to return a Promise here because pExec will not resolve until the
-* settings window is closed (we can just fire and forget).
-* Note: we need to use exec (pExec) to run 'command -v ...' as that is a
-* shell-specific command.
+* We don't want to return a Promise here because openSettingsWindowInPreferredBrowser will not
+* resolve until the settings window is closed.
+* Note: we need to use exec (pExec) to run 'command -v ...' as that is a shell-specific command.
 */
 openSettingsWindow():void ->
   /*****

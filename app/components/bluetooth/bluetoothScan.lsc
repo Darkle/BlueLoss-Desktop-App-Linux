@@ -1,5 +1,4 @@
-import { promisify } from 'util'
-import { execFile } from 'child_process'
+import { spawn } from 'child_process'
 
 import tp from 'timeproxy'
 
@@ -7,24 +6,43 @@ import { handleScanResults } from './handleScanResults.lsc'
 import { logger } from '../logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
 
-pExecFile = promisify(execFile)
+let spawnedScans = []
 
 /*****
 * We don't return a promise here as we want scanForBlueToothDevices to
 * be spun off seperately. Also, if we returned a promise here that calls
 * itself recursively we get stuck in appMain.lsc.
+* Also we store the running scans in an array so that we can easily kill whatever
+* is running on exit - it's possible one scan may not be finished by the time a new scan
+* starts, so that's why we keep a record of all the currently running scans instead
+* of just the latest one.
 */
 scanForBlueToothDevices():void ->
   if !getSettings().blueLossEnabled: scheduleScan()
   logger.verbose('=======New Scan Started=======')
-  pExecFile('hcitool', ['scan']).then(handleScanResults).catch(logger.error)
+  spawnHciToolScan()
   scheduleScan()
+
+spawnHciToolScan():void ->
+  scan = spawn('hcitool', ['scan'])
+  spawnedScans.push(scan)
+
+  scan.stdout.on('data', handleScanResults)
+  scan.on('error', logger.verbose)
+  scan.on('close', () -> removeStoredScan(scan.pid))
+
+removeStoredScan(processId:Number):void ->
+  now spawnedScans = spawnedScans.filter(({pid}) -> pid === processId)
 
 scheduleScan():Promise ->
   setTimeout(
     scanForBlueToothDevices,
     tp`${ getSettings().scanInterval } seconds`
   )
+
+process.on('exit', () ->
+  spawnedScans.forEach(scan -> scan.kill())
+)
 
 export {
   scanForBlueToothDevices,

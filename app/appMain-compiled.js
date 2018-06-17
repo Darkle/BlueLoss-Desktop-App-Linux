@@ -331,8 +331,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.scanForBlueToothDevices = undefined;
 
-var _util = __webpack_require__(/*! util */ "util");
-
 var _child_process = __webpack_require__(/*! child_process */ "child_process");
 
 var _timeproxy = __webpack_require__(/*! timeproxy */ "timeproxy");
@@ -347,21 +345,44 @@ var _settings = __webpack_require__(/*! ../settings/settings.lsc */ "./app/compo
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const pExecFile = (0, _util.promisify)(_child_process.execFile);
+let spawnedScans = [];
 
 /*****
 * We don't return a promise here as we want scanForBlueToothDevices to
 * be spun off seperately. Also, if we returned a promise here that calls
 * itself recursively we get stuck in appMain.lsc.
+* Also we store the running scans in an array so that we can easily kill whatever
+* is running on exit - it's possible one scan may not be finished by the time a new scan
+* starts, so that's why we keep a record of all the currently running scans instead
+* of just the latest one.
 */
 function scanForBlueToothDevices() {
   if (!(0, _settings.getSettings)().blueLossEnabled) scheduleScan();
   _logging.logger.verbose('=======New Scan Started=======');
-  pExecFile('hcitool', ['scan']).then(_handleScanResults.handleScanResults).catch(_logging.logger.error);
+  spawnHciToolScan();
   scheduleScan();
+}function spawnHciToolScan() {
+  const scan = (0, _child_process.spawn)('hcitool', ['scan']);
+  spawnedScans.push(scan);
+
+  scan.stdout.on('data', _handleScanResults.handleScanResults);
+  scan.on('error', _logging.logger.verbose);
+  scan.on('close', function () {
+    return removeStoredScan(scan.pid);
+  });
+}function removeStoredScan(processId) {
+  spawnedScans = spawnedScans.filter(function ({ pid }) {
+    return pid === processId;
+  });
 }function scheduleScan() {
   return setTimeout(scanForBlueToothDevices, _timeproxy2.default`${(0, _settings.getSettings)().scanInterval} seconds`);
-}exports.scanForBlueToothDevices = scanForBlueToothDevices;
+}process.on('exit', function () {
+  return spawnedScans.forEach(function (scan) {
+    return scan.kill();
+  });
+});
+
+exports.scanForBlueToothDevices = scanForBlueToothDevices;
 
 /***/ }),
 
@@ -1292,10 +1313,9 @@ const pExec = (0, _util.promisify)(_child_process.exec);
 let spawnedSettingsWindow = null;
 
 /*****
-* We don't want to return a Promise here because pExec will not resolve until the
-* settings window is closed (we can just fire and forget).
-* Note: we need to use exec (pExec) to run 'command -v ...' as that is a
-* shell-specific command.
+* We don't want to return a Promise here because openSettingsWindowInPreferredBrowser will not
+* resolve until the settings window is closed.
+* Note: we need to use exec (pExec) to run 'command -v ...' as that is a shell-specific command.
 */
 function openSettingsWindow() {
   /*****
