@@ -1,5 +1,7 @@
 // @ts-nocheck
 const path = require('path')
+const { rename } = require('fs')
+const { promisify } = require('util');
 
 const { exec: execPkg } = require('pkg')
 const exeq = require('exeq')
@@ -8,12 +10,15 @@ const del = require('del')
 const Zip = require('node-7z')
 const fs = require('fs-extra')
 
+const pRename = promisify(rename)
 const basePath = path.resolve(__dirname, '..')
 const inputJSfile = path.join(basePath, 'app', 'appMain-compiled.js')
 const buildFolder = path.join(basePath, 'build')
 const zipFolder = path.join(buildFolder, 'zip')
 const pkgOutputFolder = path.join(buildFolder, 'BlueLoss')
 const pkgBuildFile = path.join(pkgOutputFolder, 'BlueLoss')
+const appImageFolderPath = path.join(buildFolder, 'BlueLoss.AppDir')
+const appRunExecPath = path.join(appImageFolderPath, 'AppRun')
 const appIconSrc = path.join(basePath, 'resources', 'icons', 'Blue', 'BlueLoss-blue-512x512.png')
 const appIconOutput = path.join(pkgOutputFolder, 'BlueLoss.png')
 const desktopFilePath = path.join(pkgOutputFolder, 'BlueLoss.desktop')
@@ -28,13 +33,17 @@ const pkgParams = [
   '--output',
   pkgBuildFile
 ]
+/*****
+* desktop-file-validate says for the Icon - "there should be no extension as described in the Icon Theme
+* Specification if the value is not an absolute path"
+*/
 const desktopFileData = `
 [Desktop Entry]
 Type=Application
 Version=1.0
 Name=BlueLoss
 Exec=BlueLoss
-Icon=BlueLoss.png
+Icon=BlueLoss
 StartupNotify=false
 Terminal=false
 Categories=Utility;
@@ -46,8 +55,7 @@ function packageLinux64() {
     .then(copyAppIcon)
     .then(createDesktopFile)
     .then(createZipVersion)
-    // .then(createSnap)
-    // .then(createAppImage)
+    .then(createAppImage)
     .then(() => {
       console.log(chalk.green('Successfully Packaged App!'))
     })
@@ -77,10 +85,12 @@ function createZipVersion() {
   )
 }
 
-// function createSnap() { } // make sure that it sets the right .desktop stuff
-
-// function createAppImage(){} // make sure that it sets the right .desktop stuff
-
+function createAppImage(){
+  console.log(chalk.blue(`Creating AppImage`))
+  return fs.copy(pkgOutputFolder, appImageFolderPath)
+    .then(() => pRename(path.join(appImageFolderPath, 'BlueLoss'), appRunExecPath))
+    .then(() => exeq(`cd ${ appImageFolderPath }`, `appimagetool ${ appImageFolderPath }`))
+}
 
 function webpackBuild() {
   console.log(chalk.blue('Running Webpack Build'))
@@ -93,15 +103,9 @@ function copyAppIcon(){
 }
 
 function createDesktopFile(){
-  fs.outputFile(desktopFilePath, desktopFileData)
-
+  console.log(chalk.blue(`Creating .desktop File`))
+  return fs.outputFile(desktopFilePath, desktopFileData)
 }
-
-// function generateDesktopFileData(containerType){
-//   if(containerType === 'zip'){
-//     return
-//   }
-// }
 
 function prettyGlobs(globArr){
   return globArr.reduce((str, nextItem) =>
