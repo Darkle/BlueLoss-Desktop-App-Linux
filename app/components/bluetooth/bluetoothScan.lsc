@@ -28,7 +28,10 @@ spawnHciToolScan():void ->
   spawnedScans.push(scan)
 
   scan.stdout.on('data', handleScanResults)
-  scan.on('error', logger.verbose)
+  scan.on('error', (err) => {
+    logger.verbose(err)
+    removeStoredScan(scan.pid)
+  })
   scan.on('close', () -> removeStoredScan(scan.pid))
 
 removeStoredScan(processId:Number):void ->

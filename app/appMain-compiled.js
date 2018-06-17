@@ -366,7 +366,10 @@ function scanForBlueToothDevices() {
   spawnedScans.push(scan);
 
   scan.stdout.on('data', _handleScanResults.handleScanResults);
-  scan.on('error', _logging.logger.verbose);
+  scan.on('error', err => {
+    _logging.logger.verbose(err);
+    return removeStoredScan(scan.pid);
+  });
   scan.on('close', function () {
     return removeStoredScan(scan.pid);
   });
