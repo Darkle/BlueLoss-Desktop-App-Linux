@@ -1,12 +1,6 @@
-import { promisify } from 'util'
-import { exec, execFile } from 'child_process'
-
 import pRatRace from 'promise-rat-race'
 
-import { noop, getExecNameFromStdOut } from './utils.lsc'
-
-pExec = promisify(exec)
-pExecFile = promisify(execFile)
+import { noop, getExecNameFromStdOut, pExec, pExecFile } from './utils.lsc'
 
 /*****
 * Note: we need to use exec (pExec) to run 'command -v ...' as that is a

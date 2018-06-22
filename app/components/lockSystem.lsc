@@ -1,13 +1,8 @@
-import { promisify } from 'util'
-import { exec, execFile } from 'child_process'
-
 import pRatRace from 'promise-rat-race'
 
 import { logger } from './logging/logging.lsc'
-import { getExecNameFromStdOut } from './utils.lsc'
+import { getExecNameFromStdOut, pExec, pExecFile } from './utils.lsc'
 
-pExec = promisify(exec)
-pExecFile = promisify(execFile)
 lockCommandArgs = {
   'xdg-screensaver': 'lock',
   'gnome-screensaver-command': '--lock',

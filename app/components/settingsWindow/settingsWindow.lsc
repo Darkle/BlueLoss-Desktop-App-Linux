@@ -1,5 +1,4 @@
-import { promisify } from 'util'
-import { exec, execFile } from 'child_process'
+import { execFile } from 'child_process'
 import path from 'path'
 
 import pRatRace from 'promise-rat-race'
@@ -7,9 +6,8 @@ import onExit from 'signal-exit'
 
 import { getServerAddress } from '../server/server.lsc'
 import { getBlueLossConfigFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
-import { getExecNameFromStdOut, xdgOpenServerWebPage } from '../utils.lsc'
+import { getExecNameFromStdOut, xdgOpenServerWebPage, pExec } from '../utils.lsc'
 
-pExec = promisify(exec)
 let spawnedSettingsWindow = null
 
 /*****
