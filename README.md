@@ -44,13 +44,13 @@ When you run BlueLoss, it sits in your system tray and searches for discoverable
 
 #### System Tray Options:
 
-- **Open BlueLoss Settings** This opens the settings/status window
+- **Open BlueLoss Settings**: This opens the settings/status window
 
 - **Disable BlueLoss**
 
-- **Toggle Tray Icon Color** Toggles the BlueLoss system tray icon color between blue or white
+- **Toggle Tray Icon Color**: Toggles the BlueLoss system tray icon color between blue or white
 
-- **Open Logs** This will open the folder where the BlueLoss logs are written to
+- **Open Logs**: This will open the folder where the BlueLoss logs are written to
 
 - **Quit BlueLoss**
 
