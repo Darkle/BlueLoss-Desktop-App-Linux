@@ -25,8 +25,6 @@ curryRight(f) -> (...a) -> (...b) -> f(...b, ...a)
 
 identity(param) -> param
 
-range(start, end) -> Array.from({length: ((end - start) + 1)}, (v, k) -> k + start) //includes end number
-
 tenYearsFromNow():Number -> Date.now() + tp.FIVE_HUNDRED_WEEKS
 
 getExecNameFromStdOut({stdout}):String ->
@@ -47,7 +45,6 @@ export {
   pipe,
   curry,
   curryRight,
-  range,
   compose,
   identity,
   tenYearsFromNow,
