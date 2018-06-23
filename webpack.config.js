@@ -1,3 +1,4 @@
+// @ts-nocheck
 const path = require('path')
 
 const webpack = require('webpack')
@@ -38,7 +39,7 @@ const commonWebpackOptions = {
   plugins: [
     // Gonna still use DefinePlugin as its a bit shorter than using global.ISDEV.
     new webpack.DefinePlugin({
-      ISDEV: (process.env.NODE_ENV !== 'production')
+      ISDEV: process.env.NODE_ENV !== 'production'
     })
   ]
 }
