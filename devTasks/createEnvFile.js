@@ -2,7 +2,7 @@ const path = require('path')
 
 const fs = require('fs-extra')
 
-const newEnvFilePath = path.resolve(__dirname, '..', 'app', 'config', '.env')
+const newEnvFilePath = path.resolve(__dirname, '..', 'config', '.env')
 
 function createEnvFile(){
   fs.outputFile(newEnvFilePath, 'rollbarAccessToken=1234')
