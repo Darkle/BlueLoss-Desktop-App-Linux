@@ -1,5 +1,5 @@
-import './config/env.lsc'
-
+import path from 'path'
+require('dotenv').config({path: path.resolve(__dirname, '..', 'config','.env')})
 if !process.env.NODE_ENV: process.env.NODE_ENV = "production"
 
 import { createBlueLossConfig as initAppConfigFiles } from './components/bluelossConfig/createBlueLossConfig.lsc'

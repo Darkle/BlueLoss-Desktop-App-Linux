@@ -3,21 +3,24 @@ import util from 'util'
 import winston from 'winston'
 import Rollbar from 'rollbar'
 
-rollbarLogger = new Rollbar({
-  accessToken: process.env.rollbarAccessToken,
-  enabled: false,
-  captureUncaught: true,
-  captureUnhandledRejections: true,
-  environment: process.env.NODE_ENV,
-  reportLevel: 'error',
-  payload: {
-    BlueLossVersion: require('../../../package.json').version
-  },
-  // Ignore the server stuff cause that includes info about the host pc name.
-  transform(payload){
-    payload.server = {}
-  },
-})
+let rollbarLogger = null
+
+createRollbarLogger():void ->
+  now rollbarLogger = new Rollbar({
+    accessToken: process.env.rollbarAccessToken,
+    enabled: false,
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+    environment: process.env.NODE_ENV,
+    reportLevel: 'error',
+    payload: {
+      BlueLossVersion: require('../../../package.json').version
+    },
+    // Ignore the server stuff cause that includes info about the host pc name.
+    transform(payload){
+      payload.server = {}
+    },
+  })
 
 CustomRollbarTransport = winston.transports.CustomLogger = (options):void ->
   Object.assign(this, options)
@@ -32,6 +35,7 @@ CustomRollbarTransport.prototype.log = (level, msg = '', error, callback):void -
 
 
 export {
+  createRollbarLogger
   CustomRollbarTransport
   rollbarLogger
 }

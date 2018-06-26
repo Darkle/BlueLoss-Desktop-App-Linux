@@ -9,15 +9,14 @@ const appDir = path.join(projectDir, 'app')
 const mainAppEntryPoint = path.join(appDir, 'appMain.lsc')
 const frontEndJsPath = path.join(appDir, 'components', 'settingsWindow', 'frontEnd', 'js')
 const settingsWindowMainEntryPoint = path.join(frontEndJsPath, 'settingsWindowWeb.lsc')
-const isDev = process.env.NODE_ENV !== 'production'
-const debugging = isDev && process.env.nodeDebug === 'true'
+const ISDEV = process.env.NODE_ENV !== 'production'
 
-console.log('process.env.nodeDebug: ', process.env.nodeDebug)
+console.log('ISDEV: ', ISDEV)
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV)
 
 const commonWebpackOptions = {
   mode: process.env.NODE_ENV,
-  devtool: debugging ? 'eval-source-map' : 'none',
+  devtool: ISDEV ? 'source-map' : 'none',
   context: projectDir,
   module: {
     rules: [
@@ -28,7 +27,7 @@ const commonWebpackOptions = {
         ],
         loader: 'babel-loader',
         options: {
-          sourceMap: debugging
+          sourceMap: ISDEV
         }
       },
     ]
@@ -36,10 +35,13 @@ const commonWebpackOptions = {
   resolve: {
     extensions: ['.lsc', '.js']
   },
+  optimization: {
+    minimize: false
+  },
   plugins: [
     // Gonna still use DefinePlugin as its a bit shorter than using global.ISDEV.
     new webpack.DefinePlugin({
-      ISDEV: process.env.NODE_ENV !== 'production'
+      ISDEV
     })
   ]
 }

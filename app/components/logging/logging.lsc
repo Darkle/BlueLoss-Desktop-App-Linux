@@ -2,7 +2,7 @@ import path from 'path'
 
 import winston from 'winston'
 
-import { CustomRollbarTransport, rollbarLogger } from './customRollbarTransport.lsc'
+import { CustomRollbarTransport, rollbarLogger, createRollbarLogger } from './customRollbarTransport.lsc'
 import { getSettings } from '../settings/settings.lsc'
 import { getBlueLossLogsFolderPath } from '../bluelossConfig/createBlueLossConfig.lsc'
 
@@ -43,6 +43,8 @@ initLogging():void ->
       handleExceptions: true,
       humanReadableUnhandledException: true,
     })
+
+  createRollbarLogger()
   /*****
   * We dont send errors to rollbar in dev and also only if enabled.
   */

@@ -15,7 +15,7 @@
   },
   "pkg": {
     "assets": [
-      "app/config/.env",
+      "config/.env",
       "app/components/settingsWindow/frontEnd/js/settingsWindowWeb-compiled.js",
       "app/components/settingsWindow/frontEnd/assets/styles/*.css",
       "app/components/settingsWindow/frontEnd/assets/vendor/materialize/materialize.css",
