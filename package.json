@@ -5,7 +5,7 @@
   "description": "A desktop app that locks your computer when a device is lost",
   "main": "app/appMain-compiled.js",
   "scripts": {
-    "webpackWatch": "cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats",
+    "ww": "cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats",
     "startDev": "cross-env NODE_ENV=development nodemon app/appMain-compiled.js",
     "debug": "cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect app/appMain-compiled.js",
     "lintWatch": "cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear",
@@ -21,7 +21,8 @@
       "app/components/settingsWindow/frontEnd/assets/vendor/materialize/materialize.css",
       "app/components/settingsWindow/frontEnd/assets/vendor/modern-normalize/modern-normalize.css",
       "app/components/settingsWindow/frontEnd/assets/icons/*",
-      "app/components/settingsWindow/frontEnd/html/settingsWindow.html"
+      "app/components/settingsWindow/frontEnd/html/settingsWindow.html",
+      "node_modules/systray/traybin/tray_linux_release"
     ]
   },
   "repository": "https://github.com/Darkle/BlueLoss.git",
@@ -73,7 +74,7 @@
     "node-7z": "^0.4.0",
     "nodemon": "^1.17.5",
     "parallel-webpack": "^2.3.0",
-    "pkg": "^4.3.1",
+    "pkg": "^4.3.3",
     "snyk": "^1.82.0",
     "webpack": "^4.10.2",
     "webpack-node-externals": "^1.7.2"
