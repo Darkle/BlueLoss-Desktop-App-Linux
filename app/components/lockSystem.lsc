@@ -12,8 +12,8 @@ lockCommandArgs = {
 
 /*****
 * Based on: https://github.com/sindresorhus/lock-system/blob/master/index.js
-* The spawned xdg-screensaved command always seems to error for me, so only log
-* the error when verbose logging is enabled.
+* The spawned xdg-screensaved command always seems to error for me even though
+* the command actually succeeds, so only log the error when verbose logging is enabled.
 * Note: we need to use exec (pExec) to run 'command -v ...' as that is a
 * shell-specific command.
 */
