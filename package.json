@@ -7,7 +7,7 @@
   "scripts": {
     "ww": "cross-env NODE_ENV=development parallel-webpack --watch --max-retries=1 --no-stats",
     "startDev": "cross-env NODE_ENV=development nodemon app/appMain-compiled.js",
-    "debug": "cross-env NODE_ENV=development nodeDebug=true parallel-webpack && node --inspect app/appMain-compiled.js",
+    "debug": "cross-env NODE_ENV=development parallel-webpack && node --inspect app/appMain-compiled.js",
     "lintWatch": "cross-env NODE_ENV=development esw -w --ext .lsc -c .eslintrc.json --color --clear",
     "start": "cross-env NODE_ENV=production node app/appMain-compiled.js",
     "devTasks": "cross-env NODE_ENV=production node devTasks/tasks.js",
