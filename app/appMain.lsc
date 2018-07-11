@@ -5,7 +5,7 @@ require('dotenv').config({path: path.resolve(__dirname, '..', 'config','.env')})
 import { createBlueLossConfig as initAppConfigFiles } from './components/bluelossConfig/createBlueLossConfig.lsc'
 import { makeSingleInstance } from './components/makeSingleInstance.lsc'
 import { initSettings, updateSetting, getSettings } from './components/settings/settings.lsc'
-import { initLogging, logger } from './components/logging/logging.lsc'
+import { initLogging } from './components/logging/logging.lsc'
 import { initTrayMenu } from './components/tray/tray.lsc'
 import { startServer } from './components/server/server.lsc'
 import { setUpDev, bailOnFatalError } from './components/utils.lsc'
