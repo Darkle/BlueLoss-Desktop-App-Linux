@@ -4,6 +4,7 @@ const tasks = {
   ...require('./packageApp.js'),
   ...require('./snyk.js'),
   ...require('./createEnvFile.js'),
+  ...require('./bumpAppVersion.js'),
 }
 
 const promptOptions = {
