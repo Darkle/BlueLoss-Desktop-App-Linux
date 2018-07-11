@@ -7,6 +7,7 @@ import { openSettingsWindow } from '../components/settingsWindow/settingsWindow.
 import { getSettings } from './settings/settings.lsc'
 import { getBlueLossLogsFolderPath } from './bluelossConfig/createBlueLossConfig.lsc'
 import { getServerAddress } from './server/server.lsc'
+import { logger } from './logging/logging.lsc'
 
 pExecFile = promisify(execFile)
 pExec = promisify(exec)
@@ -37,6 +38,11 @@ xdgOpenServerWebPage():Promise ->
 xdgOpenLogsFolder():Promise ->
   pExecFile(`xdg-open`, [getBlueLossLogsFolderPath()])
 
+bailOnFatalError(err):void ->
+  console.error(err)
+  logger?.error?(err)
+  process.exit(1)
+
 export {
   pExecFile,
   pExec,
@@ -51,4 +57,5 @@ export {
   getExecNameFromStdOut,
   xdgOpenServerWebPage,
   xdgOpenLogsFolder,
+  bailOnFatalError,
 }
