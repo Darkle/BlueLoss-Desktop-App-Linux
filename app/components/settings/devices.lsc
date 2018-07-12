@@ -20,7 +20,7 @@ filterDevicesToSearchFor(deviceIdToRemove: String):Object ->
   }
 
 deviceIsInDevicesToSearchFor(deviceId: String):Boolean ->
-  getSettings().devicesToSearchFor[deviceId]
+  !!getSettings().devicesToSearchFor[deviceId]
 
 updateLastSeenForDeviceSearchingFor(deviceId: String, time: Number):Object ->
   { devicesToSearchFor } = getSettings()
