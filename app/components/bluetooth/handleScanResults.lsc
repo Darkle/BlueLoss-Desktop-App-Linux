@@ -20,14 +20,7 @@ handleScanResults(scanResult:Buffer):void ->
   updateDevicesToSearchFor(devicesToSearchFor, deviceList)
   lockSystemIfDeviceLost()
 
-/**
-* If any devices we are looking for showed up in the latest scan,
-* update the device's lastSeen value to now in devicesToSearchFor.
-*/
-updateDevicesToSearchFor(devicesToSearchFor, deviceList):void ->
-  for elem { deviceId } in deviceList:
-    if devicesToSearchFor[deviceId]:
-      updateLastSeenForDeviceSearchingFor(deviceId, Date.now())
+
 
 /*****
 * result will be a buffer which as text looks like:
