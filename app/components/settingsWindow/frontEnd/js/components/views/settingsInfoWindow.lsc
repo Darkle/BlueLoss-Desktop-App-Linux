@@ -28,7 +28,7 @@ export default ({ actions, state }) ->
           Time To Lock
         </h5>
         <p class="settingDescription">
-          The time in minutes BlueLoss will wait before locking the computer once a device is lost.
+          The time in minutes BlueLoss will wait before locking the computer once a device is lost. If a device is found before the time to lock elapses, the computer is not locked.
         </p>
       </div>
     </div>
