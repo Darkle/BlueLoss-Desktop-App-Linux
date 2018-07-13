@@ -10,9 +10,7 @@ export default addNewDevice(newDevice: DeviceType) -> state ->
   if state.devicesToSearchFor[newDevice.deviceId]: return {}
   devicesToSearchFor = {
     ...state.devicesToSearchFor,
-    ...{
-      [ newDevice.deviceId ]: newDevice
-    }
+    [ newDevice.deviceId ]: newDevice
   }
   sendNewSettingToServer('devicesToSearchFor', devicesToSearchFor)
   ({ devicesToSearchFor })

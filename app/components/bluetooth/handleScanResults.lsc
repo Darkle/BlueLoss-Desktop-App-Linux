@@ -34,7 +34,7 @@ getDeviceDataFromScanResult(scanResult:Buffer):Array<DeviceType> ->
     splitIDandName = nextResult.trim().split('\t')
     deviceId = splitIDandName[0].trim()
     deviceName = splitIDandName[1].trim()
-    [...resultsArr, ...[ {deviceId, deviceName} ] ]
+    [...resultsArr, {deviceId, deviceName} ]
   )
 
 addTimeStampToSeenDevices(deviceList: Array<DeviceType>):Array<DeviceType> ->

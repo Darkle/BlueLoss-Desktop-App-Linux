@@ -34,7 +34,7 @@ initLogging():void ->
     winston.transports.File,
     {
       ...fileTransportOptions,
-      ...{ filename: path.join(getBlueLossLogsFolderPath(), 'BlueLoss.log.txt') },
+      filename: path.join(getBlueLossLogsFolderPath(), 'BlueLoss.log.txt'),
     }
   )
 

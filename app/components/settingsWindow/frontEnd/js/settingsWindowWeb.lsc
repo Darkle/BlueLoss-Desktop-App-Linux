@@ -6,10 +6,8 @@ import views from './components/views/viewsIndex.lsc'
 import { logInDev } from './frontEndUtils.lsc'
 
 initialState = {
-  ...{
-    activeTab: 'statusTab',
-    devicesCanSee: []
-  },
+  activeTab: 'statusTab',
+  devicesCanSee: []
   ...JSON.parse(Cookies.get('bluelossSettings'))
 }
 
