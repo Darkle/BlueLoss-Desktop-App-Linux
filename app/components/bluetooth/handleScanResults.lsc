@@ -4,7 +4,7 @@ import { logger } from '../logging/logging.lsc'
 import { DeviceType } from '../types/types.lsc'
 import { getSettings } from '../settings/settings.lsc'
 import { pushUpdatesToFrontEnd } from '../server/server.lsc'
-import { updateLastSeenForDeviceSearchingFor } from '../settings/devices.lsc'
+import { updateTimeStampForSingleDeviceSearchingFor } from '../settings/devices.lsc'
 import { lockSystemIfDeviceLost } from './lockCheck.lsc'
 
 handleScanResults(scanResult:Buffer):void ->
@@ -20,7 +20,14 @@ handleScanResults(scanResult:Buffer):void ->
   updateDevicesToSearchFor(devicesToSearchFor, deviceList)
   lockSystemIfDeviceLost()
 
-
+/**
+* If any devices we are looking for showed up in the latest scan,
+* update the device's lastSeen value to now in devicesToSearchFor.
+*/
+updateDevicesToSearchFor(devicesToSearchFor, deviceList):void ->
+  for elem { deviceId } in deviceList:
+    if devicesToSearchFor[deviceId]:
+      updateTimeStampForSingleDeviceSearchingFor(deviceId, Date.now())
 
 /*****
 * result will be a buffer which as text looks like:

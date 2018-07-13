@@ -2,7 +2,7 @@ import tp from 'timeproxy'
 
 import { tenYearsFromNow } from '../utils.lsc'
 import { getSettings } from '../settings/settings.lsc'
-import { updateLastSeenForDeviceSearchingFor } from '../settings/devices.lsc'
+import { updateTimeStampForSingleDeviceSearchingFor } from '../settings/devices.lsc'
 import { lockSystem } from '../lockSystem.lsc'
 
 /**
@@ -17,7 +17,7 @@ lockSystemIfDeviceLost():void ->
   for val { lastSeen, deviceId } in devicesToSearchFor:
     if deviceHasBeenLost(lastSeen, timeToLock):
       lockSystem(blueLossEnabled)
-      updateLastSeenForDeviceSearchingFor(deviceId, tenYearsFromNow())
+      updateTimeStampForSingleDeviceSearchingFor(deviceId, tenYearsFromNow())
 
 deviceHasBeenLost(lastTimeSawDevice: number, timeToLock: number):boolean ->
   Date.now() > (lastTimeSawDevice + tp`${ timeToLock } minutes`)
