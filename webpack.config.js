@@ -42,7 +42,7 @@ const commonWebpackOptions = {
         loader: StringReplacePlugin.replace({
           replacements: [
             {
-              pattern: /import.*from.*\/types\/types\.lsc'/ig,
+              pattern: /import +\{.*\} +from.*\/types\/types\.lsc'/ig,
               replacement: () => ''
             }
           ]
