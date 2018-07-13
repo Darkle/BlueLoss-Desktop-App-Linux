@@ -1,26 +1,6 @@
 import { getSettings, updateSetting } from './settings.lsc'
 import { DeviceType } from '../types/types.lsc'
 
-addNewDeviceToSearchFor(deviceToAdd: DeviceType):void ->
-  { deviceId } = deviceToAdd
-  if deviceIsInDevicesToSearchFor(deviceId): return
-  updateSetting('devicesToSearchFor',
-    {...getSettings().devicesToSearchFor, [ deviceId ]: deviceToAdd }
-  )
-
-removeNewDeviceToSearchFor({ deviceId }):void ->
-  if !deviceIsInDevicesToSearchFor(deviceId): return
-  updateSetting('devicesToSearchFor', filterDevicesToSearchFor(deviceId))
-
-filterDevicesToSearchFor(deviceIdToRemove: String):Object ->
-  {
-    ...for key deviceId, val device in getSettings().devicesToSearchFor:
-      if deviceId != deviceIdToRemove: { [ deviceId ]: device }
-  }
-
-deviceIsInDevicesToSearchFor(deviceId: String):Boolean ->
-  !!getSettings().devicesToSearchFor[deviceId]
-
 updateTimeStampForSingleDeviceSearchingFor(deviceId: String, newTimeStamp: Number):Object ->
   { devicesToSearchFor } = getSettings()
   deviceToUpdate = devicesToSearchFor[deviceId]
@@ -37,8 +17,6 @@ updateTimeStampForAllDevicesSearchingFor(newTimeStamp: Number):void ->
   )
 
 export {
-  addNewDeviceToSearchFor,
-  removeNewDeviceToSearchFor,
   updateTimeStampForSingleDeviceSearchingFor,
   updateTimeStampForAllDevicesSearchingFor,
 }
