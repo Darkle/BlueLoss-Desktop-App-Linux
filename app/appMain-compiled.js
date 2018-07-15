@@ -955,10 +955,6 @@ exports.sendOSnotification = undefined;
 
 var _utils = __webpack_require__(/*! ./utils.lsc */ "./app/components/utils.lsc");
 
-/*****
-* Note: we need to use exec (pExec) to run 'command -v ...' as that is a
-* shell-specific command.
-*/
 function sendOSnotification(message) {
   (0, _utils.pExecFile)('notify-send', [message]).catch(_utils.noop);
 }exports.sendOSnotification = sendOSnotification;

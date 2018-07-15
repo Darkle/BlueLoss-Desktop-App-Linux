@@ -1,9 +1,5 @@
 import { noop, pExecFile } from './utils.lsc'
 
-/*****
-* Note: we need to use exec (pExec) to run 'command -v ...' as that is a
-* shell-specific command.
-*/
 sendOSnotification(message:String):void ->
   pExecFile('notify-send', [message]).catch(noop)
 
