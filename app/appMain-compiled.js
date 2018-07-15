@@ -1554,7 +1554,7 @@ exports.updateEnabledDisabledMenuItem = updateEnabledDisabledMenuItem;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.generateLogTimeStamp = exports.bailOnFatalError = exports.xdgOpenLogsFolder = exports.xdgOpenServerWebPage = exports.getExecNameFromStdOut = exports.tenYearsFromNow = exports.identity = exports.compose = exports.curryRight = exports.curry = exports.pipe = exports.noop = exports.setUpDev = exports.pExec = exports.pExecFile = undefined;
+exports.generateLogTimeStamp = exports.bailOnFatalError = exports.xdgOpenLogsFolder = exports.xdgOpenServerWebPage = exports.getExecNameFromStdOut = exports.tenYearsFromNow = exports.identity = exports.noop = exports.setUpDev = exports.pExec = exports.pExecFile = undefined;
 
 var _util = __webpack_require__(/*! util */ "util");
 
@@ -1583,30 +1583,6 @@ function setUpDev() {
   true && !(0, _settings.getSettings)().firstRun ? (0, _settingsWindow.openSettingsWindow)() : void 0;
 }function noop() {
   return;
-}function pipe(...fns) {
-  return function (param) {
-    return fns.reduce(function (result, fn) {
-      return fn(result);
-    }, param);
-  };
-}function compose(...fns) {
-  return function (value) {
-    return fns.reduceRight(function (accumulator, current) {
-      return current(accumulator);
-    }, value);
-  };
-}function curry(f) {
-  return function (...a) {
-    return function (...b) {
-      return f(...(a === void 0 ? [] : a), ...(b === void 0 ? [] : b));
-    };
-  };
-}function curryRight(f) {
-  return function (...a) {
-    return function (...b) {
-      return f(...(b === void 0 ? [] : b), ...(a === void 0 ? [] : a));
-    };
-  };
 }function identity(param) {
   return param;
 }function tenYearsFromNow() {
@@ -1629,10 +1605,6 @@ function setUpDev() {
 exports.pExec = pExec;
 exports.setUpDev = setUpDev;
 exports.noop = noop;
-exports.pipe = pipe;
-exports.curry = curry;
-exports.curryRight = curryRight;
-exports.compose = compose;
 exports.identity = identity;
 exports.tenYearsFromNow = tenYearsFromNow;
 exports.getExecNameFromStdOut = getExecNameFromStdOut;
