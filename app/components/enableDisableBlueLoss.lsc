@@ -20,10 +20,7 @@ enableDisableBlueLoss(toggleFromSysTray: Boolean, blueLossEnabled: Boolean):void
   if toggleFromSysTray: pushUpdatesToFrontEnd('blueLossEnabled', blueLossEnabled)
   if !blueLossEnabled: updateTimeStampForAllDevicesSearchingFor(tenYearsFromNow())
   updateSysTrayEnabledDisabledMenuItem()
-  sendOSnotification(generateNotifcationText(blueLossEnabled))
-
-generateNotifcationText(blueLossEnabled: Boolean):String ->
-  if blueLossEnabled: 'BlueLoss Enabled' else: 'BlueLoss Disabled'
+  sendOSnotification(`BlueLoss ${ blueLossEnabled? 'Enabled': 'Disabled' }`)
 
 export {
   enableDisableBlueLoss

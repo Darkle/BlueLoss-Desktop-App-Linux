@@ -570,9 +570,7 @@ function enableDisableBlueLoss(toggleFromSysTray, blueLossEnabled) {
   if (toggleFromSysTray) (0, _server.pushUpdatesToFrontEnd)('blueLossEnabled', blueLossEnabled);
   if (!blueLossEnabled) (0, _devices.updateTimeStampForAllDevicesSearchingFor)((0, _utils.tenYearsFromNow)());
   (0, _tray.updateEnabledDisabledMenuItem)();
-  (0, _sendOSnotification.sendOSnotification)(generateNotifcationText(blueLossEnabled));
-}function generateNotifcationText(blueLossEnabled) {
-  if (blueLossEnabled) return 'BlueLoss Enabled';else return 'BlueLoss Disabled';
+  (0, _sendOSnotification.sendOSnotification)(`BlueLoss ${blueLossEnabled ? 'Enabled' : 'Disabled'}`);
 }exports.enableDisableBlueLoss = enableDisableBlueLoss;
 
 /***/ }),
