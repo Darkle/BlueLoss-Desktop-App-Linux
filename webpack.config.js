@@ -75,35 +75,31 @@ const commonWebpackOptions = {
 
 const mainWebpackOptions = {
   ...commonWebpackOptions,
-  ...{
-    target: 'node',
-    entry: mainAppEntryPoint,
-    output: {
-      filename: 'appMain-compiled.js',
-      path: appDir
-    },
-    externals: [nodeExternals()],
-    node: {
-      console: false,
-      global: false,
-      process: false,
-      Buffer: false,
-      __filename: false,
-      __dirname: false,
-      setImmediate: false
-    }
+  target: 'node',
+  entry: mainAppEntryPoint,
+  output: {
+    filename: 'appMain-compiled.js',
+    path: appDir
+  },
+  externals: [nodeExternals()],
+  node: {
+    console: false,
+    global: false,
+    process: false,
+    Buffer: false,
+    __filename: false,
+    __dirname: false,
+    setImmediate: false
   }
 }
 
 const frontEndWebpackOptions = {
   ...commonWebpackOptions,
-  ...{
-    target: 'web',
-    entry: settingsWindowMainEntryPoint,
-    output: {
-      filename: 'settingsWindowWeb-compiled.js',
-      path: frontEndJsPath
-    }
+  target: 'web',
+  entry: settingsWindowMainEntryPoint,
+  output: {
+    filename: 'settingsWindowWeb-compiled.js',
+    path: frontEndJsPath
   }
 }
 
