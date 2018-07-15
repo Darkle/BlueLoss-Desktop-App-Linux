@@ -1103,14 +1103,12 @@ var _frontEndUtils = __webpack_require__(/*! ./frontEndUtils.lsc */ "./app/compo
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const initialState = _extends({
+const settingsWindowApp = (0, _frontEndUtils.logInDev)()(_hyperapp.app)(_extends({
   activeTab: 'statusTab',
   devicesCanSee: []
-}, JSON.parse(_jsCookie2.default.get('bluelossSettings')));
+}, JSON.parse(_jsCookie2.default.get('bluelossSettings'))), _actionsIndex2.default, _viewsIndex2.default, document.body);
 
 _jsCookie2.default.remove('bluelossSettings');
-
-const settingsWindowApp = (0, _frontEndUtils.logInDev)()(_hyperapp.app)(initialState, _actionsIndex2.default, _viewsIndex2.default, document.body);
 
 const serverSideEventSource = new EventSource('/sse-update');
 
