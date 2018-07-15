@@ -57,7 +57,7 @@ function packageLinux64() {
     .then(createZipVersion)
     .then(createAppImage)
     .then(() => {
-      console.log(chalk.green('Successfully Packaged App!'))
+      console.log(chalk.green('Successfully Built App!'))
     })
     .catch(err => {
       console.error(chalk.red(`There was an error packaging`), err)
@@ -65,11 +65,8 @@ function packageLinux64() {
 }
 
 function prepareForPackaging(){
-  return webpackBuild()
-    .then(() => {
-      console.log(chalk.blue(`Cleaning: ${prettyGlobs(foldersToClean) }`))
-      return del(foldersToClean, { glob: true })
-    })
+  console.log(chalk.blue(`Cleaning: ${prettyGlobs(foldersToClean) }`))
+  return del(foldersToClean, { glob: true }).then(webpackBuild)
 }
 
 function runPkg(){
