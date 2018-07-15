@@ -2,20 +2,9 @@ import gawk from 'gawk'
 
 import { addRollbarLogging, removeRollbarLogging, changeLogLevel } from '../logging/logging.lsc'
 import { enableRunOnStartup, disableRunOnStartup } from '../runOnStartup.lsc'
-import { pushUpdatesToFrontEnd } from '../server/server.lsc'
-import { noop, tenYearsFromNow } from '../utils.lsc'
-import { updateTimeStampForAllDevicesSearchingFor } from './devices.lsc'
+import { noop } from '../utils.lsc'
 
 initSettingsObservers(settings:Object):void ->
-  /*****
-  * We run `updateTimeStampForAllDevicesSearchingFor(tenYearsFromNow())` when BlueLoss
-  * is disabled because otherwise if you disabled BlueLoss and devices that you are
-  * looking for went away and then re-enabled BlueLoss, it would lock straight away.
-  */
-  gawk.watch(settings, ['blueLossEnabled'], (enabled: Boolean):void ->
-    pushUpdatesToFrontEnd('blueLossEnabled', enabled)
-    if !enabled: updateTimeStampForAllDevicesSearchingFor(tenYearsFromNow())
-  )
   gawk.watch(settings, ['reportErrors'], (enabled: Boolean):void ->
     if enabled: addRollbarLogging()
     else: removeRollbarLogging()

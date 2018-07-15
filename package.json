@@ -30,9 +30,8 @@
   "license": "MIT",
   "dependencies": {
     "@hyperapp/logger": "^0.5.0",
-    "auto-launch": "^5.0.5",
     "body-parser": "^1.18.3",
-    "dotenv": "^5.0.1",
+    "dotenv": "^6.0.0",
     "express": "^4.16.3",
     "fs-extra": "^6.0.1",
     "gawk": "^4.4.5",
@@ -42,7 +41,6 @@
     "js-cookie": "^2.2.0",
     "lodash.omit": "^4.5.0",
     "lowdb": "^1.0.0",
-    "ono": "^4.0.5",
     "promise-rat-race": "^1.5.1",
     "rollbar": "^2.4.1",
     "signal-exit": "^3.0.2",
@@ -51,7 +49,7 @@
     "timeproxy": "^1.2.1",
     "typa": "^0.1.18",
     "untildify": "^3.0.3",
-    "winston": "^2.4.1"
+    "winston": "^2.4.3"
   },
   "devDependencies": {
     "@oigroup/babel-preset-lightscript": "^3.1.1",
@@ -70,7 +68,7 @@
     "eslint-plugin-react": "^7.8.2",
     "eslint-watch": "^3.1.5",
     "exeq": "^3.0.0",
-    "inquirer": "^5.2.0",
+    "inquirer": "^6.0.0",
     "node-7z": "^0.4.0",
     "nodemon": "^1.17.5",
     "parallel-webpack": "^2.3.0",

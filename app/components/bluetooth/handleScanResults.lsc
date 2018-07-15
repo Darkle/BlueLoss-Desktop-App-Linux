@@ -7,16 +7,23 @@ import { pushUpdatesToFrontEnd } from '../server/server.lsc'
 import { updateTimeStampForSingleDeviceSearchingFor } from '../settings/devices.lsc'
 import { lockSystemIfDeviceLost } from './lockCheck.lsc'
 
+/*****
+* We check for blueLossEnabled before calling updateDevicesToSearchFor because if
+* they disable blueloss and a scan hasn't finished, when it does finish it will
+* update the devices lastSeen in devicesToSearchFor with Date.now() which is not
+* what we want. As you can see in settingsObservers.lsc, we need to update the
+* devices lastSeen with tenYearsFromNow(). More comments in settingsObservers.lsc.
+*/
 handleScanResults(scanResult:Buffer):void ->
   deviceList = getDeviceDataFromScanResult(scanResult)
   logger.verbose(`Found these Bluetooth devices in scan: `, { deviceList })
 
-  { devicesToSearchFor } = getSettings()
+  { devicesToSearchFor, blueLossEnabled } = getSettings()
   timeStampedDeviceList = addTimeStampToSeenDevices(deviceList)
 
   pushUpdatesToFrontEnd('devicesCanSee', timeStampedDeviceList)
 
-  if isEmpty(devicesToSearchFor): return
+  if isEmpty(devicesToSearchFor) || !blueLossEnabled: return
   updateDevicesToSearchFor(devicesToSearchFor, deviceList)
   lockSystemIfDeviceLost()
 

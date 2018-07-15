@@ -1,5 +1,4 @@
 import { getSettings, updateSetting } from './settings.lsc'
-import { DeviceType } from '../types/types.lsc'
 
 updateTimeStampForSingleDeviceSearchingFor(deviceId: String, newTimeStamp: Number):Object ->
   { devicesToSearchFor } = getSettings()

@@ -6,6 +6,7 @@ import onExit from 'signal-exit'
 import { handleScanResults } from './handleScanResults.lsc'
 import { logger } from '../logging/logging.lsc'
 import { getSettings } from '../settings/settings.lsc'
+import { generateLogTimeStamp as timeStamp } from '../utils.lsc'
 
 spawnedScans = new Set()
 
@@ -20,7 +21,7 @@ spawnedScans = new Set()
 */
 scanForBlueToothDevices():void ->
   if !getSettings().blueLossEnabled: return scheduleScan()
-  logger.verbose('=======New Scan Started=======')
+  logger.verbose(`=======New Scan Started======= ${ timeStamp() }`)
   spawnHciToolScan()
   scheduleScan()
 

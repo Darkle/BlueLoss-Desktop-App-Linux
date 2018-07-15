@@ -1,15 +1,19 @@
 import { withLogger } from '@hyperapp/logger'
 
+fetchOptions = {
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+  method: 'POST'
+}
+
 identity(param) -> param
 
 sendNewSettingToServer(settingName, settingValue):void ->
   fetch('/updatesettings', {
     body: JSON.stringify({ [settingName]: settingValue }),
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    method: 'POST',
+    ...fetchOptions
   }).catch(e => {
     console.error(e)
   })

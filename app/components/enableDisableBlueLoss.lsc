@@ -1,0 +1,30 @@
+import { pushUpdatesToFrontEnd } from './server/server.lsc'
+import { tenYearsFromNow } from './utils.lsc'
+import { updateTimeStampForAllDevicesSearchingFor } from './settings/devices.lsc'
+import { updateSetting } from './settings/settings.lsc'
+import { updateEnabledDisabledMenuItem as updateSysTrayEnabledDisabledMenuItem } from './tray/tray.lsc'
+import { sendOSnotification } from './sendOSnotification.lsc'
+
+/*****
+* We aren't using a gawk observer for blueLossEnabled as we were running in to
+* circular issues.
+*
+* We run `updateTimeStampForAllDevicesSearchingFor(tenYearsFromNow())` when BlueLoss
+* is disabled because otherwise if you disabled BlueLoss and devices that you are
+* looking for went away and then re-enabled BlueLoss, it would lock straight away.
+*
+* Also update the frontend when we enable/disable BlueLoss from the systray.
+*/
+enableDisableBlueLoss(toggleFromSysTray: Boolean, blueLossEnabled: Boolean):void ->
+  updateSetting('blueLossEnabled', blueLossEnabled)
+  if toggleFromSysTray: pushUpdatesToFrontEnd('blueLossEnabled', blueLossEnabled)
+  if !blueLossEnabled: updateTimeStampForAllDevicesSearchingFor(tenYearsFromNow())
+  updateSysTrayEnabledDisabledMenuItem()
+  sendOSnotification(generateNotifcationText(blueLossEnabled))
+
+generateNotifcationText(blueLossEnabled: Boolean):String ->
+  if blueLossEnabled: 'BlueLoss Enabled' else: 'BlueLoss Disabled'
+
+export {
+  enableDisableBlueLoss
+}

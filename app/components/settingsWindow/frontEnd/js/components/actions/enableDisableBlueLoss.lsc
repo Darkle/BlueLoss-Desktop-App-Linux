@@ -1,0 +1,16 @@
+fetchOptions = {
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+  method: 'POST'
+}
+
+export default enableDisableBlueLoss({ blueLossEnabled }) ->
+  fetch('/blueloss-enabled-disabled-from-frontend', {
+    body: JSON.stringify({ blueLossEnabled }),
+    ...fetchOptions
+  }).catch(e => {
+    console.error(e)
+  })
+  { blueLossEnabled }

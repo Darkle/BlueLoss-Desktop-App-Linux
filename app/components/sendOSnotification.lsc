@@ -1,5 +1,3 @@
-import pRatRace from 'promise-rat-race'
-
 import { noop, getExecNameFromStdOut, pExec, pExecFile } from './utils.lsc'
 
 /*****
@@ -7,10 +5,7 @@ import { noop, getExecNameFromStdOut, pExec, pExecFile } from './utils.lsc'
 * shell-specific command.
 */
 sendOSnotification(message:String):void ->
-  pRatRace([
-    pExec('command -v zenity'),
-    pExec('command -v notify-send'),
-  ])
+  pExec('command -v notify-send')
   .then(getExecNameFromStdOut)
   .then(notificationExec ->
     pExecFile(notificationExec,

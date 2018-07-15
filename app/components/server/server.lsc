@@ -7,13 +7,15 @@ import omit from 'lodash.omit'
 
 import { logger } from '../logging/logging.lsc'
 import { updateSetting, getSettings } from '../settings/settings.lsc'
-import { validateUpdatePost } from './validation.lsc'
+import { validateGeneralUpdatePost, validateEnableDisableUpdatePost } from './validation.lsc'
+import { enableDisableBlueLoss } from '../enableDisableBlueLoss.lsc'
 
 let serverAddress = null
 frontEndDirPath = path.resolve(__dirname, '..', 'app', 'components', 'settingsWindow', 'frontEnd')
 assetsPath = path.join(frontEndDirPath, 'assets')
 jsPath = path.join(frontEndDirPath, 'js')
 settingsPagePath = path.join(frontEndDirPath, 'html', 'settingsWindow.html')
+blueLossToggledFromTray = false
 
 push = ssePusher()
 expressApp = express()
@@ -25,7 +27,18 @@ expressApp.get('/', (req, res) ->
   res.cookie('bluelossSettings', generateServerSettingsCookie())
   res.sendFile(settingsPagePath)
 )
-expressApp.post('/updatesettings', validateUpdatePost, updateSettingsPostHandler)
+expressApp.post('/updatesettings',
+  validateGeneralUpdatePost,
+  updateSettingsPostHandler
+)
+/*****
+* Check comments in enableDisableBlueLoss.lsc for why we need a seperate api path for
+* updates to blueLossEnabled.
+*/
+expressApp.post('/blueloss-enabled-disabled-from-frontend',
+  validateEnableDisableUpdatePost,
+  blueLossEnableDisableUpdatePostHandler
+)
 expressApp.use('/sse-update', push.handler())
 
 /*****
@@ -46,7 +59,12 @@ startServer():Promise ->
 updateSettingsPostHandler(req, res):Function ->
   [[settingName, newSettingValue]] = Object.entries(req.body)
   updateSetting(settingName, newSettingValue)
-  return res.end()
+  res.end()
+
+blueLossEnableDisableUpdatePostHandler(req, res):Function ->
+  [[, blueLossEnabled]] = Object.entries(req.body)
+  enableDisableBlueLoss(blueLossToggledFromTray, blueLossEnabled)
+  res.end()
 
 storeServerAddress({family, address, port}):void ->
   ip = if family.toLowerCase() === 'ipv6': `[${ address }]` else: address
@@ -59,15 +77,7 @@ pushUpdatesToFrontEnd(settingName, settingValue):void ->
   push('settingsUpdate', {[settingName]: settingValue})
 
 generateServerSettingsCookie():String ->
-  JSON.stringify(omit(
-    getSettings(),
-    [
-      'trayIconColor',
-      'dateLastCheckedForAppUpdate',
-      'skipUpdateVersion',
-      'firstRun',
-    ]
-  ))
+  JSON.stringify(omit(getSettings(), ['trayIconColor', 'firstRun']))
 
 export{
   startServer,

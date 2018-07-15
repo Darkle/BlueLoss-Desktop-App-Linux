@@ -2,18 +2,20 @@ import SysTray from 'systray'
 
 import { updateSetting, getSettings } from '../settings/settings.lsc'
 import { base64IconData } from './iconsData.lsc'
-import { sendOSnotification } from '../sendOSnotification.lsc'
 import { xdgOpenLogsFolder } from '../utils.lsc'
 import { logger } from '../logging/logging.lsc'
 import { openSettingsWindow } from '../settingsWindow/settingsWindow.lsc'
+import { enableDisableBlueLoss } from '../enableDisableBlueLoss.lsc'
 
 let systray = null
+blueLossToggledFromTray = true
+disableEnableBlueLossMenuActionItemNumber = 1
 
 initTrayMenu():Promise ->
   new Promise((resolve):void ->
     now systray = new SysTray({
       menu: {
-        icon: base64IconData[getTrayIconColor()],
+        icon: base64IconData[getSettings().trayIconColor],
         tooltip: "BlueLoss",
         items: generateMenuItems()
       },
@@ -36,9 +38,10 @@ systrayClickHandler(action:Object):void ->
   if action.seq_id === 0:
     openSettingsWindow()
   if action.seq_id === 1:
-    updateSetting('blueLossEnabled', !getSettings().blueLossEnabled)
-    updateEnabledDisabledMenuItem(action)
-    sendOSnotification(generateNotifcationText())
+    enableDisableBlueLoss(
+      blueLossToggledFromTray,
+      !getSettings().blueLossEnabled,
+    )
   if action.seq_id === 2:
     toggleTrayIconColorSetting()
     updateSystrayIcon(action)
@@ -47,23 +50,23 @@ systrayClickHandler(action:Object):void ->
   if action.seq_id === 4:
     systray.kill()
 
-updateEnabledDisabledMenuItem(action:Object):void ->
+updateEnabledDisabledMenuItem():void ->
   systray.sendAction({
     type: 'update-item',
     item: {
-      ...action.item,
+      checked: false,
+      enabled: true,
       title: generateEnabledDisabledLabel(),
       tooltip: generateEnabledDisabledLabel(),
     },
-    seq_id: action.seq_id,
+    seq_id: disableEnableBlueLossMenuActionItemNumber,
   })
 
 updateSystrayIcon(action:Object):void ->
   systray.sendAction({
     type: 'update-menu',
     menu: {
-      icon: base64IconData[getTrayIconColor()],
-      title: "BlueLoss",
+      icon: base64IconData[getSettings().trayIconColor],
       tooltip: "BlueLoss",
       items: generateMenuItems()
     },
@@ -99,19 +102,14 @@ generateMenuItems():Array ->
     }
   ]
 
-getTrayIconColor():String ->
-  if ISDEV: 'white' else: getSettings().trayIconColor
-
 toggleTrayIconColorSetting():void ->
   newColor = if getSettings().trayIconColor === 'white': 'blue' else: 'white'
   updateSetting('trayIconColor', newColor)
-
-generateNotifcationText():String ->
-  if getSettings().blueLossEnabled: 'BlueLoss Enabled' else: 'BlueLoss Disabled'
 
 generateEnabledDisabledLabel():String ->
   `${ if getSettings().blueLossEnabled: 'Disable' else: 'Enable' } BlueLoss`
 
 export {
   initTrayMenu,
+  updateEnabledDisabledMenuItem,
 }

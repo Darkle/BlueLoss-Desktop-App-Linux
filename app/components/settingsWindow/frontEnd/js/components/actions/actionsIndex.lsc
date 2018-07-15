@@ -5,6 +5,7 @@ import updateSetting from './updateSetting.lsc'
 import updateStateOnServerMessage from './updateStateOnServerMessage.lsc'
 import removeDevice from './removeDevice.lsc'
 import addNewDevice from './addNewDevice.lsc'
+import enableDisableBlueLoss from './enableDisableBlueLoss.lsc'
 
 export default {
   toggleTab,
@@ -14,4 +15,5 @@ export default {
   updateStateOnServerMessage,
   removeDevice,
   addNewDevice,
+  enableDisableBlueLoss,
 }
