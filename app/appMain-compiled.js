@@ -774,7 +774,7 @@ const fileTransportOptions = {
 
 function initLogging() {
   /*****
-  * Note: we're using the old Winston 2.4 branch: https://github.com/winstonjs/winston/tree/2.4.0
+  * Note: we're using the old Winston 2.4 branch: https://github.com/winstonjs/winston/tree/2.4.3
   */
   exports.logger = logger = new _winston2.default.Logger({
     level: initialLogLevel(),
