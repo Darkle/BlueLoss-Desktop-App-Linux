@@ -70,12 +70,12 @@ function prepareForPackaging(){
 }
 
 function runPkg(){
-  console.log(chalk.blue(`Running Pkg`))
+  console.log(chalk.blue(`Running Pkg, Please Wait...`))
   return execPkg(pkgParams)
 }
 
 function createZipVersion() {
-  console.log(chalk.blue(`Creating Zip Version`))
+  console.log(chalk.blue(`Creating Zip Version, Please Wait...`))
   return archive7zip.add(
     path.join(zipFolder, `BlueLoss-Linux-x86_64.7z`),
     path.join(buildFolder, 'BlueLoss')
@@ -83,14 +83,14 @@ function createZipVersion() {
 }
 
 function createAppImage(){
-  console.log(chalk.blue(`Creating AppImage`))
+  console.log(chalk.blue(`Creating AppImage, Please Wait...`))
   return fs.copy(pkgOutputFolder, appImageFolderPath)
     .then(() => pRename(path.join(appImageFolderPath, 'BlueLoss'), appRunExecPath))
     .then(() => exeq(`cd ${ appImageFolderPath }`, `appimagetool ${ appImageFolderPath }`))
 }
 
 function webpackBuild() {
-  console.log(chalk.blue('Running Webpack Build'))
+  console.log(chalk.blue('Running Webpack Build, Please Wait...'))
   return exeq(`cross-env NODE_ENV=production parallel-webpack`)
 }
 
