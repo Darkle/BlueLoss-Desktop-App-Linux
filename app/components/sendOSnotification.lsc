@@ -1,19 +1,11 @@
-import { noop, getExecNameFromStdOut, pExec, pExecFile } from './utils.lsc'
+import { noop, pExecFile } from './utils.lsc'
 
 /*****
 * Note: we need to use exec (pExec) to run 'command -v ...' as that is a
 * shell-specific command.
 */
 sendOSnotification(message:String):void ->
-  pExec('command -v notify-send')
-  .then(getExecNameFromStdOut)
-  .then(notificationExec ->
-    pExecFile(notificationExec,
-      if notificationExec === 'zenity': ['--notification', `--text="${ message }"`]
-      else: [message]
-    )
-  )
-  .catch(noop)
+  pExecFile('notify-send', [message]).catch(noop)
 
 export {
   sendOSnotification

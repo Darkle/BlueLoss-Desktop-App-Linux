@@ -960,9 +960,7 @@ var _utils = __webpack_require__(/*! ./utils.lsc */ "./app/components/utils.lsc"
 * shell-specific command.
 */
 function sendOSnotification(message) {
-  (0, _utils.pExec)('command -v notify-send').then(_utils.getExecNameFromStdOut).then(function (notificationExec) {
-    return (0, _utils.pExecFile)(notificationExec, notificationExec === 'zenity' ? ['--notification', `--text="${message}"`] : [message]);
-  }).catch(_utils.noop);
+  (0, _utils.pExecFile)('notify-send', [message]).catch(_utils.noop);
 }exports.sendOSnotification = sendOSnotification;
 
 /***/ }),
