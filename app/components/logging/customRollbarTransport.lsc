@@ -14,6 +14,7 @@ createRollbarLogger():void ->
     environment: process.env.NODE_ENV,
     reportLevel: 'error',
     payload: {
+      platform: process.platform,
       BlueLossVersion: require('../../../package.json').version
     },
     // Ignore the server stuff cause that includes info about the host pc name.

@@ -39,7 +39,7 @@ openSettingsWindowInPreferredBrowser(browser):Promise ->
       generateBrowserParams(browser),
       (error) ->
         if error: return reject(error)
-        return resolve()
+        resolve()
     )
   )
 
