@@ -1,6 +1,6 @@
 import { execSync } from 'child_process'
 
-getFirefoxUserChrome():string -> `
+getFirefoxUserChrome():String -> `
 @-moz-document url(chrome://browser/content/browser.xul) {
 #TabsToolbar {
   visibility: collapse !important;
