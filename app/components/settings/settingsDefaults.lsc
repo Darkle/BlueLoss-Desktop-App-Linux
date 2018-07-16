@@ -11,7 +11,7 @@ defaultSettings: {
   verboseLogging: Boolean
 } = {
   blueLossEnabled: true,
-  runOnStartup: true,
+  runOnStartup: false,
   trayIconColor: 'blue',
   devicesToSearchFor: {},
   timeToLock: 2,

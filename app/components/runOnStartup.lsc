@@ -8,8 +8,7 @@ import { logger } from './logging/logging.lsc'
 autoStartFolder = untildify('~/.config/autostart/')
 bluelossDesktopFilePath = path.join(autoStartFolder, 'BlueLoss.desktop')
 
-enableRunOnStartup(firstRun):Promise ->
-  if firstRun and ISDEV: return Promise.resolve()
+enableRunOnStartup():Promise ->
   fs.outputFile(bluelossDesktopFilePath, generateDesktopFile())
     .catch(logger.error)
 

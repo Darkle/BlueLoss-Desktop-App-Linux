@@ -10,7 +10,6 @@ import { startServer } from './components/server/server.lsc'
 import { setUpDev, bailOnFatalError } from './components/utils.lsc'
 import { scanForBlueToothDevices } from './components/bluetooth/bluetoothScan.lsc'
 import { openSettingsWindow } from './components/settingsWindow/settingsWindow.lsc'
-import { enableRunOnStartup } from './components/runOnStartup.lsc'
 
 initAppConfigFiles()
   .then(makeSingleInstance)
@@ -27,7 +26,7 @@ firstRunSetup():Promise ->
   { firstRun } = getSettings()
   if !firstRun: return Promise.resolve()
   updateSetting('firstRun', !firstRun)
-  enableRunOnStartup(firstRun).then(openSettingsWindow)
+  openSettingsWindow()
 
 process.on('unhandledRejection', bailOnFatalError)
 process.on('uncaughtException', bailOnFatalError)

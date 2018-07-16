@@ -102,13 +102,13 @@ var _path = __webpack_require__(3);
 
 var _path2 = _interopRequireDefault(_path);
 
-var _winston = __webpack_require__(17);
+var _winston = __webpack_require__(16);
 
 var _winston2 = _interopRequireDefault(_winston);
 
 var _customRollbarTransport = __webpack_require__(40);
 
-var _settings = __webpack_require__(2);
+var _settings = __webpack_require__(1);
 
 var _createBlueLossConfig = __webpack_require__(4);
 
@@ -180,9 +180,78 @@ exports.initLogging = initLogging;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.getSettings = exports.updateSetting = exports.initSettings = undefined;
+
+var _lowdb = __webpack_require__(43);
+
+var _lowdb2 = _interopRequireDefault(_lowdb);
+
+var _FileSync = __webpack_require__(42);
+
+var _FileSync2 = _interopRequireDefault(_FileSync);
+
+var _gawk = __webpack_require__(18);
+
+var _gawk2 = _interopRequireDefault(_gawk);
+
+var _settingsDefaults = __webpack_require__(17);
+
+var _settingsObservers = __webpack_require__(41);
+
+var _createBlueLossConfig = __webpack_require__(4);
+
+var _logSettingsUpdates = __webpack_require__(35);
+
+var _devices = __webpack_require__(6);
+
+var _utils = __webpack_require__(2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+let db = null;
+let settings = null;
+
+function initSettings() {
+  return new Promise(function (resolve) {
+    db = (0, _lowdb2.default)(new _FileSync2.default((0, _createBlueLossConfig.getBlueLossSettingsFilePath)()));
+    db.defaults(_settingsDefaults.defaultSettings).write();
+    settings = (0, _gawk2.default)(db.getState());
+    (0, _settingsObservers.initSettingsObservers)(settings);
+    /**
+    * When a user starts up BlueLoss after previously exiting, the
+    * lastSeen value will be out of date for the devices in
+    * devicesToSearchFor. This would cause BlueLoss to lock the
+    * system straight away because the lastSeen value + timeToLock
+    *  will be less than Date.now(). So to prevent this, we give all
+    * devices in devicesToSearchFor a lastSeen of 10 years from now.
+    * (when a device is seen again during a scan, lastSeen is updated.)
+    */
+    (0, _devices.updateTimeStampForAllDevicesSearchingFor)((0, _utils.tenYearsFromNow)());
+    return resolve();
+  });
+}function getSettings() {
+  return settings;
+}function updateSetting(newSettingKey, newSettingValue) {
+  settings[newSettingKey] = newSettingValue;
+  db.set(newSettingKey, newSettingValue).write();
+  (0, _logSettingsUpdates.logSettingsUpdateForVerboseLogging)(newSettingKey, newSettingValue);
+}exports.initSettings = initSettings;
+exports.updateSetting = updateSetting;
+exports.getSettings = getSettings;
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.generateLogTimeStamp = exports.bailOnFatalError = exports.xdgOpenLogsFolder = exports.xdgOpenServerWebPage = exports.getExecNameFromStdOut = exports.tenYearsFromNow = exports.identity = exports.noop = exports.setUpDev = exports.pExec = exports.pExecFile = undefined;
 
-var _util = __webpack_require__(16);
+var _util = __webpack_require__(15);
 
 var _child_process = __webpack_require__(7);
 
@@ -192,7 +261,7 @@ var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
 var _settingsWindow = __webpack_require__(8);
 
-var _settings = __webpack_require__(2);
+var _settings = __webpack_require__(1);
 
 var _createBlueLossConfig = __webpack_require__(4);
 
@@ -243,75 +312,6 @@ exports.xdgOpenServerWebPage = xdgOpenServerWebPage;
 exports.xdgOpenLogsFolder = xdgOpenLogsFolder;
 exports.bailOnFatalError = bailOnFatalError;
 exports.generateLogTimeStamp = generateLogTimeStamp;
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getSettings = exports.updateSetting = exports.initSettings = undefined;
-
-var _lowdb = __webpack_require__(43);
-
-var _lowdb2 = _interopRequireDefault(_lowdb);
-
-var _FileSync = __webpack_require__(42);
-
-var _FileSync2 = _interopRequireDefault(_FileSync);
-
-var _gawk = __webpack_require__(19);
-
-var _gawk2 = _interopRequireDefault(_gawk);
-
-var _settingsDefaults = __webpack_require__(18);
-
-var _settingsObservers = __webpack_require__(41);
-
-var _createBlueLossConfig = __webpack_require__(4);
-
-var _logSettingsUpdates = __webpack_require__(27);
-
-var _devices = __webpack_require__(6);
-
-var _utils = __webpack_require__(1);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-let db = null;
-let settings = null;
-
-function initSettings() {
-  return new Promise(function (resolve) {
-    db = (0, _lowdb2.default)(new _FileSync2.default((0, _createBlueLossConfig.getBlueLossSettingsFilePath)()));
-    db.defaults(_settingsDefaults.defaultSettings).write();
-    settings = (0, _gawk2.default)(db.getState());
-    (0, _settingsObservers.initSettingsObservers)(settings);
-    /**
-    * When a user starts up BlueLoss after previously exiting, the
-    * lastSeen value will be out of date for the devices in
-    * devicesToSearchFor. This would cause BlueLoss to lock the
-    * system straight away because the lastSeen value + timeToLock
-    *  will be less than Date.now(). So to prevent this, we give all
-    * devices in devicesToSearchFor a lastSeen of 10 years from now.
-    * (when a device is seen again during a scan, lastSeen is updated.)
-    */
-    (0, _devices.updateTimeStampForAllDevicesSearchingFor)((0, _utils.tenYearsFromNow)());
-    return resolve();
-  });
-}function getSettings() {
-  return settings;
-}function updateSetting(newSettingKey, newSettingValue) {
-  settings[newSettingKey] = newSettingValue;
-  db.set(newSettingKey, newSettingValue).write();
-  (0, _logSettingsUpdates.logSettingsUpdateForVerboseLogging)(newSettingKey, newSettingValue);
-}exports.initSettings = initSettings;
-exports.updateSetting = updateSetting;
-exports.getSettings = getSettings;
 
 /***/ }),
 /* 3 */
@@ -400,27 +400,27 @@ var _path = __webpack_require__(3);
 
 var _path2 = _interopRequireDefault(_path);
 
-var _express = __webpack_require__(36);
+var _express = __webpack_require__(33);
 
 var _express2 = _interopRequireDefault(_express);
 
-var _bodyParser = __webpack_require__(35);
+var _bodyParser = __webpack_require__(32);
 
 var _bodyParser2 = _interopRequireDefault(_bodyParser);
 
-var _ssePusher = __webpack_require__(34);
+var _ssePusher = __webpack_require__(31);
 
 var _ssePusher2 = _interopRequireDefault(_ssePusher);
 
-var _lodash = __webpack_require__(33);
+var _lodash = __webpack_require__(30);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
 var _logging = __webpack_require__(0);
 
-var _settings = __webpack_require__(2);
+var _settings = __webpack_require__(1);
 
-var _validation = __webpack_require__(32);
+var _validation = __webpack_require__(29);
 
 var _enableDisableBlueLoss = __webpack_require__(13);
 
@@ -502,7 +502,7 @@ exports.updateTimeStampForAllDevicesSearchingFor = exports.updateTimeStampForSin
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _settings = __webpack_require__(2);
+var _settings = __webpack_require__(1);
 
 function updateTimeStampForSingleDeviceSearchingFor(deviceId, newTimeStamp) {
   const { devicesToSearchFor } = (0, _settings.getSettings)();
@@ -555,7 +555,7 @@ var _server = __webpack_require__(5);
 
 var _createBlueLossConfig = __webpack_require__(4);
 
-var _utils = __webpack_require__(1);
+var _utils = __webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -630,15 +630,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.updateEnabledDisabledMenuItem = exports.initTrayMenu = undefined;
 
-var _systray = __webpack_require__(30);
+var _systray = __webpack_require__(27);
 
 var _systray2 = _interopRequireDefault(_systray);
 
-var _settings = __webpack_require__(2);
+var _settings = __webpack_require__(1);
 
-var _iconsData = __webpack_require__(29);
+var _iconsData = __webpack_require__(26);
 
-var _utils = __webpack_require__(1);
+var _utils = __webpack_require__(2);
 
 var _logging = __webpack_require__(0);
 
@@ -752,15 +752,15 @@ exports.enableDisableBlueLoss = undefined;
 
 var _server = __webpack_require__(5);
 
-var _utils = __webpack_require__(1);
+var _utils = __webpack_require__(2);
 
 var _devices = __webpack_require__(6);
 
-var _settings = __webpack_require__(2);
+var _settings = __webpack_require__(1);
 
 var _tray = __webpack_require__(12);
 
-var _sendOSnotification = __webpack_require__(28);
+var _sendOSnotification = __webpack_require__(25);
 
 /*****
 * We aren't using a gawk observer for blueLossEnabled as we were running in to
@@ -788,73 +788,18 @@ module.exports = require("promise-rat-race");
 
 /***/ }),
 /* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.disableRunOnStartup = exports.enableRunOnStartup = undefined;
-
-var _path = __webpack_require__(3);
-
-var _path2 = _interopRequireDefault(_path);
-
-var _untildify = __webpack_require__(37);
-
-var _untildify2 = _interopRequireDefault(_untildify);
-
-var _fsExtra = __webpack_require__(11);
-
-var _fsExtra2 = _interopRequireDefault(_fsExtra);
-
-var _logging = __webpack_require__(0);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const autoStartFolder = (0, _untildify2.default)('~/.config/autostart/');
-const bluelossDesktopFilePath = _path2.default.join(autoStartFolder, 'BlueLoss.desktop');
-
-function enableRunOnStartup(firstRun) {
-  if (firstRun && false) return Promise.resolve();
-  return _fsExtra2.default.outputFile(bluelossDesktopFilePath, generateDesktopFile()).catch(_logging.logger.error);
-}function disableRunOnStartup() {
-  return _fsExtra2.default.remove(bluelossDesktopFilePath).catch(_logging.logger.error);
-} /*****
-  * https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.0.html
-  * "Version" is the Free Desktop spec version.
-  */
-function generateDesktopFile() {
-  return `
-[Desktop Entry]
-Type=Application
-Version=1.0
-Name=BlueLoss
-Exec=${process.execPath}
-Icon=${_path2.default.join(process.cwd(), 'BlueLoss.png')}
-StartupNotify=false
-Terminal=false
-Categories=Utility;
-`.trim();
-}exports.enableRunOnStartup = enableRunOnStartup;
-exports.disableRunOnStartup = disableRunOnStartup;
-
-/***/ }),
-/* 16 */
 /***/ (function(module, exports) {
 
 module.exports = require("util");
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports) {
 
 module.exports = require("winston");
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -866,7 +811,7 @@ Object.defineProperty(exports, "__esModule", {
 
 const defaultSettings = {
   blueLossEnabled: true,
-  runOnStartup: true,
+  runOnStartup: false,
   trayIconColor: 'blue',
   devicesToSearchFor: {},
   timeToLock: 2,
@@ -879,19 +824,19 @@ const defaultSettings = {
 exports.defaultSettings = defaultSettings;
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports) {
 
 module.exports = require("gawk");
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports) {
 
 module.exports = require("dotenv");
 
 /***/ }),
-/* 21 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -908,7 +853,7 @@ var _promiseRatRace2 = _interopRequireDefault(_promiseRatRace);
 
 var _logging = __webpack_require__(0);
 
-var _utils = __webpack_require__(1);
+var _utils = __webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -933,7 +878,7 @@ const lockCommandArgs = {
 }exports.lockSystem = lockSystem;
 
 /***/ }),
-/* 22 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -948,13 +893,13 @@ var _timeproxy = __webpack_require__(9);
 
 var _timeproxy2 = _interopRequireDefault(_timeproxy);
 
-var _utils = __webpack_require__(1);
+var _utils = __webpack_require__(2);
 
-var _settings = __webpack_require__(2);
+var _settings = __webpack_require__(1);
 
 var _devices = __webpack_require__(6);
 
-var _lockSystem = __webpack_require__(21);
+var _lockSystem = __webpack_require__(20);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -979,13 +924,13 @@ function lockSystemIfDeviceLost() {
 }exports.lockSystemIfDeviceLost = lockSystemIfDeviceLost;
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports) {
 
 module.exports = require("is-empty");
 
 /***/ }),
-/* 24 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -998,19 +943,19 @@ exports.handleScanResults = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _isEmpty = __webpack_require__(23);
+var _isEmpty = __webpack_require__(22);
 
 var _isEmpty2 = _interopRequireDefault(_isEmpty);
 
 var _logging = __webpack_require__(0);
 
-var _settings = __webpack_require__(2);
+var _settings = __webpack_require__(1);
 
 var _server = __webpack_require__(5);
 
 var _devices = __webpack_require__(6);
 
-var _lockCheck = __webpack_require__(22);
+var _lockCheck = __webpack_require__(21);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1069,7 +1014,7 @@ function getDeviceDataFromScanResult(scanResult) {
 exports.handleScanResults = handleScanResults;
 
 /***/ }),
-/* 25 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1090,13 +1035,13 @@ var _signalExit = __webpack_require__(10);
 
 var _signalExit2 = _interopRequireDefault(_signalExit);
 
-var _handleScanResults = __webpack_require__(24);
+var _handleScanResults = __webpack_require__(23);
 
 var _logging = __webpack_require__(0);
 
-var _settings = __webpack_require__(2);
+var _settings = __webpack_require__(1);
 
-var _utils = __webpack_require__(1);
+var _utils = __webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1137,47 +1082,7 @@ function scanForBlueToothDevices() {
 exports.scanForBlueToothDevices = scanForBlueToothDevices;
 
 /***/ }),
-/* 26 */
-/***/ (function(module, exports) {
-
-module.exports = require("typa");
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.logSettingsUpdateForVerboseLogging = undefined;
-
-var _typa = __webpack_require__(26);
-
-var _typa2 = _interopRequireDefault(_typa);
-
-var _logging = __webpack_require__(0);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function logSettingsUpdateForVerboseLogging(newSettingKey, newSettingValue) {
-  /*****
-  * Check if the logger is instantiated first as logSettingsUpdateForVerboseLogging gets
-  * called early on startup.
-  */
-  if (!_logging.logger) return;
-  const debugMessage = `Updated Setting: updated '${newSettingKey}' with:`;
-  if (_typa2.default.obj(newSettingValue)) {
-    _logging.logger.verbose(debugMessage, { [newSettingKey]: newSettingValue });
-  } else {
-    _logging.logger.verbose(`${debugMessage} ${newSettingValue}`);
-  }
-}exports.logSettingsUpdateForVerboseLogging = logSettingsUpdateForVerboseLogging;
-
-/***/ }),
-/* 28 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1188,14 +1093,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.sendOSnotification = undefined;
 
-var _utils = __webpack_require__(1);
+var _utils = __webpack_require__(2);
 
 function sendOSnotification(message) {
   (0, _utils.pExecFile)('notify-send', [message]).catch(_utils.noop);
 }exports.sendOSnotification = sendOSnotification;
 
 /***/ }),
-/* 29 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1213,19 +1118,19 @@ const base64IconData = {
 exports.base64IconData = base64IconData;
 
 /***/ }),
-/* 30 */
+/* 27 */
 /***/ (function(module, exports) {
 
 module.exports = require("systray");
 
 /***/ }),
-/* 31 */
+/* 28 */
 /***/ (function(module, exports) {
 
 module.exports = require("joi");
 
 /***/ }),
-/* 32 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1236,11 +1141,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.validateEnableDisableUpdatePost = exports.validateGeneralUpdatePost = undefined;
 
-var _joi = __webpack_require__(31);
+var _joi = __webpack_require__(28);
 
 var _joi2 = _interopRequireDefault(_joi);
 
-var _settingsDefaults = __webpack_require__(18);
+var _settingsDefaults = __webpack_require__(17);
 
 var _logging = __webpack_require__(0);
 
@@ -1276,34 +1181,128 @@ function validateGeneralUpdatePost(req, res, next) {
 exports.validateEnableDisableUpdatePost = validateEnableDisableUpdatePost;
 
 /***/ }),
-/* 33 */
+/* 30 */
 /***/ (function(module, exports) {
 
 module.exports = require("lodash.omit");
 
 /***/ }),
-/* 34 */
+/* 31 */
 /***/ (function(module, exports) {
 
 module.exports = require("sse-pusher");
 
 /***/ }),
-/* 35 */
+/* 32 */
 /***/ (function(module, exports) {
 
 module.exports = require("body-parser");
 
 /***/ }),
-/* 36 */
+/* 33 */
 /***/ (function(module, exports) {
 
 module.exports = require("express");
 
 /***/ }),
-/* 37 */
+/* 34 */
+/***/ (function(module, exports) {
+
+module.exports = require("typa");
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.logSettingsUpdateForVerboseLogging = undefined;
+
+var _typa = __webpack_require__(34);
+
+var _typa2 = _interopRequireDefault(_typa);
+
+var _logging = __webpack_require__(0);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function logSettingsUpdateForVerboseLogging(newSettingKey, newSettingValue) {
+  /*****
+  * Check if the logger is instantiated first as logSettingsUpdateForVerboseLogging gets
+  * called early on startup.
+  */
+  if (!_logging.logger) return;
+  const debugMessage = `Updated Setting: updated '${newSettingKey}' with:`;
+  if (_typa2.default.obj(newSettingValue)) {
+    _logging.logger.verbose(debugMessage, { [newSettingKey]: newSettingValue });
+  } else {
+    _logging.logger.verbose(`${debugMessage} ${newSettingValue}`);
+  }
+}exports.logSettingsUpdateForVerboseLogging = logSettingsUpdateForVerboseLogging;
+
+/***/ }),
+/* 36 */
 /***/ (function(module, exports) {
 
 module.exports = require("untildify");
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.disableRunOnStartup = exports.enableRunOnStartup = undefined;
+
+var _path = __webpack_require__(3);
+
+var _path2 = _interopRequireDefault(_path);
+
+var _untildify = __webpack_require__(36);
+
+var _untildify2 = _interopRequireDefault(_untildify);
+
+var _fsExtra = __webpack_require__(11);
+
+var _fsExtra2 = _interopRequireDefault(_fsExtra);
+
+var _logging = __webpack_require__(0);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const autoStartFolder = (0, _untildify2.default)('~/.config/autostart/');
+const bluelossDesktopFilePath = _path2.default.join(autoStartFolder, 'BlueLoss.desktop');
+
+function enableRunOnStartup() {
+  return _fsExtra2.default.outputFile(bluelossDesktopFilePath, generateDesktopFile()).catch(_logging.logger.error);
+}function disableRunOnStartup() {
+  return _fsExtra2.default.remove(bluelossDesktopFilePath).catch(_logging.logger.error);
+} /*****
+  * https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.0.html
+  * "Version" is the Free Desktop spec version.
+  */
+function generateDesktopFile() {
+  return `
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=BlueLoss
+Exec=${process.execPath}
+Icon=${_path2.default.join(process.cwd(), 'BlueLoss.png')}
+StartupNotify=false
+Terminal=false
+Categories=Utility;
+`.trim();
+}exports.enableRunOnStartup = enableRunOnStartup;
+exports.disableRunOnStartup = disableRunOnStartup;
 
 /***/ }),
 /* 38 */
@@ -1329,11 +1328,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.rollbarLogger = exports.CustomRollbarTransport = exports.createRollbarLogger = undefined;
 
-var _util = __webpack_require__(16);
+var _util = __webpack_require__(15);
 
 var _util2 = _interopRequireDefault(_util);
 
-var _winston = __webpack_require__(17);
+var _winston = __webpack_require__(16);
 
 var _winston2 = _interopRequireDefault(_winston);
 
@@ -1387,15 +1386,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.initSettingsObservers = undefined;
 
-var _gawk = __webpack_require__(19);
+var _gawk = __webpack_require__(18);
 
 var _gawk2 = _interopRequireDefault(_gawk);
 
 var _logging = __webpack_require__(0);
 
-var _runOnStartup = __webpack_require__(15);
-
-var _utils = __webpack_require__(1);
+var _runOnStartup = __webpack_require__(37);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1404,7 +1401,7 @@ function initSettingsObservers(settings) {
     if (enabled) (0, _logging.addRollbarLogging)();else (0, _logging.removeRollbarLogging)();
   });
   _gawk2.default.watch(settings, ['runOnStartup'], function (enabled) {
-    if (enabled) (0, _runOnStartup.enableRunOnStartup)().catch(_utils.noop);else (0, _runOnStartup.disableRunOnStartup)().catch(_utils.noop);
+    if (enabled) (0, _runOnStartup.enableRunOnStartup)();else (0, _runOnStartup.disableRunOnStartup)();
   });
   _gawk2.default.watch(settings, ['verboseLogging'], function (enabled) {
     (0, _logging.changeLogLevel)(enabled ? 'verbose' : 'error');
@@ -1601,7 +1598,7 @@ var _createBlueLossConfig = __webpack_require__(4);
 
 var _makeSingleInstance = __webpack_require__(44);
 
-var _settings = __webpack_require__(2);
+var _settings = __webpack_require__(1);
 
 var _logging = __webpack_require__(0);
 
@@ -1609,17 +1606,15 @@ var _tray = __webpack_require__(12);
 
 var _server = __webpack_require__(5);
 
-var _utils = __webpack_require__(1);
+var _utils = __webpack_require__(2);
 
-var _bluetoothScan = __webpack_require__(25);
+var _bluetoothScan = __webpack_require__(24);
 
 var _settingsWindow = __webpack_require__(8);
 
-var _runOnStartup = __webpack_require__(15);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-__webpack_require__(20).config({ path: _path2.default.resolve(__dirname, '..', 'config', '.env') });
+__webpack_require__(19).config({ path: _path2.default.resolve(__dirname, '..', 'config', '.env') });
 
 (0, _createBlueLossConfig.createBlueLossConfig)().then(_makeSingleInstance.makeSingleInstance).then(_settings.initSettings).then(_logging.initLogging).then(_tray.initTrayMenu).then(_server.startServer).then(_utils.setUpDev).then(firstRunSetup).then(_bluetoothScan.scanForBlueToothDevices).catch(_utils.bailOnFatalError);
 
@@ -1627,7 +1622,7 @@ function firstRunSetup() {
   const { firstRun } = (0, _settings.getSettings)();
   if (!firstRun) return Promise.resolve();
   (0, _settings.updateSetting)('firstRun', !firstRun);
-  return (0, _runOnStartup.enableRunOnStartup)(firstRun).then(_settingsWindow.openSettingsWindow);
+  return (0, _settingsWindow.openSettingsWindow)();
 }process.on('unhandledRejection', _utils.bailOnFatalError);
 process.on('uncaughtException', _utils.bailOnFatalError);
 

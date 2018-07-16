@@ -603,7 +603,7 @@ Object.defineProperty(exports, "__esModule", {
 
 const defaultSettings = {
   blueLossEnabled: true,
-  runOnStartup: true,
+  runOnStartup: false,
   trayIconColor: 'blue',
   devicesToSearchFor: {},
   timeToLock: 2,
