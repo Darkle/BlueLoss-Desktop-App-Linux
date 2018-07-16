@@ -1586,10 +1586,15 @@ function setUpDev() {
   return pExecFile(`xdg-open`, [(0, _server.getServerAddress)()]);
 }function xdgOpenLogsFolder() {
   return pExecFile(`xdg-open`, [(0, _createBlueLossConfig.getBlueLossLogsFolderPath)()]);
-}function bailOnFatalError(err) {
+} /*****
+  * Delay a little bit before exiting to allow the error to be sent to rollbar.
+  */
+function bailOnFatalError(err) {
   console.error(err);
   _logging.logger == null ? void 0 : typeof _logging.logger.error !== 'function' ? void 0 : _logging.logger.error(err);
-  process.exit(1);
+  setTimeout(function () {
+    return process.exit(1);
+  }, _timeproxy2.default.THREE_SECONDS);
 }function generateLogTimeStamp() {
   const today = new Date();
   return `[${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}]`;
