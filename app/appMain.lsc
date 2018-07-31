@@ -22,9 +22,9 @@ initAppConfigFiles()
   .then(scanForBlueToothDevices)
   .catch(bailOnFatalError)
 
-firstRunSetup():Promise ->
+firstRunSetup():void ->
   { firstRun } = getSettings()
-  if !firstRun: return Promise.resolve()
+  if !firstRun: return
   updateSetting('firstRun', !firstRun)
   openSettingsWindow()
 
