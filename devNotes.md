@@ -13,4 +13,6 @@
 
 * For building the AppImage, you will need to install the `appimagetool`: https://github.com/AppImage/AppImageKit/wiki/Creating-AppImages#6-manually-create-an-appdir
 
+* Note: the makeSingleInstanceLock seems to break when it's an AppImage, so don't build that.
+
 * Built on node 8.11.3

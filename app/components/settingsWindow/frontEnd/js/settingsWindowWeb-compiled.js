@@ -81,11 +81,1131 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 22);
+/******/ 	return __webpack_require__(__webpack_require__.s = "./app/components/settingsWindow/frontEnd/js/settingsWindowWeb.lsc");
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ "./app/components/settings/settingsDefaults.lsc":
+/*!******************************************************!*\
+  !*** ./app/components/settings/settingsDefaults.lsc ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+const defaultSettings = {
+  blueLossEnabled: true,
+  runOnStartup: false,
+  trayIconColor: 'blue',
+  devicesToSearchFor: {},
+  timeToLock: 2,
+  reportErrors: true,
+  firstRun: true,
+  scanInterval: 30,
+  verboseLogging: false
+};
+
+exports.defaultSettings = defaultSettings;
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/actions/actionsIndex.lsc":
+/*!***************************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/actions/actionsIndex.lsc ***!
+  \***************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _toggleTab = __webpack_require__(/*! ./toggleTab.lsc */ "./app/components/settingsWindow/frontEnd/js/components/actions/toggleTab.lsc");
+
+var _toggleTab2 = _interopRequireDefault(_toggleTab);
+
+var _openLink = __webpack_require__(/*! ./openLink.lsc */ "./app/components/settingsWindow/frontEnd/js/components/actions/openLink.lsc");
+
+var _openLink2 = _interopRequireDefault(_openLink);
+
+var _animateDots = __webpack_require__(/*! ./animateDots.lsc */ "./app/components/settingsWindow/frontEnd/js/components/actions/animateDots.lsc");
+
+var _animateDots2 = _interopRequireDefault(_animateDots);
+
+var _updateSetting = __webpack_require__(/*! ./updateSetting.lsc */ "./app/components/settingsWindow/frontEnd/js/components/actions/updateSetting.lsc");
+
+var _updateSetting2 = _interopRequireDefault(_updateSetting);
+
+var _updateStateOnServerMessage = __webpack_require__(/*! ./updateStateOnServerMessage.lsc */ "./app/components/settingsWindow/frontEnd/js/components/actions/updateStateOnServerMessage.lsc");
+
+var _updateStateOnServerMessage2 = _interopRequireDefault(_updateStateOnServerMessage);
+
+var _removeDevice = __webpack_require__(/*! ./removeDevice.lsc */ "./app/components/settingsWindow/frontEnd/js/components/actions/removeDevice.lsc");
+
+var _removeDevice2 = _interopRequireDefault(_removeDevice);
+
+var _addNewDevice = __webpack_require__(/*! ./addNewDevice.lsc */ "./app/components/settingsWindow/frontEnd/js/components/actions/addNewDevice.lsc");
+
+var _addNewDevice2 = _interopRequireDefault(_addNewDevice);
+
+var _enableDisableBlueLoss = __webpack_require__(/*! ./enableDisableBlueLoss.lsc */ "./app/components/settingsWindow/frontEnd/js/components/actions/enableDisableBlueLoss.lsc");
+
+var _enableDisableBlueLoss2 = _interopRequireDefault(_enableDisableBlueLoss);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  toggleTab: _toggleTab2.default,
+  openLink: _openLink2.default,
+  animateDots: _animateDots2.default,
+  updateSetting: _updateSetting2.default,
+  updateStateOnServerMessage: _updateStateOnServerMessage2.default,
+  removeDevice: _removeDevice2.default,
+  addNewDevice: _addNewDevice2.default,
+  enableDisableBlueLoss: _enableDisableBlueLoss2.default
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/actions/addNewDevice.lsc":
+/*!***************************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/actions/addNewDevice.lsc ***!
+  \***************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _frontEndUtils = __webpack_require__(/*! ../../frontEndUtils.lsc */ "./app/components/settingsWindow/frontEnd/js/frontEndUtils.lsc");
+
+/**
+* HyperApp - if you need to use the state & actions and return data, you need
+* to use `(value) => (state, actions) =>`
+* https://github.com/hyperapp/hyperapp#actions
+*/
+exports.default = function addNewDevice(newDevice) {
+  return function (state) {
+    if (state.devicesToSearchFor[newDevice.deviceId]) return {};
+    const devicesToSearchFor = _extends({}, state.devicesToSearchFor, {
+      [newDevice.deviceId]: newDevice
+    });
+    (0, _frontEndUtils.sendNewSettingToServer)('devicesToSearchFor', devicesToSearchFor);
+    return { devicesToSearchFor };
+  };
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/actions/animateDots.lsc":
+/*!**************************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/actions/animateDots.lsc ***!
+  \**************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+// HyperApp - this is called from a lifecycle event, so the element is the thing thats passed in.
+exports.default = function animateDots(element) {
+  function animateStatusDots(interval = 0) {
+    setTimeout(function () {
+      element.classList.toggle('play');
+      animateStatusDots(!element.classList.contains('play') ? 285 : 4200);
+    }, interval);
+  }animateStatusDots();
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/actions/enableDisableBlueLoss.lsc":
+/*!************************************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/actions/enableDisableBlueLoss.lsc ***!
+  \************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+const fetchOptions = {
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+  method: 'POST'
+};
+
+exports.default = function enableDisableBlueLoss({ blueLossEnabled }) {
+  fetch('/blueloss-enabled-disabled-from-frontend', _extends({
+    body: JSON.stringify({ blueLossEnabled })
+  }, fetchOptions)).catch(e => {
+    return console.error(e);
+  });
+  return { blueLossEnabled };
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/actions/openLink.lsc":
+/*!***********************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/actions/openLink.lsc ***!
+  \***********************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function openLink(event) {
+  event.preventDefault();
+  window.open(event.currentTarget.dataset.externalLink);
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/actions/removeDevice.lsc":
+/*!***************************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/actions/removeDevice.lsc ***!
+  \***************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _frontEndUtils = __webpack_require__(/*! ../../frontEndUtils.lsc */ "./app/components/settingsWindow/frontEnd/js/frontEndUtils.lsc");
+
+/**
+* HyperApp - if you need to use the state & actions and return data, you need
+* to use `(value) => (state, actions) =>`
+* https://github.com/hyperapp/hyperapp#actions
+*/
+exports.default = function removeDevice(deviceToRemove) {
+  return function (state) {
+    if (!state.devicesToSearchFor[deviceToRemove.deviceId]) return {};
+    const devicesToSearchFor = (() => {
+      const _obj = {};
+      for (let _obj2 = state.devicesToSearchFor, _i = 0, _keys = Object.keys(_obj2), _len = _keys.length; _i < _len; _i++) {
+        const deviceId = _keys[_i];const device = _obj2[deviceId];
+        if (deviceId !== deviceToRemove.deviceId) _obj[deviceId] = device;
+      }return _obj;
+    })();
+    (0, _frontEndUtils.sendNewSettingToServer)('devicesToSearchFor', devicesToSearchFor);
+    return { devicesToSearchFor };
+  };
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/actions/toggleTab.lsc":
+/*!************************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/actions/toggleTab.lsc ***!
+  \************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+// HyperApp - this is called from a lifecycle event, so the element is the thing thats passed in.
+exports.default = function toggleTab(event) {
+  return { activeTab: event.currentTarget.id };
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/actions/updateSetting.lsc":
+/*!****************************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/actions/updateSetting.lsc ***!
+  \****************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _frontEndUtils = __webpack_require__(/*! ../../frontEndUtils.lsc */ "./app/components/settingsWindow/frontEnd/js/frontEndUtils.lsc");
+
+exports.default = function updateSetting({ settingName, settingValue }) {
+  (0, _frontEndUtils.sendNewSettingToServer)(settingName, settingValue);
+  return { [settingName]: settingValue };
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/actions/updateStateOnServerMessage.lsc":
+/*!*****************************************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/actions/updateStateOnServerMessage.lsc ***!
+  \*****************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function updateStateOnServerMessage(newStateObjToMerge) {
+  return newStateObjToMerge;
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/deviceCard.lsc":
+/*!*****************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/deviceCard.lsc ***!
+  \*****************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _hyperapp = __webpack_require__(/*! hyperapp */ "./node_modules/hyperapp/src/index.js");
+
+exports.default = function deviceCard({ lookingForDevice, device, remove, add }) {
+  return (0, _hyperapp.h)(
+    "div",
+    { "class": "card deviceCard" },
+    (0, _hyperapp.h)(
+      "div",
+      { "class": "cardDeviceIcon" },
+      (0, _hyperapp.h)("img", { src: `assets/icons/devicesIconForCards-${lookingForDevice ? 'blue' : 'grey'}.svg` })
+    ),
+    (0, _hyperapp.h)(
+      "div",
+      { "class": "deviceDetails" },
+      (0, _hyperapp.h)(
+        "div",
+        { "class": "deviceName" },
+        device.deviceName
+      ),
+      (0, _hyperapp.h)(
+        "div",
+        { "class": "deviceMacAddress" },
+        device.deviceId
+      )
+    ),
+    (0, _hyperapp.h)(
+      "div",
+      { "class": "deviceCardButtons" },
+      lookingForDevice ? (0, _hyperapp.h)(
+        "a",
+        { "class": "btn-flat", onclick: function () {
+            return remove(device);
+          } },
+        "Remove"
+      ) : (0, _hyperapp.h)(
+        "a",
+        { "class": "btn-flat", onclick: function () {
+            return add(device);
+          } },
+        "Add"
+      )
+    )
+  );
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/views/header.lsc":
+/*!*******************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/views/header.lsc ***!
+  \*******************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _hyperapp = __webpack_require__(/*! hyperapp */ "./node_modules/hyperapp/src/index.js");
+
+exports.default = function () {
+  return (0, _hyperapp.h)(
+    "header",
+    { id: "header" },
+    (0, _hyperapp.h)(
+      "div",
+      { id: "logo" },
+      (0, _hyperapp.h)(
+        "div",
+        { id: "headerIcon" },
+        (0, _hyperapp.h)("img", { src: "assets/icons/BlueLossIcon.svg" })
+      ),
+      (0, _hyperapp.h)(
+        "div",
+        { id: "headerText" },
+        "BlueLoss"
+      )
+    )
+  );
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/views/helpTab.lsc":
+/*!********************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/views/helpTab.lsc ***!
+  \********************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _hyperapp = __webpack_require__(/*! hyperapp */ "./node_modules/hyperapp/src/index.js");
+
+exports.default = function ({ actions }) {
+  return (0, _hyperapp.h)(
+    "div",
+    { "class": "tab", id: "helpTab", onclick: actions.openLink, "data-external-link": "https://blueloss.ccoding.net/" },
+    (0, _hyperapp.h)(
+      "div",
+      { "class": "tabIcon" },
+      (0, _hyperapp.h)(
+        "svg",
+        { height: "24", viewbox: "0 0 24 24", width: "24", xmlns: "http://www.w3.org/2000/svg" },
+        (0, _hyperapp.h)("path", { d: "M0 0h24v24H0z", fill: "none" }),
+        (0, _hyperapp.h)("path", { d: "M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z" })
+      )
+    ),
+    (0, _hyperapp.h)(
+      "div",
+      { "class": "tabText" },
+      "Help"
+    ),
+    (0, _hyperapp.h)(
+      "div",
+      { "class": "tabLip" },
+      (0, _hyperapp.h)("div", { "class": "tabArrow" }),
+      (0, _hyperapp.h)("div", { "class": "tabLine" })
+    )
+  );
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/views/settingsInfoWindow.lsc":
+/*!*******************************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/views/settingsInfoWindow.lsc ***!
+  \*******************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _hyperapp = __webpack_require__(/*! hyperapp */ "./node_modules/hyperapp/src/index.js");
+
+var _settingsDefaults = __webpack_require__(/*! ../../../../../settings/settingsDefaults.lsc */ "./app/components/settings/settingsDefaults.lsc");
+
+exports.default = function ({ actions, state }) {
+  const infoWindowDisplay = state.activeTab === 'settingsTab' ? 'flex' : 'none';
+  const minTimeToLock = _settingsDefaults.defaultSettings.timeToLock;
+  const minScanInterval = _settingsDefaults.defaultSettings.scanInterval;
+
+  return (0, _hyperapp.h)(
+    'div',
+    { id: 'settingsTabInfoWindow', style: { display: infoWindowDisplay } },
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'settingContainer' },
+      (0, _hyperapp.h)(
+        'div',
+        { 'class': 'settingInputContainer' },
+        (0, _hyperapp.h)(
+          'label',
+          null,
+          (0, _hyperapp.h)('input', {
+            value: state.timeToLock,
+            min: minTimeToLock,
+            onchange: function ({ currentTarget: { value } }) {
+              const newTimeToLock = !value || value < minTimeToLock ? minTimeToLock : value;
+              return actions.updateSetting({ settingName: 'timeToLock', settingValue: Number(newTimeToLock) });
+            },
+            type: 'number',
+            required: true
+          })
+        )
+      ),
+      (0, _hyperapp.h)(
+        'div',
+        { 'class': 'settingDetails' },
+        (0, _hyperapp.h)(
+          'h5',
+          { 'class': 'settingHeading' },
+          'Time To Lock'
+        ),
+        (0, _hyperapp.h)(
+          'p',
+          { 'class': 'settingDescription' },
+          'The time in minutes BlueLoss will wait before locking the computer once a device is lost. If a device is found before the time to lock elapses, the computer is not locked.'
+        )
+      )
+    ),
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'settingContainer' },
+      (0, _hyperapp.h)(
+        'div',
+        { 'class': 'settingInputContainer' },
+        (0, _hyperapp.h)(
+          'label',
+          null,
+          (0, _hyperapp.h)('input', {
+            value: state.scanInterval,
+            min: minScanInterval,
+            onchange: function ({ currentTarget: { value } }) {
+              const newScanInterval = !value || value < minScanInterval ? minScanInterval : value;
+              return actions.updateSetting({ settingName: 'scanInterval', settingValue: Number(newScanInterval) });
+            },
+            type: 'number',
+            required: true
+          })
+        )
+      ),
+      (0, _hyperapp.h)(
+        'div',
+        { 'class': 'settingDetails' },
+        (0, _hyperapp.h)(
+          'h5',
+          { 'class': 'settingHeading' },
+          'Scan Interval'
+        ),
+        (0, _hyperapp.h)(
+          'p',
+          { 'class': 'settingDescription' },
+          'The interval in seconds between BlueLoss scans for nearby devices.'
+        )
+      )
+    ),
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'settingContainer' },
+      (0, _hyperapp.h)(
+        'div',
+        { 'class': 'switch settingInputContainer' },
+        (0, _hyperapp.h)(
+          'label',
+          null,
+          (0, _hyperapp.h)('input', {
+            type: 'checkbox',
+            checked: state.runOnStartup,
+            onchange: function (event) {
+              return actions.updateSetting({ settingName: 'runOnStartup', settingValue: event.currentTarget.checked });
+            }
+          }),
+          (0, _hyperapp.h)('span', { 'class': 'lever' })
+        )
+      ),
+      (0, _hyperapp.h)(
+        'div',
+        { 'class': 'settingDetails' },
+        (0, _hyperapp.h)(
+          'h5',
+          { 'class': 'settingHeading' },
+          'Run On System Startup'
+        ),
+        (0, _hyperapp.h)('p', { 'class': 'settingDescription' })
+      )
+    ),
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'settingContainer' },
+      (0, _hyperapp.h)(
+        'div',
+        { 'class': 'switch settingInputContainer' },
+        (0, _hyperapp.h)(
+          'label',
+          null,
+          (0, _hyperapp.h)('input', {
+            type: 'checkbox',
+            checked: state.reportErrors,
+            onchange: function (event) {
+              return actions.updateSetting({ settingName: 'reportErrors', settingValue: event.currentTarget.checked });
+            }
+          }),
+          (0, _hyperapp.h)('span', { 'class': 'lever' })
+        )
+      ),
+      (0, _hyperapp.h)(
+        'div',
+        { 'class': 'settingDetails' },
+        (0, _hyperapp.h)(
+          'h5',
+          { 'class': 'settingHeading' },
+          'Error Reporting'
+        ),
+        (0, _hyperapp.h)(
+          'p',
+          { 'class': 'settingDescription' },
+          'Any errors generated by BlueLoss will be sent to rollbar.com. This helps development of the app.'
+        )
+      )
+    ),
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'settingContainer' },
+      (0, _hyperapp.h)(
+        'div',
+        { 'class': 'switch settingInputContainer' },
+        (0, _hyperapp.h)(
+          'label',
+          null,
+          (0, _hyperapp.h)('input', {
+            type: 'checkbox',
+            checked: state.verboseLogging,
+            onchange: function (event) {
+              return actions.updateSetting({ settingName: 'verboseLogging', settingValue: event.currentTarget.checked });
+            }
+          }),
+          (0, _hyperapp.h)('span', { 'class': 'lever' })
+        )
+      ),
+      (0, _hyperapp.h)(
+        'div',
+        { 'class': 'settingDetails' },
+        (0, _hyperapp.h)(
+          'h5',
+          { 'class': 'settingHeading' },
+          'Verbose Logging'
+        ),
+        (0, _hyperapp.h)(
+          'p',
+          { 'class': 'settingDescription' },
+          'Enabling this will turn on verbose logging. You can find your log files by right-clicking on the BlueLoss system tray icon and clicking on Open Logs.'
+        )
+      )
+    )
+  );
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/views/settingsTab.lsc":
+/*!************************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/views/settingsTab.lsc ***!
+  \************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _hyperapp = __webpack_require__(/*! hyperapp */ "./node_modules/hyperapp/src/index.js");
+
+exports.default = function ({ actions, state }) {
+  const activeTabClass = state.activeTab === 'settingsTab' ? 'activeTab' : '';
+  return (0, _hyperapp.h)(
+    'div',
+    { 'class': `tab settingsTab ${activeTabClass}`, id: 'settingsTab', onclick: actions.toggleTab },
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'tabIcon' },
+      (0, _hyperapp.h)(
+        'svg',
+        { height: '24', viewbox: '0 0 24 24', width: '24' },
+        (0, _hyperapp.h)('path', { d: 'M0 0h24v24H0z', fill: 'none' }),
+        (0, _hyperapp.h)('path', { d: 'M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z' })
+      )
+    ),
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'tabText' },
+      'Settings'
+    ),
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'tabLip' },
+      (0, _hyperapp.h)('div', { 'class': 'tabArrow' }),
+      (0, _hyperapp.h)('div', { 'class': 'tabLine' })
+    )
+  );
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/views/statusInfoWindow.lsc":
+/*!*****************************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/views/statusInfoWindow.lsc ***!
+  \*****************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _hyperapp = __webpack_require__(/*! hyperapp */ "./node_modules/hyperapp/src/index.js");
+
+var _deviceCard = __webpack_require__(/*! ../deviceCard.lsc */ "./app/components/settingsWindow/frontEnd/js/components/deviceCard.lsc");
+
+var _deviceCard2 = _interopRequireDefault(_deviceCard);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function ({ actions, state }) {
+  const infoWindowDisplay = state.activeTab === 'statusTab' ? 'block' : 'none';
+  const statusAnimationVisibility = state.blueLossEnabled ? 'visible' : 'hidden';
+  const blueLossStatusText = state.blueLossEnabled ? 'Enabled' : 'Disabled';
+  const lookingForHeaderDisplay = Object.keys(state.devicesToSearchFor).length ? 'block' : 'none';
+
+  return (0, _hyperapp.h)(
+    'div',
+    { id: 'statusTabInfoWindow', style: { display: infoWindowDisplay } },
+    (0, _hyperapp.h)(
+      'div',
+      { id: 'topStatus' },
+      (0, _hyperapp.h)(
+        'div',
+        { id: 'statusAnimation', style: { visibility: statusAnimationVisibility } },
+        (0, _hyperapp.h)(
+          'ul',
+          { oncreate: actions.animateDots },
+          (0, _hyperapp.h)('li', null),
+          (0, _hyperapp.h)('li', null),
+          (0, _hyperapp.h)('li', null),
+          (0, _hyperapp.h)('li', null),
+          (0, _hyperapp.h)('li', null)
+        )
+      ),
+      (0, _hyperapp.h)(
+        'div',
+        { 'class': 'switch', id: 'blueLossEnableswitch' },
+        (0, _hyperapp.h)(
+          'label',
+          null,
+          (0, _hyperapp.h)('input', {
+            type: 'checkbox',
+            checked: state.blueLossEnabled,
+            onchange: function (event) {
+              return actions.enableDisableBlueLoss({ blueLossEnabled: event.currentTarget.checked });
+            }
+          }),
+          (0, _hyperapp.h)('span', { 'class': 'lever' })
+        ),
+        (0, _hyperapp.h)(
+          'label',
+          null,
+          'BlueLoss ',
+          blueLossStatusText
+        )
+      )
+    ),
+    (0, _hyperapp.h)(
+      'div',
+      { id: 'devicesContainer' },
+      (0, _hyperapp.h)(
+        'div',
+        { id: 'lookingForHeader', style: { display: lookingForHeaderDisplay } },
+        'Currently Looking For:'
+      ),
+      Object.values(state.devicesToSearchFor).map(function (device) {
+        return (0, _hyperapp.h)(_deviceCard2.default, {
+          key: device.deviceId,
+          add: actions.addNewDevice,
+          remove: actions.removeDevice,
+          lookingForDevice: true,
+          device: device
+        });
+      }),
+      (0, _hyperapp.h)(
+        'div',
+        { id: 'deviceAddHeader' },
+        'Devices To Add:'
+      ),
+      state.devicesCanSee.filter(function ({ deviceId }) {
+        return !state.devicesToSearchFor[deviceId];
+      }).map(function (device) {
+        return (0, _hyperapp.h)(_deviceCard2.default, {
+          key: device.deviceId,
+          add: actions.addNewDevice,
+          remove: actions.removeDevice,
+          lookingForDevice: false,
+          device: device
+        });
+      })
+    )
+  );
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/views/statusTab.lsc":
+/*!**********************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/views/statusTab.lsc ***!
+  \**********************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _hyperapp = __webpack_require__(/*! hyperapp */ "./node_modules/hyperapp/src/index.js");
+
+exports.default = function ({ actions, state }) {
+  const activeTabClass = state.activeTab === 'statusTab' ? 'activeTab' : '';
+  return (0, _hyperapp.h)(
+    'div',
+    { 'class': `tab statusTab ${activeTabClass}`, id: 'statusTab', onclick: actions.toggleTab },
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'tabIcon' },
+      (0, _hyperapp.h)(
+        'svg',
+        { fill: '#1B5299', x: '0px', y: '0px', viewBox: '0 0 24 30' },
+        (0, _hyperapp.h)(
+          'g',
+          null,
+          (0, _hyperapp.h)('path', { fill: '#1B5299', d: 'M7.833,23.873L7,23.5V13.203l-5.309,5.191L0.992,17.68l5.795-5.667L1,6.375l0.698-0.716L7,10.823V0.5l0.833-0.373   l6.151,5.5l0.017,0.73L8.22,12.011L14,17.642l-0.016,0.731L7.833,23.873z M8,13.193v9.188l4.919-4.397L8,13.193z M8,1.618v9.209   l4.919-4.811L8,1.618z'
+          }),
+          (0, _hyperapp.h)('path', { fill: '#1B5299', d: 'M20.708,19.448l-0.707-0.707l0.354-0.354c3.521-3.522,3.521-9.253,0-12.775l-0.354-0.354l0.707-0.707l0.354,0.354   c3.912,3.912,3.912,10.277,0,14.189L20.708,19.448z'
+          }),
+          (0, _hyperapp.h)('path', { fill: '#1B5299', d: 'M17.781,16.855l-0.707-0.707l0.354-0.354C18.441,14.781,19,13.434,19,12s-0.559-2.781-1.572-3.795l-0.354-0.354   l0.707-0.707l0.354,0.354C19.338,8.7,20,10.299,20,12c0,1.701-0.662,3.3-1.865,4.502L17.781,16.855z'
+          }),
+          (0, _hyperapp.h)('path', { fill: '#1B5299', d: 'M12.5,12.5c-0.07,0-0.13-0.01-0.19-0.04c-0.06-0.02-0.12-0.06-0.16-0.11C12.05,12.26,12,12.13,12,12   c0-0.07,0.01-0.13,0.04-0.19c0.02-0.06,0.06-0.12,0.11-0.16c0.04-0.05,0.1-0.09,0.16-0.11c0.12-0.05,0.26-0.05,0.38,0   c0.06,0.02,0.12,0.06,0.16,0.11C12.95,11.74,13,11.87,13,12c0,0.06-0.01,0.13-0.04,0.19c-0.02,0.06-0.06,0.12-0.11,0.16   c-0.04,0.05-0.1,0.09-0.16,0.11C12.63,12.49,12.56,12.5,12.5,12.5z'
+          }),
+          (0, _hyperapp.h)('path', { fill: '#1B5299', d: 'M15.5,12.5c-0.061,0-0.13-0.01-0.19-0.04c-0.06-0.02-0.12-0.06-0.16-0.11C15.05,12.26,15,12.13,15,12   c0-0.07,0.01-0.13,0.04-0.19c0.02-0.06,0.06-0.12,0.109-0.16c0.04-0.05,0.101-0.09,0.16-0.11c0.181-0.08,0.4-0.03,0.54,0.11   c0.05,0.04,0.09,0.1,0.11,0.16C15.99,11.87,16,11.93,16,12c0,0.13-0.05,0.26-0.15,0.35C15.76,12.45,15.63,12.5,15.5,12.5z'
+          })
+        )
+      )
+    ),
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'tabText' },
+      'Status'
+    ),
+    (0, _hyperapp.h)(
+      'div',
+      { 'class': 'tabLip' },
+      (0, _hyperapp.h)('div', { 'class': 'tabArrow' }),
+      (0, _hyperapp.h)('div', { 'class': 'tabLine' })
+    )
+  );
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/components/views/viewsIndex.lsc":
+/*!***********************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/components/views/viewsIndex.lsc ***!
+  \***********************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _hyperapp = __webpack_require__(/*! hyperapp */ "./node_modules/hyperapp/src/index.js");
+
+var _header = __webpack_require__(/*! ./header.lsc */ "./app/components/settingsWindow/frontEnd/js/components/views/header.lsc");
+
+var _header2 = _interopRequireDefault(_header);
+
+var _statusTab = __webpack_require__(/*! ./statusTab.lsc */ "./app/components/settingsWindow/frontEnd/js/components/views/statusTab.lsc");
+
+var _statusTab2 = _interopRequireDefault(_statusTab);
+
+var _settingsTab = __webpack_require__(/*! ./settingsTab.lsc */ "./app/components/settingsWindow/frontEnd/js/components/views/settingsTab.lsc");
+
+var _settingsTab2 = _interopRequireDefault(_settingsTab);
+
+var _helpTab = __webpack_require__(/*! ./helpTab.lsc */ "./app/components/settingsWindow/frontEnd/js/components/views/helpTab.lsc");
+
+var _helpTab2 = _interopRequireDefault(_helpTab);
+
+var _statusInfoWindow = __webpack_require__(/*! ./statusInfoWindow.lsc */ "./app/components/settingsWindow/frontEnd/js/components/views/statusInfoWindow.lsc");
+
+var _statusInfoWindow2 = _interopRequireDefault(_statusInfoWindow);
+
+var _settingsInfoWindow = __webpack_require__(/*! ./settingsInfoWindow.lsc */ "./app/components/settingsWindow/frontEnd/js/components/views/settingsInfoWindow.lsc");
+
+var _settingsInfoWindow2 = _interopRequireDefault(_settingsInfoWindow);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function (state, actions) {
+  return (0, _hyperapp.h)(
+    'div',
+    null,
+    (0, _hyperapp.h)(_header2.default, null),
+    (0, _hyperapp.h)(
+      'div',
+      { id: 'mainContainer' },
+      (0, _hyperapp.h)(
+        'div',
+        { id: 'sidebar' },
+        (0, _hyperapp.h)(_statusTab2.default, { actions: actions, state: state }),
+        (0, _hyperapp.h)(_settingsTab2.default, { actions: actions, state: state }),
+        (0, _hyperapp.h)('div', { id: 'sidebarSpacer' }),
+        (0, _hyperapp.h)(_helpTab2.default, { actions: actions })
+      ),
+      (0, _hyperapp.h)(
+        'div',
+        { id: 'rightInfoContainer' },
+        (0, _hyperapp.h)(_statusInfoWindow2.default, { actions: actions, state: state }),
+        (0, _hyperapp.h)(_settingsInfoWindow2.default, { actions: actions, state: state })
+      )
+    )
+  );
+};
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/frontEndUtils.lsc":
+/*!*********************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/frontEndUtils.lsc ***!
+  \*********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.logInDev = exports.sendNewSettingToServer = exports.identity = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _logger = __webpack_require__(/*! @hyperapp/logger */ "./node_modules/@hyperapp/logger/src/index.js");
+
+const fetchOptions = {
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+  method: 'POST'
+};
+
+function identity(param) {
+  return param;
+}function sendNewSettingToServer(settingName, settingValue) {
+  fetch('/updatesettings', _extends({
+    body: JSON.stringify({ [settingName]: settingValue })
+  }, fetchOptions)).catch(e => {
+    return console.error(e);
+  });
+}function logInDev() {
+  return  true ? _logger.withLogger : undefined;
+}exports.identity = identity;
+exports.sendNewSettingToServer = sendNewSettingToServer;
+exports.logInDev = logInDev;
+
+/***/ }),
+
+/***/ "./app/components/settingsWindow/frontEnd/js/settingsWindowWeb.lsc":
+/*!*************************************************************************!*\
+  !*** ./app/components/settingsWindow/frontEnd/js/settingsWindowWeb.lsc ***!
+  \*************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; // eslint-disable-line no-unused-vars
+
+
+var _hyperapp = __webpack_require__(/*! hyperapp */ "./node_modules/hyperapp/src/index.js");
+
+var _jsCookie = __webpack_require__(/*! js-cookie */ "./node_modules/js-cookie/src/js.cookie.js");
+
+var _jsCookie2 = _interopRequireDefault(_jsCookie);
+
+var _actionsIndex = __webpack_require__(/*! ./components/actions/actionsIndex.lsc */ "./app/components/settingsWindow/frontEnd/js/components/actions/actionsIndex.lsc");
+
+var _actionsIndex2 = _interopRequireDefault(_actionsIndex);
+
+var _viewsIndex = __webpack_require__(/*! ./components/views/viewsIndex.lsc */ "./app/components/settingsWindow/frontEnd/js/components/views/viewsIndex.lsc");
+
+var _viewsIndex2 = _interopRequireDefault(_viewsIndex);
+
+var _frontEndUtils = __webpack_require__(/*! ./frontEndUtils.lsc */ "./app/components/settingsWindow/frontEnd/js/frontEndUtils.lsc");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const settingsWindowApp = (0, _frontEndUtils.logInDev)()(_hyperapp.app)(_extends({
+  activeTab: 'statusTab',
+  devicesCanSee: []
+}, JSON.parse(_jsCookie2.default.get('bluelossSettings'))), _actionsIndex2.default, _viewsIndex2.default, document.body);
+
+_jsCookie2.default.remove('bluelossSettings');
+
+const serverSideEventSource = new EventSource('/sse-update');
+
+serverSideEventSource.addEventListener('settingsUpdate', e => {
+  return settingsWindowApp.updateStateOnServerMessage(JSON.parse(e.data));
+});
+
+/***/ }),
+
+/***/ "./node_modules/@hyperapp/logger/src/defaultLog.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/@hyperapp/logger/src/defaultLog.js ***!
+  \*********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony default export */ __webpack_exports__["default"] = (function(prevState, action, nextState) {
+  console.group("%c action", "color: gray; font-weight: lighter;", action.name)
+  console.log("%c prev state", "color: #9E9E9E; font-weight: bold;", prevState)
+  console.log("%c data", "color: #03A9F4; font-weight: bold;", action.data)
+  console.log("%c next state", "color: #4CAF50; font-weight: bold;", nextState)
+  console.groupEnd()
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/@hyperapp/logger/src/index.js":
+/*!****************************************************!*\
+  !*** ./node_modules/@hyperapp/logger/src/index.js ***!
+  \****************************************************/
+/*! exports provided: withLogger */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "withLogger", function() { return withLogger; });
+/* harmony import */ var _defaultLog__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./defaultLog */ "./node_modules/@hyperapp/logger/src/defaultLog.js");
+
+
+var isFn = function(value) {
+  return typeof value === "function"
+}
+
+function makeLoggerApp(log, nextApp) {
+  return function(initialState, actionsTemplate, view, container) {
+    function enhanceActions(actions, prefix) {
+      var namespace = prefix ? prefix + "." : ""
+      return Object.keys(actions || {}).reduce(function(otherActions, name) {
+        var namedspacedName = namespace + name
+        var action = actions[name]
+        otherActions[name] =
+          typeof action === "function"
+            ? function(data) {
+                return function(state, actions) {
+                  var result = action(data)
+                  result =
+                    typeof result === "function"
+                      ? result(state, actions)
+                      : result
+                  log(state, { name: namedspacedName, data: data }, result)
+                  return result
+                }
+              }
+            : enhanceActions(action, namedspacedName)
+        return otherActions
+      }, {})
+    }
+
+    var enhancedActions = enhanceActions(actionsTemplate)
+
+    var appActions = nextApp(initialState, enhancedActions, view, container)
+    return appActions
+  }
+}
+
+function withLogger(optionsOrApp) {
+  if (isFn(optionsOrApp)) {
+    return makeLoggerApp(_defaultLog__WEBPACK_IMPORTED_MODULE_0__["default"], optionsOrApp)
+  } else {
+    var log = isFn(optionsOrApp.log) ? optionsOrApp.log : _defaultLog__WEBPACK_IMPORTED_MODULE_0__["default"]
+    return function(nextApp) {
+      return makeLoggerApp(log, nextApp)
+    }
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/hyperapp/src/index.js":
+/*!********************************************!*\
+  !*** ./node_modules/hyperapp/src/index.js ***!
+  \********************************************/
+/*! exports provided: h, app */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -485,966 +1605,12 @@ function app(state, actions, view, container) {
 
 
 /***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.logInDev = exports.sendNewSettingToServer = exports.identity = undefined;
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _logger = __webpack_require__(2);
-
-const fetchOptions = {
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  },
-  method: 'POST'
-};
-
-function identity(param) {
-  return param;
-}function sendNewSettingToServer(settingName, settingValue) {
-  fetch('/updatesettings', _extends({
-    body: JSON.stringify({ [settingName]: settingValue })
-  }, fetchOptions)).catch(e => {
-    return console.error(e);
-  });
-}function logInDev() {
-  return  false ? undefined : identity;
-}exports.identity = identity;
-exports.sendNewSettingToServer = sendNewSettingToServer;
-exports.logInDev = logInDev;
-
-/***/ }),
-/* 2 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-
-// CONCATENATED MODULE: ./node_modules/@hyperapp/logger/src/defaultLog.js
-/* harmony default export */ var defaultLog = (function(prevState, action, nextState) {
-  console.group("%c action", "color: gray; font-weight: lighter;", action.name)
-  console.log("%c prev state", "color: #9E9E9E; font-weight: bold;", prevState)
-  console.log("%c data", "color: #03A9F4; font-weight: bold;", action.data)
-  console.log("%c next state", "color: #4CAF50; font-weight: bold;", nextState)
-  console.groupEnd()
-});
-
-// CONCATENATED MODULE: ./node_modules/@hyperapp/logger/src/index.js
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "withLogger", function() { return withLogger; });
-
-
-var isFn = function(value) {
-  return typeof value === "function"
-}
-
-function makeLoggerApp(log, nextApp) {
-  return function(initialState, actionsTemplate, view, container) {
-    function enhanceActions(actions, prefix) {
-      var namespace = prefix ? prefix + "." : ""
-      return Object.keys(actions || {}).reduce(function(otherActions, name) {
-        var namedspacedName = namespace + name
-        var action = actions[name]
-        otherActions[name] =
-          typeof action === "function"
-            ? function(data) {
-                return function(state, actions) {
-                  var result = action(data)
-                  result =
-                    typeof result === "function"
-                      ? result(state, actions)
-                      : result
-                  log(state, { name: namedspacedName, data: data }, result)
-                  return result
-                }
-              }
-            : enhanceActions(action, namedspacedName)
-        return otherActions
-      }, {})
-    }
-
-    var enhancedActions = enhanceActions(actionsTemplate)
-
-    var appActions = nextApp(initialState, enhancedActions, view, container)
-    return appActions
-  }
-}
-
-function withLogger(optionsOrApp) {
-  if (isFn(optionsOrApp)) {
-    return makeLoggerApp(defaultLog, optionsOrApp)
-  } else {
-    var log = isFn(optionsOrApp.log) ? optionsOrApp.log : defaultLog
-    return function(nextApp) {
-      return makeLoggerApp(log, nextApp)
-    }
-  }
-}
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-const defaultSettings = {
-  blueLossEnabled: true,
-  runOnStartup: false,
-  trayIconColor: 'blue',
-  devicesToSearchFor: {},
-  timeToLock: 2,
-  reportErrors: true,
-  firstRun: true,
-  scanInterval: 30,
-  verboseLogging: false
-};
-
-exports.defaultSettings = defaultSettings;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _hyperapp = __webpack_require__(0);
-
-var _settingsDefaults = __webpack_require__(3);
-
-exports.default = function ({ actions, state }) {
-  const infoWindowDisplay = state.activeTab === 'settingsTab' ? 'flex' : 'none';
-  const minTimeToLock = _settingsDefaults.defaultSettings.timeToLock;
-  const minScanInterval = _settingsDefaults.defaultSettings.scanInterval;
-
-  return (0, _hyperapp.h)(
-    'div',
-    { id: 'settingsTabInfoWindow', style: { display: infoWindowDisplay } },
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'settingContainer' },
-      (0, _hyperapp.h)(
-        'div',
-        { 'class': 'settingInputContainer' },
-        (0, _hyperapp.h)(
-          'label',
-          null,
-          (0, _hyperapp.h)('input', {
-            value: state.timeToLock,
-            min: minTimeToLock,
-            onchange: function ({ currentTarget: { value } }) {
-              const newTimeToLock = !value || value < minTimeToLock ? minTimeToLock : value;
-              return actions.updateSetting({ settingName: 'timeToLock', settingValue: Number(newTimeToLock) });
-            },
-            type: 'number',
-            required: true
-          })
-        )
-      ),
-      (0, _hyperapp.h)(
-        'div',
-        { 'class': 'settingDetails' },
-        (0, _hyperapp.h)(
-          'h5',
-          { 'class': 'settingHeading' },
-          'Time To Lock'
-        ),
-        (0, _hyperapp.h)(
-          'p',
-          { 'class': 'settingDescription' },
-          'The time in minutes BlueLoss will wait before locking the computer once a device is lost. If a device is found before the time to lock elapses, the computer is not locked.'
-        )
-      )
-    ),
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'settingContainer' },
-      (0, _hyperapp.h)(
-        'div',
-        { 'class': 'settingInputContainer' },
-        (0, _hyperapp.h)(
-          'label',
-          null,
-          (0, _hyperapp.h)('input', {
-            value: state.scanInterval,
-            min: minScanInterval,
-            onchange: function ({ currentTarget: { value } }) {
-              const newScanInterval = !value || value < minScanInterval ? minScanInterval : value;
-              return actions.updateSetting({ settingName: 'scanInterval', settingValue: Number(newScanInterval) });
-            },
-            type: 'number',
-            required: true
-          })
-        )
-      ),
-      (0, _hyperapp.h)(
-        'div',
-        { 'class': 'settingDetails' },
-        (0, _hyperapp.h)(
-          'h5',
-          { 'class': 'settingHeading' },
-          'Scan Interval'
-        ),
-        (0, _hyperapp.h)(
-          'p',
-          { 'class': 'settingDescription' },
-          'The interval in seconds between BlueLoss scans for nearby devices.'
-        )
-      )
-    ),
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'settingContainer' },
-      (0, _hyperapp.h)(
-        'div',
-        { 'class': 'switch settingInputContainer' },
-        (0, _hyperapp.h)(
-          'label',
-          null,
-          (0, _hyperapp.h)('input', {
-            type: 'checkbox',
-            checked: state.runOnStartup,
-            onchange: function (event) {
-              return actions.updateSetting({ settingName: 'runOnStartup', settingValue: event.currentTarget.checked });
-            }
-          }),
-          (0, _hyperapp.h)('span', { 'class': 'lever' })
-        )
-      ),
-      (0, _hyperapp.h)(
-        'div',
-        { 'class': 'settingDetails' },
-        (0, _hyperapp.h)(
-          'h5',
-          { 'class': 'settingHeading' },
-          'Run On System Startup'
-        ),
-        (0, _hyperapp.h)('p', { 'class': 'settingDescription' })
-      )
-    ),
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'settingContainer' },
-      (0, _hyperapp.h)(
-        'div',
-        { 'class': 'switch settingInputContainer' },
-        (0, _hyperapp.h)(
-          'label',
-          null,
-          (0, _hyperapp.h)('input', {
-            type: 'checkbox',
-            checked: state.reportErrors,
-            onchange: function (event) {
-              return actions.updateSetting({ settingName: 'reportErrors', settingValue: event.currentTarget.checked });
-            }
-          }),
-          (0, _hyperapp.h)('span', { 'class': 'lever' })
-        )
-      ),
-      (0, _hyperapp.h)(
-        'div',
-        { 'class': 'settingDetails' },
-        (0, _hyperapp.h)(
-          'h5',
-          { 'class': 'settingHeading' },
-          'Error Reporting'
-        ),
-        (0, _hyperapp.h)(
-          'p',
-          { 'class': 'settingDescription' },
-          'Any errors generated by BlueLoss will be sent to rollbar.com. This helps development of the app.'
-        )
-      )
-    ),
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'settingContainer' },
-      (0, _hyperapp.h)(
-        'div',
-        { 'class': 'switch settingInputContainer' },
-        (0, _hyperapp.h)(
-          'label',
-          null,
-          (0, _hyperapp.h)('input', {
-            type: 'checkbox',
-            checked: state.verboseLogging,
-            onchange: function (event) {
-              return actions.updateSetting({ settingName: 'verboseLogging', settingValue: event.currentTarget.checked });
-            }
-          }),
-          (0, _hyperapp.h)('span', { 'class': 'lever' })
-        )
-      ),
-      (0, _hyperapp.h)(
-        'div',
-        { 'class': 'settingDetails' },
-        (0, _hyperapp.h)(
-          'h5',
-          { 'class': 'settingHeading' },
-          'Verbose Logging'
-        ),
-        (0, _hyperapp.h)(
-          'p',
-          { 'class': 'settingDescription' },
-          'Enabling this will turn on verbose logging. You can find your log files by right-clicking on the BlueLoss system tray icon and clicking on Open Logs.'
-        )
-      )
-    )
-  );
-};
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _hyperapp = __webpack_require__(0);
-
-exports.default = function deviceCard({ lookingForDevice, device, remove, add }) {
-  return (0, _hyperapp.h)(
-    "div",
-    { "class": "card deviceCard" },
-    (0, _hyperapp.h)(
-      "div",
-      { "class": "cardDeviceIcon" },
-      (0, _hyperapp.h)("img", { src: `assets/icons/devicesIconForCards-${lookingForDevice ? 'blue' : 'grey'}.svg` })
-    ),
-    (0, _hyperapp.h)(
-      "div",
-      { "class": "deviceDetails" },
-      (0, _hyperapp.h)(
-        "div",
-        { "class": "deviceName" },
-        device.deviceName
-      ),
-      (0, _hyperapp.h)(
-        "div",
-        { "class": "deviceMacAddress" },
-        device.deviceId
-      )
-    ),
-    (0, _hyperapp.h)(
-      "div",
-      { "class": "deviceCardButtons" },
-      lookingForDevice ? (0, _hyperapp.h)(
-        "a",
-        { "class": "btn-flat", onclick: function () {
-            return remove(device);
-          } },
-        "Remove"
-      ) : (0, _hyperapp.h)(
-        "a",
-        { "class": "btn-flat", onclick: function () {
-            return add(device);
-          } },
-        "Add"
-      )
-    )
-  );
-};
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _hyperapp = __webpack_require__(0);
-
-var _deviceCard = __webpack_require__(5);
-
-var _deviceCard2 = _interopRequireDefault(_deviceCard);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = function ({ actions, state }) {
-  const infoWindowDisplay = state.activeTab === 'statusTab' ? 'block' : 'none';
-  const statusAnimationVisibility = state.blueLossEnabled ? 'visible' : 'hidden';
-  const blueLossStatusText = state.blueLossEnabled ? 'Enabled' : 'Disabled';
-  const lookingForHeaderDisplay = Object.keys(state.devicesToSearchFor).length ? 'block' : 'none';
-
-  return (0, _hyperapp.h)(
-    'div',
-    { id: 'statusTabInfoWindow', style: { display: infoWindowDisplay } },
-    (0, _hyperapp.h)(
-      'div',
-      { id: 'topStatus' },
-      (0, _hyperapp.h)(
-        'div',
-        { id: 'statusAnimation', style: { visibility: statusAnimationVisibility } },
-        (0, _hyperapp.h)(
-          'ul',
-          { oncreate: actions.animateDots },
-          (0, _hyperapp.h)('li', null),
-          (0, _hyperapp.h)('li', null),
-          (0, _hyperapp.h)('li', null),
-          (0, _hyperapp.h)('li', null),
-          (0, _hyperapp.h)('li', null)
-        )
-      ),
-      (0, _hyperapp.h)(
-        'div',
-        { 'class': 'switch', id: 'blueLossEnableswitch' },
-        (0, _hyperapp.h)(
-          'label',
-          null,
-          (0, _hyperapp.h)('input', {
-            type: 'checkbox',
-            checked: state.blueLossEnabled,
-            onchange: function (event) {
-              return actions.enableDisableBlueLoss({ blueLossEnabled: event.currentTarget.checked });
-            }
-          }),
-          (0, _hyperapp.h)('span', { 'class': 'lever' })
-        ),
-        (0, _hyperapp.h)(
-          'label',
-          null,
-          'BlueLoss ',
-          blueLossStatusText
-        )
-      )
-    ),
-    (0, _hyperapp.h)(
-      'div',
-      { id: 'devicesContainer' },
-      (0, _hyperapp.h)(
-        'div',
-        { id: 'lookingForHeader', style: { display: lookingForHeaderDisplay } },
-        'Currently Looking For:'
-      ),
-      Object.values(state.devicesToSearchFor).map(function (device) {
-        return (0, _hyperapp.h)(_deviceCard2.default, {
-          key: device.deviceId,
-          add: actions.addNewDevice,
-          remove: actions.removeDevice,
-          lookingForDevice: true,
-          device: device
-        });
-      }),
-      (0, _hyperapp.h)(
-        'div',
-        { id: 'deviceAddHeader' },
-        'Devices To Add:'
-      ),
-      state.devicesCanSee.filter(function ({ deviceId }) {
-        return !state.devicesToSearchFor[deviceId];
-      }).map(function (device) {
-        return (0, _hyperapp.h)(_deviceCard2.default, {
-          key: device.deviceId,
-          add: actions.addNewDevice,
-          remove: actions.removeDevice,
-          lookingForDevice: false,
-          device: device
-        });
-      })
-    )
-  );
-};
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _hyperapp = __webpack_require__(0);
-
-exports.default = function ({ actions }) {
-  return (0, _hyperapp.h)(
-    "div",
-    { "class": "tab", id: "helpTab", onclick: actions.openLink, "data-external-link": "https://darkle.github.io/BlueLoss/" },
-    (0, _hyperapp.h)(
-      "div",
-      { "class": "tabIcon" },
-      (0, _hyperapp.h)(
-        "svg",
-        { height: "24", viewbox: "0 0 24 24", width: "24", xmlns: "http://www.w3.org/2000/svg" },
-        (0, _hyperapp.h)("path", { d: "M0 0h24v24H0z", fill: "none" }),
-        (0, _hyperapp.h)("path", { d: "M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z" })
-      )
-    ),
-    (0, _hyperapp.h)(
-      "div",
-      { "class": "tabText" },
-      "Help"
-    ),
-    (0, _hyperapp.h)(
-      "div",
-      { "class": "tabLip" },
-      (0, _hyperapp.h)("div", { "class": "tabArrow" }),
-      (0, _hyperapp.h)("div", { "class": "tabLine" })
-    )
-  );
-};
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _hyperapp = __webpack_require__(0);
-
-exports.default = function ({ actions, state }) {
-  const activeTabClass = state.activeTab === 'settingsTab' ? 'activeTab' : '';
-  return (0, _hyperapp.h)(
-    'div',
-    { 'class': `tab settingsTab ${activeTabClass}`, id: 'settingsTab', onclick: actions.toggleTab },
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'tabIcon' },
-      (0, _hyperapp.h)(
-        'svg',
-        { height: '24', viewbox: '0 0 24 24', width: '24' },
-        (0, _hyperapp.h)('path', { d: 'M0 0h24v24H0z', fill: 'none' }),
-        (0, _hyperapp.h)('path', { d: 'M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z' })
-      )
-    ),
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'tabText' },
-      'Settings'
-    ),
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'tabLip' },
-      (0, _hyperapp.h)('div', { 'class': 'tabArrow' }),
-      (0, _hyperapp.h)('div', { 'class': 'tabLine' })
-    )
-  );
-};
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _hyperapp = __webpack_require__(0);
-
-exports.default = function ({ actions, state }) {
-  const activeTabClass = state.activeTab === 'statusTab' ? 'activeTab' : '';
-  return (0, _hyperapp.h)(
-    'div',
-    { 'class': `tab statusTab ${activeTabClass}`, id: 'statusTab', onclick: actions.toggleTab },
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'tabIcon' },
-      (0, _hyperapp.h)(
-        'svg',
-        { fill: '#1B5299', x: '0px', y: '0px', viewBox: '0 0 24 30' },
-        (0, _hyperapp.h)(
-          'g',
-          null,
-          (0, _hyperapp.h)('path', { fill: '#1B5299', d: 'M7.833,23.873L7,23.5V13.203l-5.309,5.191L0.992,17.68l5.795-5.667L1,6.375l0.698-0.716L7,10.823V0.5l0.833-0.373   l6.151,5.5l0.017,0.73L8.22,12.011L14,17.642l-0.016,0.731L7.833,23.873z M8,13.193v9.188l4.919-4.397L8,13.193z M8,1.618v9.209   l4.919-4.811L8,1.618z'
-          }),
-          (0, _hyperapp.h)('path', { fill: '#1B5299', d: 'M20.708,19.448l-0.707-0.707l0.354-0.354c3.521-3.522,3.521-9.253,0-12.775l-0.354-0.354l0.707-0.707l0.354,0.354   c3.912,3.912,3.912,10.277,0,14.189L20.708,19.448z'
-          }),
-          (0, _hyperapp.h)('path', { fill: '#1B5299', d: 'M17.781,16.855l-0.707-0.707l0.354-0.354C18.441,14.781,19,13.434,19,12s-0.559-2.781-1.572-3.795l-0.354-0.354   l0.707-0.707l0.354,0.354C19.338,8.7,20,10.299,20,12c0,1.701-0.662,3.3-1.865,4.502L17.781,16.855z'
-          }),
-          (0, _hyperapp.h)('path', { fill: '#1B5299', d: 'M12.5,12.5c-0.07,0-0.13-0.01-0.19-0.04c-0.06-0.02-0.12-0.06-0.16-0.11C12.05,12.26,12,12.13,12,12   c0-0.07,0.01-0.13,0.04-0.19c0.02-0.06,0.06-0.12,0.11-0.16c0.04-0.05,0.1-0.09,0.16-0.11c0.12-0.05,0.26-0.05,0.38,0   c0.06,0.02,0.12,0.06,0.16,0.11C12.95,11.74,13,11.87,13,12c0,0.06-0.01,0.13-0.04,0.19c-0.02,0.06-0.06,0.12-0.11,0.16   c-0.04,0.05-0.1,0.09-0.16,0.11C12.63,12.49,12.56,12.5,12.5,12.5z'
-          }),
-          (0, _hyperapp.h)('path', { fill: '#1B5299', d: 'M15.5,12.5c-0.061,0-0.13-0.01-0.19-0.04c-0.06-0.02-0.12-0.06-0.16-0.11C15.05,12.26,15,12.13,15,12   c0-0.07,0.01-0.13,0.04-0.19c0.02-0.06,0.06-0.12,0.109-0.16c0.04-0.05,0.101-0.09,0.16-0.11c0.181-0.08,0.4-0.03,0.54,0.11   c0.05,0.04,0.09,0.1,0.11,0.16C15.99,11.87,16,11.93,16,12c0,0.13-0.05,0.26-0.15,0.35C15.76,12.45,15.63,12.5,15.5,12.5z'
-          })
-        )
-      )
-    ),
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'tabText' },
-      'Status'
-    ),
-    (0, _hyperapp.h)(
-      'div',
-      { 'class': 'tabLip' },
-      (0, _hyperapp.h)('div', { 'class': 'tabArrow' }),
-      (0, _hyperapp.h)('div', { 'class': 'tabLine' })
-    )
-  );
-};
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _hyperapp = __webpack_require__(0);
-
-exports.default = function () {
-  return (0, _hyperapp.h)(
-    "header",
-    { id: "header" },
-    (0, _hyperapp.h)(
-      "div",
-      { id: "logo" },
-      (0, _hyperapp.h)(
-        "div",
-        { id: "headerIcon" },
-        (0, _hyperapp.h)("img", { src: "assets/icons/BlueLossIcon.svg" })
-      ),
-      (0, _hyperapp.h)(
-        "div",
-        { id: "headerText" },
-        "BlueLoss"
-      )
-    )
-  );
-};
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _hyperapp = __webpack_require__(0);
-
-var _header = __webpack_require__(10);
-
-var _header2 = _interopRequireDefault(_header);
-
-var _statusTab = __webpack_require__(9);
-
-var _statusTab2 = _interopRequireDefault(_statusTab);
-
-var _settingsTab = __webpack_require__(8);
-
-var _settingsTab2 = _interopRequireDefault(_settingsTab);
-
-var _helpTab = __webpack_require__(7);
-
-var _helpTab2 = _interopRequireDefault(_helpTab);
-
-var _statusInfoWindow = __webpack_require__(6);
-
-var _statusInfoWindow2 = _interopRequireDefault(_statusInfoWindow);
-
-var _settingsInfoWindow = __webpack_require__(4);
-
-var _settingsInfoWindow2 = _interopRequireDefault(_settingsInfoWindow);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = function (state, actions) {
-  return (0, _hyperapp.h)(
-    'div',
-    null,
-    (0, _hyperapp.h)(_header2.default, null),
-    (0, _hyperapp.h)(
-      'div',
-      { id: 'mainContainer' },
-      (0, _hyperapp.h)(
-        'div',
-        { id: 'sidebar' },
-        (0, _hyperapp.h)(_statusTab2.default, { actions: actions, state: state }),
-        (0, _hyperapp.h)(_settingsTab2.default, { actions: actions, state: state }),
-        (0, _hyperapp.h)('div', { id: 'sidebarSpacer' }),
-        (0, _hyperapp.h)(_helpTab2.default, { actions: actions })
-      ),
-      (0, _hyperapp.h)(
-        'div',
-        { id: 'rightInfoContainer' },
-        (0, _hyperapp.h)(_statusInfoWindow2.default, { actions: actions, state: state }),
-        (0, _hyperapp.h)(_settingsInfoWindow2.default, { actions: actions, state: state })
-      )
-    )
-  );
-};
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-const fetchOptions = {
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  },
-  method: 'POST'
-};
-
-exports.default = function enableDisableBlueLoss({ blueLossEnabled }) {
-  fetch('/blueloss-enabled-disabled-from-frontend', _extends({
-    body: JSON.stringify({ blueLossEnabled })
-  }, fetchOptions)).catch(e => {
-    return console.error(e);
-  });
-  return { blueLossEnabled };
-};
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _frontEndUtils = __webpack_require__(1);
-
-/**
-* HyperApp - if you need to use the state & actions and return data, you need
-* to use `(value) => (state, actions) =>`
-* https://github.com/hyperapp/hyperapp#actions
-*/
-exports.default = function addNewDevice(newDevice) {
-  return function (state) {
-    if (state.devicesToSearchFor[newDevice.deviceId]) return {};
-    const devicesToSearchFor = _extends({}, state.devicesToSearchFor, {
-      [newDevice.deviceId]: newDevice
-    });
-    (0, _frontEndUtils.sendNewSettingToServer)('devicesToSearchFor', devicesToSearchFor);
-    return { devicesToSearchFor };
-  };
-};
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _frontEndUtils = __webpack_require__(1);
-
-/**
-* HyperApp - if you need to use the state & actions and return data, you need
-* to use `(value) => (state, actions) =>`
-* https://github.com/hyperapp/hyperapp#actions
-*/
-exports.default = function removeDevice(deviceToRemove) {
-  return function (state) {
-    if (!state.devicesToSearchFor[deviceToRemove.deviceId]) return {};
-    const devicesToSearchFor = (() => {
-      const _obj = {};
-      for (let _obj2 = state.devicesToSearchFor, _i = 0, _keys = Object.keys(_obj2), _len = _keys.length; _i < _len; _i++) {
-        const deviceId = _keys[_i];const device = _obj2[deviceId];
-        if (deviceId !== deviceToRemove.deviceId) _obj[deviceId] = device;
-      }return _obj;
-    })();
-    (0, _frontEndUtils.sendNewSettingToServer)('devicesToSearchFor', devicesToSearchFor);
-    return { devicesToSearchFor };
-  };
-};
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function updateStateOnServerMessage(newStateObjToMerge) {
-  return newStateObjToMerge;
-};
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _frontEndUtils = __webpack_require__(1);
-
-exports.default = function updateSetting({ settingName, settingValue }) {
-  (0, _frontEndUtils.sendNewSettingToServer)(settingName, settingValue);
-  return { [settingName]: settingValue };
-};
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-// HyperApp - this is called from a lifecycle event, so the element is the thing thats passed in.
-exports.default = function animateDots(element) {
-  function animateStatusDots(interval = 0) {
-    setTimeout(function () {
-      element.classList.toggle('play');
-      animateStatusDots(!element.classList.contains('play') ? 285 : 4200);
-    }, interval);
-  }animateStatusDots();
-};
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function openLink(event) {
-  event.preventDefault();
-  window.open(event.currentTarget.dataset.externalLink);
-};
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-// HyperApp - this is called from a lifecycle event, so the element is the thing thats passed in.
-exports.default = function toggleTab(event) {
-  return { activeTab: event.currentTarget.id };
-};
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _toggleTab = __webpack_require__(19);
-
-var _toggleTab2 = _interopRequireDefault(_toggleTab);
-
-var _openLink = __webpack_require__(18);
-
-var _openLink2 = _interopRequireDefault(_openLink);
-
-var _animateDots = __webpack_require__(17);
-
-var _animateDots2 = _interopRequireDefault(_animateDots);
-
-var _updateSetting = __webpack_require__(16);
-
-var _updateSetting2 = _interopRequireDefault(_updateSetting);
-
-var _updateStateOnServerMessage = __webpack_require__(15);
-
-var _updateStateOnServerMessage2 = _interopRequireDefault(_updateStateOnServerMessage);
-
-var _removeDevice = __webpack_require__(14);
-
-var _removeDevice2 = _interopRequireDefault(_removeDevice);
-
-var _addNewDevice = __webpack_require__(13);
-
-var _addNewDevice2 = _interopRequireDefault(_addNewDevice);
-
-var _enableDisableBlueLoss = __webpack_require__(12);
-
-var _enableDisableBlueLoss2 = _interopRequireDefault(_enableDisableBlueLoss);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-  toggleTab: _toggleTab2.default,
-  openLink: _openLink2.default,
-  animateDots: _animateDots2.default,
-  updateSetting: _updateSetting2.default,
-  updateStateOnServerMessage: _updateStateOnServerMessage2.default,
-  removeDevice: _removeDevice2.default,
-  addNewDevice: _addNewDevice2.default,
-  enableDisableBlueLoss: _enableDisableBlueLoss2.default
-};
-
-/***/ }),
-/* 21 */
+/***/ "./node_modules/js-cookie/src/js.cookie.js":
+/*!*************************************************!*\
+  !*** ./node_modules/js-cookie/src/js.cookie.js ***!
+  \*************************************************/
+/*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -1618,46 +1784,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 }));
 
 
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; // eslint-disable-line no-unused-vars
-
-
-var _hyperapp = __webpack_require__(0);
-
-var _jsCookie = __webpack_require__(21);
-
-var _jsCookie2 = _interopRequireDefault(_jsCookie);
-
-var _actionsIndex = __webpack_require__(20);
-
-var _actionsIndex2 = _interopRequireDefault(_actionsIndex);
-
-var _viewsIndex = __webpack_require__(11);
-
-var _viewsIndex2 = _interopRequireDefault(_viewsIndex);
-
-var _frontEndUtils = __webpack_require__(1);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const settingsWindowApp = (0, _frontEndUtils.logInDev)()(_hyperapp.app)(_extends({
-  activeTab: 'statusTab',
-  devicesCanSee: []
-}, JSON.parse(_jsCookie2.default.get('bluelossSettings'))), _actionsIndex2.default, _viewsIndex2.default, document.body);
-
-_jsCookie2.default.remove('bluelossSettings');
-
-const serverSideEventSource = new EventSource('/sse-update');
-
-serverSideEventSource.addEventListener('settingsUpdate', e => {
-  return settingsWindowApp.updateStateOnServerMessage(JSON.parse(e.data));
-});
-
 /***/ })
-/******/ ]);
+
+/******/ });
+//# sourceMappingURL=settingsWindowWeb-compiled.js.map
